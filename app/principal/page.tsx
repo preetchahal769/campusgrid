@@ -19,6 +19,7 @@ import {
   RiMegaphoneLine,
   RiUserLine,
   RiBuildingLine,
+  RiUserSharedLine,
 } from "@remixicon/react"
 import { cn } from "@/lib/utils"
 
@@ -43,6 +44,7 @@ const ACTIONS = [
     group: "⚖️ Oversight",
     items: [
       { label: "Leave Appeals",     icon: RiCalendarCheckLine, route: "/principal/leaves",          color: "bg-orange-500/10 text-orange-600", border: "hover:border-orange-500/40" },
+      { label: "Staff Substitutions", icon: RiUserSharedLine, route: "/principal/substitutions", color: "bg-fuchsia-500/10 text-fuchsia-600", border: "hover:border-fuchsia-500/40" },
       { label: "Staff Availability", icon: RiTimeLine,         route: "/principal/staff-attendance", color: "bg-cyan-500/10 text-cyan-600",    border: "hover:border-cyan-500/40" },
     ],
   },
