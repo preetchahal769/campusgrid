@@ -17,6 +17,7 @@ import {
   RiDashboard3Line,
   RiMegaphoneLine,
   RiTimeLine,
+  RiCheckLine,
 } from "@remixicon/react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -125,6 +126,7 @@ export default function TeacherDashboardPage() {
           <div className="grid grid-cols-2 gap-4">
             {[
               { label: 'Manage Homework', icon: RiBookOpenLine, route: '/teacher/homework', color: 'bg-primary/10 text-primary', border: 'hover:border-primary/40' },
+              { label: 'Mark Attendance', icon: RiCheckLine, route: '/teacher/attendance', color: 'bg-blue-500/10 text-blue-600', border: 'hover:border-blue-500/40' },
               { label: 'Leave Requests', icon: RiCalendarCheckLine, route: '/teacher/leaves', color: 'bg-amber-500/10 text-amber-600', border: 'hover:border-amber-500/40', badge: pendingLeaves.length },
               { label: 'Send Broadcast', icon: RiMegaphoneLine, route: '/teacher/broadcast', color: 'bg-emerald-500/10 text-emerald-600', border: 'hover:border-emerald-500/40' },
               { label: 'My Schedule', icon: RiTimeLine, route: '/teacher/schedule', color: 'bg-purple-500/10 text-purple-600', border: 'hover:border-purple-500/40' },

@@ -130,3 +130,39 @@ We have simplified the broadcast flow to make it faster for school staff.
 - **POST \/communications/broadcasts\**: Send a new broadcast (Multipart/form-data with \iles\ array).
 - **GET \/communications/broadcasts\**: Fetch the list of broadcasts.
 - **GET \/communications/broadcasts/:id\**: Fetch full details of one announcement.
+
+---
+
+## ?? 7. Class In-charge & Attendance System
+
+Dedicated endpoints for Teachers assigned as Class In-charges.
+
+### Get My Students (with Leave Status)
+- **Method**: \GET\\
+- **URL**: \/academics/sections/my-class/students\\
+- **Response**: Returns students in your section with a live \isOnLeave\ flag.\
+\\\json
+{
+  'sectionId': '...',
+  'students': [
+    {
+      'id': 'student_id',
+      'name': 'Alice Smith',
+      'rollNumber': 101,
+      'isOnLeave': true,
+      'leaveReason': 'Family Wedding'
+    }
+  ]
+}
+\\\`n
+### Mark Class Attendance (Secure)
+- **Method**: \POST\\
+- **URL**: \/attendance/class/:sectionId\\
+- **Body**: Standard attendance records array.\
+- **Validation**: Fails if you are not the assigned in-charge for this section.\
+
+### View History (Filtered)
+- **Method**: \GET\\
+- **URL**: \/attendance?section_id=SEC_ID\&date=2024-05-09\\
+- **URL**: \/attendance?users_id=USER_ID\\
+- **Note**: Use these filters to see history for a whole class or a specific student.
