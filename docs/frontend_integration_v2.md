@@ -166,3 +166,49 @@ Dedicated endpoints for Teachers assigned as Class In-charges.
 - **URL**: \/attendance?section_id=SEC_ID\&date=2024-05-09\\
 - **URL**: \/attendance?users_id=USER_ID\\
 - **Note**: Use these filters to see history for a whole class or a specific student.
+
+---
+
+## 👮 8. Teacher Replacement (Substitution) System
+
+For Principals and Admins to manage vacant classes.
+
+### Get Absent Teachers & Affected Slots
+- **Method**: `GET`
+- **URL**: `/academics/substitutions/absent-teachers`
+- **Response**: List of absent teachers and their empty timetable slots today.
+```json
+[
+  {
+    "teacherId": "...",
+    "name": "John Doe",
+    "affectedSlots": [
+      { "timetableId": "...", "lectureNo": 2, "subject": "Maths", "class": "10-A" }
+    ]
+  }
+]
+```
+
+### Get Available Substitutes
+- **Method**: `GET`
+- **URL**: `/academics/substitutions/available-teachers?lectureNo=2&dayOfWeek=Monday`
+- **Response**: List of teachers who are FREE during this specific lecture.
+
+### Assign Replacement
+- **Method**: `POST`
+- **URL**: `/academics/substitutions/assign`
+- **Body**:
+```json
+{
+  "date": "2024-05-09",
+  "timetableId": "...",
+  "subTeacherId": "...",
+  "role": "TEACHING",
+  "message": "Please cover Chapter 5"
+}
+```
+- **Note**: Possible roles are `TEACHING`, `DISCIPLINE`, `REVISION`.
+
+### View Active Replacements
+- **Method**: `GET`
+- **URL**: `/academics/substitutions/active`
