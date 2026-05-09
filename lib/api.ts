@@ -1,28 +1,61 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
+// Track if we are currently refreshing the token to avoid multiple simultaneous refreshes
+let isRefreshing = false;
+let refreshPromise: Promise<any> | null = null;
+
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
-  // Ensure we don't have double slashes
   const cleanBaseUrl = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   const url = `${cleanBaseUrl}${cleanEndpoint}`;
   
+  const headers: Record<string, string> = {
+    ...Object.fromEntries(Object.entries(options.headers || {}) as [string, string][]),
+  };
+
+  // If body is FormData, fetch will automatically set the correct multipart/form-data header with boundary
+  if (!(options.body instanceof FormData)) {
+    if (!headers['Content-Type']) {
+      headers['Content-Type'] = 'application/json';
+    }
+  }
+
   const defaultOptions: RequestInit = {
     ...options,
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+    headers,
   };
 
   try {
-    const response = await fetch(url, defaultOptions);
+    let response = await fetch(url, defaultOptions);
     
-    if (response.status === 401) {
-      // Handle unauthorized (e.g., redirect to login)
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('userRole');
-        window.location.href = '/login';
+    // Handle unauthorized (401)
+    if (response.status === 401 && endpoint !== '/auth/refresh' && endpoint !== '/auth/login') {
+      if (!isRefreshing) {
+        isRefreshing = true;
+        refreshPromise = fetch(`${cleanBaseUrl}/auth/refresh`, {
+          method: 'POST',
+          credentials: 'include',
+        }).then(res => {
+          isRefreshing = false;
+          if (!res.ok) throw new Error('Refresh failed');
+          return res;
+        });
+      }
+
+      try {
+        await refreshPromise;
+        // Retry the original request
+        response = await fetch(url, defaultOptions);
+      } catch (refreshError) {
+        // Refresh failed, redirect to login
+        if (typeof window !== 'undefined') {
+          // Only redirect if we're not already on the login page
+          if (window.location.pathname !== '/login') {
+            window.location.href = '/login';
+          }
+        }
+        throw new Error('Session expired');
       }
     }
 
@@ -31,7 +64,6 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
       throw new Error(errorData.message || `API error: ${response.status}`);
     }
 
-    // Logout and some POST requests might return no content
     if (response.status === 204 || endpoint === '/auth/logout') {
       return null;
     }
@@ -42,3 +74,11 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     throw error;
   }
 }
+
+export const getImageUrl = (path: string | undefined | null) => {
+  if (!path) return undefined;
+  if (path.startsWith('http')) return path;
+  const cleanBaseUrl = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${cleanBaseUrl}${cleanPath}`;
+};

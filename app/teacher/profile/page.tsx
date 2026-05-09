@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
-import { setTeacherProfile } from "@/lib/store/slices/teacherSlice"
-import { logout } from "@/lib/store/slices/authSlice"
-import { apiFetch } from "@/lib/api"
+import { setTeacherProfile, updateUserProfile } from "@/lib/store/slices/teacherSlice"
+import { logout, updateUser } from "@/lib/store/slices/authSlice"
+import { apiFetch, getImageUrl } from "@/lib/api"
 import {
   RiArrowLeftLine,
   RiLoader4Line,
@@ -17,6 +17,12 @@ import {
   RiTimeLine,
   RiGroupLine,
   RiLogoutBoxLine,
+  RiPhoneLine,
+  RiEdit2Line,
+  RiSaveLine,
+  RiCloseLine,
+  RiUser3Line,
+  RiCameraLine,
 } from "@remixicon/react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -30,6 +36,12 @@ export default function TeacherProfilePage() {
 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const [isEditing, setIsEditing] = useState(false)
+  const [editName, setEditName] = useState("")
+  const [editPhone, setEditPhone] = useState("")
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
 
   useEffect(() => {
     if (profile) return
@@ -51,6 +63,67 @@ export default function TeacherProfilePage() {
     try { await apiFetch('/auth/logout', { method: 'POST' }) } catch {}
     dispatch(logout())
     router.push('/login')
+  }
+
+  const startEditing = () => {
+    setEditName(profile?.users?.name || user?.name || "")
+    setEditPhone(profile?.users?.phoneNo || "")
+    setIsEditing(true)
+    setError(null)
+  }
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editName.trim()) { setError("Name is required"); return }
+
+    setIsUpdating(true)
+    setError(null)
+    try {
+      const updatedUser = await apiFetch('/users/profile', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          name: editName.trim(),
+          phoneNo: editPhone.trim() || undefined,
+        }),
+      })
+      
+      // Update store
+      dispatch(updateUser({ name: updatedUser.name }))
+      dispatch(updateUserProfile({ name: updatedUser.name, phoneNo: updatedUser.phoneNo }))
+      
+      setIsEditing(false)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsUploadingPhoto(true)
+    setError(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const data = await apiFetch('/users/profile/photo', {
+        method: 'PATCH',
+        body: formData,
+      })
+
+      const photoUrl = data.photoUrl || data.user?.photoUrl
+      if (photoUrl) {
+        dispatch(updateUser({ photoUrl }))
+      }
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setIsUploadingPhoto(false)
+    }
   }
 
   const displayName = profile?.users?.name || user?.name || 'Teacher'
@@ -89,28 +162,115 @@ export default function TeacherProfilePage() {
       ) : (
         <div className="px-5 space-y-5">
           {/* Avatar + Name Card */}
-          <Card className="rounded-3xl border-border/50 bg-background/60 backdrop-blur-md overflow-hidden">
+          <Card className="rounded-3xl border-border/50 bg-background/60 backdrop-blur-md overflow-hidden relative">
+            {!isEditing && (
+              <button
+                onClick={startEditing}
+                className="absolute top-4 right-4 w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-all z-10"
+              >
+                <RiEdit2Line className="w-4 h-4" />
+              </button>
+            )}
+            
             <CardContent className="p-6">
-              <div className="flex items-center gap-5">
-                <div className="relative shrink-0">
-                  <div className="w-20 h-20 rounded-3xl bg-primary flex items-center justify-center text-primary-foreground text-2xl font-black shadow-xl shadow-primary/30">
-                    {initials}
+              {isEditing ? (
+                <form onSubmit={handleUpdateProfile} className="space-y-4">
+                  <div className="flex items-center gap-4 mb-2">
+                    <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground text-xl font-black shrink-0">
+                      {initials}
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-black tracking-tight">Edit Profile</h2>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase">Update your details</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(false)}
+                      className="ml-auto w-8 h-8 rounded-xl bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
+                    >
+                      <RiCloseLine className="w-5 h-5" />
+                    </button>
                   </div>
-                  <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-background flex items-center justify-center">
-                    <RiShieldCheckLine className="w-3 h-3 text-white" />
+
+                  <div className="space-y-3">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5 ml-1">
+                        <RiUser3Line className="w-3 h-3 text-primary" /> Full Name
+                      </label>
+                      <input
+                        type="text"
+                        value={editName}
+                        onChange={e => setEditName(e.target.value)}
+                        className="w-full h-11 rounded-xl bg-muted/40 border border-border/50 px-4 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:bg-background outline-none transition-all"
+                        placeholder="Your full name"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5 ml-1">
+                        <RiPhoneLine className="w-3 h-3 text-primary" /> Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        value={editPhone}
+                        onChange={e => setEditPhone(e.target.value)}
+                        className="w-full h-11 rounded-xl bg-muted/40 border border-border/50 px-4 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:bg-background outline-none transition-all"
+                        placeholder="+1 234 567 890"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      type="submit"
+                      disabled={isUpdating}
+                      className="flex-1 h-11 rounded-xl bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-primary/20 transition-all active:scale-95 disabled:opacity-50"
+                    >
+                      {isUpdating ? <RiLoader4Line className="w-4 h-4 animate-spin" /> : <><RiSaveLine className="w-4 h-4" /> Save Changes</>}
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="flex items-center gap-5">
+                  <div className="relative shrink-0 group">
+                    <div className="w-20 h-20 rounded-3xl bg-primary flex items-center justify-center text-primary-foreground text-2xl font-black shadow-xl shadow-primary/30 overflow-hidden relative">
+                      {user?.photoUrl ? (
+                        <img src={getImageUrl(user.photoUrl)} alt={displayName} className="w-full h-full object-cover" />
+                      ) : (
+                        initials
+                      )}
+
+                      {/* Upload Overlay */}
+                      <label className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                        {isUploadingPhoto ? (
+                          <RiLoader4Line className="w-6 h-6 animate-spin text-white" />
+                        ) : (
+                          <RiCameraLine className="w-6 h-6 text-white" />
+                        )}
+                        <input type="file" className="hidden" accept="image/*" onChange={handlePhotoUpload} disabled={isUploadingPhoto} />
+                      </label>
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-background flex items-center justify-center">
+                      <RiShieldCheckLine className="w-3 h-3 text-white" />
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-xl font-black tracking-tight truncate">{displayName}</h2>
+                    <p className="text-sm text-muted-foreground font-medium flex items-center gap-1.5 mt-0.5">
+                      <RiMailLine className="w-3.5 h-3.5 shrink-0" />
+                      <span className="truncate">{profile?.users?.email || user?.email}</span>
+                    </p>
+                    {profile?.users?.phoneNo && (
+                      <p className="text-xs text-muted-foreground font-bold flex items-center gap-1.5 mt-1">
+                        <RiPhoneLine className="w-3 h-3 shrink-0" />
+                        <span>{profile.users.phoneNo}</span>
+                      </p>
+                    )}
+                    <Badge className="mt-2 bg-primary/10 text-primary border-primary/20 font-bold text-[10px] uppercase tracking-wider">
+                      Teacher
+                    </Badge>
                   </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-xl font-black tracking-tight truncate">{displayName}</h2>
-                  <p className="text-sm text-muted-foreground font-medium flex items-center gap-1.5 mt-0.5">
-                    <RiMailLine className="w-3.5 h-3.5 shrink-0" />
-                    <span className="truncate">{profile?.users?.email || user?.email}</span>
-                  </p>
-                  <Badge className="mt-2 bg-primary/10 text-primary border-primary/20 font-bold text-[10px] uppercase tracking-wider">
-                    Teacher
-                  </Badge>
-                </div>
-              </div>
+              )}
             </CardContent>
           </Card>
 
