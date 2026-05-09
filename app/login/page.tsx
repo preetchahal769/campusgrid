@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
 import { setLoading, setAuthSuccess, setAuthFailure, clearError } from "@/lib/store/slices/authSlice"
@@ -15,12 +15,20 @@ import { cn } from "@/lib/utils"
 export default function LoginPage() {
   const router = useRouter()
   const dispatch = useAppDispatch()
-  const { isLoading, error } = useAppSelector((state) => state.auth)
+  const { user, isLoading, error } = useAppSelector((state) => state.auth)
   
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [validationError, setValidationError] = useState<string | null>(null)
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      const role = user.role.toLowerCase()
+      router.replace(`/${role}`)
+    }
+  }, [user, router])
 
   const validateForm = () => {
     if (!email || !password) { setValidationError("Please fill in all fields"); return false }

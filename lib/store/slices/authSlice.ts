@@ -5,7 +5,9 @@ export interface User {
   name: string
   email: string
   role: 'STUDENT' | 'TEACHER' | 'PRINCIPAL' | 'ADMIN'
-  avatarUrl?: string
+  School_id?: string
+  School_name?: string
+  photoUrl?: string
   lastLogin?: string
 }
 
@@ -82,9 +84,15 @@ export const authSlice = createSlice({
     },
     clearError: (state) => {
       state.error = null
+    },
+    updateUser: (state, action: PayloadAction<Partial<User>>) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload }
+        localStorage.setItem('cg_user', JSON.stringify(state.user))
+      }
     }
   },
 })
 
-export const { setLoading, setAuthSuccess, setAuthFailure, logout, clearError } = authSlice.actions
+export const { setLoading, setAuthSuccess, setAuthFailure, logout, clearError, updateUser } = authSlice.actions
 export default authSlice.reducer

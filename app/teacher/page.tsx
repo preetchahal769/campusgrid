@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
 import { setTimetable, setLeaveRequests, setLoading, setError, setTeacherProfile } from "@/lib/store/slices/teacherSlice"
@@ -29,6 +29,7 @@ export default function TeacherDashboardPage() {
   const dispatch = useAppDispatch()
   const { user } = useAppSelector((state) => state.auth)
   const { timetable, leaveRequests, isLoading, profile } = useAppSelector((state) => state.teacher)
+  const [mounted, setMounted] = useState(false)
 
   // Use teacher profile name if available, fallback to auth user name
   const firstName = (profile?.users?.name || user?.name)?.split(' ')[0] || 'Teacher'
@@ -39,6 +40,13 @@ export default function TeacherDashboardPage() {
   const pendingLeaves = leaveRequests.filter(l => l.status === 'PENDING')
 
   useEffect(() => {
+    setMounted(true)
+    // Role-based protection
+    if (user && user.role !== 'TEACHER') {
+      router.replace(`/${user.role.toLowerCase()}`)
+      return
+    }
+
     const fetchData = async () => {
       dispatch(setLoading(true))
       try {
@@ -68,6 +76,9 @@ export default function TeacherDashboardPage() {
     dispatch(logout())
     router.push('/login')
   }
+
+  if (!mounted) return null
+  if (user && user.role !== 'TEACHER') return null
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -113,7 +124,7 @@ export default function TeacherDashboardPage() {
           <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-4 px-1">Quick Actions</h2>
           <div className="grid grid-cols-2 gap-4">
             {[
-              { label: 'Create Assignment', icon: RiAddCircleLine, route: '/teacher/create-assignment', color: 'bg-primary/10 text-primary', border: 'hover:border-primary/40' },
+              { label: 'Manage Homework', icon: RiBookOpenLine, route: '/teacher/homework', color: 'bg-primary/10 text-primary', border: 'hover:border-primary/40' },
               { label: 'Leave Requests', icon: RiCalendarCheckLine, route: '/teacher/leaves', color: 'bg-amber-500/10 text-amber-600', border: 'hover:border-amber-500/40', badge: pendingLeaves.length },
               { label: 'Send Broadcast', icon: RiMegaphoneLine, route: '/teacher/broadcast', color: 'bg-emerald-500/10 text-emerald-600', border: 'hover:border-emerald-500/40' },
               { label: 'My Schedule', icon: RiTimeLine, route: '/teacher/schedule', color: 'bg-purple-500/10 text-purple-600', border: 'hover:border-purple-500/40' },
@@ -196,9 +207,9 @@ export default function TeacherDashboardPage() {
           <RiDashboard3Line className="w-6 h-6" />
           <span className="text-[10px] font-bold uppercase tracking-widest">Dash</span>
         </button>
-        <button onClick={() => router.push('/teacher/create-assignment')} className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
+        <button onClick={() => router.push('/teacher/homework')} className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
           <RiBookOpenLine className="w-6 h-6" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Assign</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest">Homework</span>
         </button>
         <button onClick={() => router.push('/teacher/leaves')} className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors relative">
           <RiCalendarCheckLine className="w-6 h-6" />

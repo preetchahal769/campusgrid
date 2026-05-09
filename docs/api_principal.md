@@ -102,19 +102,20 @@ Define which teacher manages a section (for leaves/attendance).
 
 ## 🗓️ Scheduling
 
-### 7. Create Timetable Slot
-- **Method**: `POST`
-- **URL**: `/academics/timetable`
-- **Request Body**:
+### Create Timetable (Single or Bulk)
+Assign a teacher to a specific day and time. You can pass one or many slots in a single call.
+*   **Method**: `POST`
+*   **URL**: `/academics/timetable`
+*   **Body**:
 ```json
 {
-  "dayOfWeek": "Monday",
-  "lectureNo": 2,
-  "startTime": "09:30 AM",
-  "endTime": "10:30 AM",
-  "teachersubjectsection_id": "tss_id_from_assignment_step"
+  "slots": [
+    { "dayOfWeek": "Monday", "lectureNo": 1, "startTime": "08:00 AM", "endTime": "09:00 AM", "teachersubjectsection_id": "TSS_ID" },
+    { "dayOfWeek": "Tuesday", "lectureNo": 1, "startTime": "08:00 AM", "endTime": "09:00 AM", "teachersubjectsection_id": "TSS_ID" }
+  ]
 }
 ```
+*Note: If any slot in the array has a conflict, the entire request will fail.*
 
 ---
 
@@ -136,3 +137,11 @@ Override a teacher's rejection or approve an escalated leave.
 }
 ```
 - **Details**: This is the only way to approve a request that has the `ESCALATED` status.
+
+### 10. Update Profile Photo
+Upload a new profile picture.
+- **Method**: PATCH
+- **URL**: /users/profile/photo
+- **Request**: multipart/form-data
+- **Field**: file (Image file)
+- **Response**: Returns the user object with the new photoUrl (presigned).

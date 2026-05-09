@@ -5,7 +5,7 @@ export interface TeacherProfile {
   qualification: string
   specilization: string   // note: API uses this spelling
   Experince: string
-  users: { name: string; email: string }
+  users: { name: string; email: string; phoneNo?: string }
   teachersubjectsection: {
     subject: { name: string; code: string }
     section: { name: string; grade: { name: string } }
@@ -86,6 +86,12 @@ export const teacherSlice = createSlice({
       state.isLoading = false
     },
     resetTeacherData: () => initialState,
+    updateUserProfile: (state, action: PayloadAction<{ name: string; phoneNo?: string }>) => {
+      if (state.profile && state.profile.users) {
+        state.profile.users.name = action.payload.name
+        state.profile.users.phoneNo = action.payload.phoneNo
+      }
+    },
   },
 })
 
@@ -98,6 +104,7 @@ export const {
   setSubmissions,
   setError,
   resetTeacherData,
+  updateUserProfile,
 } = teacherSlice.actions
 
 export default teacherSlice.reducer

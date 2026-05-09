@@ -26,6 +26,12 @@ export interface Assignment {
   dueDate: string
   maxMarks: number
   subject: { name: string; code: string }
+  isSubmitted?: boolean
+  submission?: {
+    status: string
+    submittedAt: string
+    attachments: { fileurl: string; filename: string }[]
+  }
 }
 
 export interface Broadcast {

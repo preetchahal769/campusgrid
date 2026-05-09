@@ -158,7 +158,20 @@ Fetch the weekly schedule for a specific section.
 - **URL**: `/academics/leaves`
 - **Response Statuses**: `PENDING`, `APPROVED`, `REJECTED`, `ESCALATED`
 
-### 7. Escalate Rejection
+### 7. My Attendance Calendar
+Fetch attendance records for the current user.
+- **Method**: `GET`
+- **URL**: `/attendance/me`
+- **Query Params**: `month=5&year=2024` (Optional)
+- **Response Structure**:
+```json
+[
+  { "date": "2024-05-01", "status": "PRESENT" },
+  { "date": "2024-05-02", "status": "LEAVE" }
+]
+```
+
+### 8. Escalate Rejection
 If a teacher rejects a leave, the student can appeal to the Principal.
 - **Method**: `POST`
 - **URL**: `/academics/leaves/:id/escalate`
@@ -172,3 +185,11 @@ If a teacher rejects a leave, the student can appeal to the Principal.
 - **Method**: `GET`
 - **URL**: `/communications/broadcasts`
 - **Response**: List of announcements from School Admin/Teachers.
+
+### Update Profile Photo
+Upload a new profile picture.
+- **Method**: PATCH
+- **URL**: /users/profile/photo
+- **Request**: multipart/form-data
+- **Field**: file (Image file)
+- **Response**: Returns the user object with the new photoUrl (presigned).

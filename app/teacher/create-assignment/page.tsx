@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAppSelector } from "@/lib/store/hooks"
 import { apiFetch } from "@/lib/api"
@@ -14,6 +14,11 @@ import {
   RiFileTextLine,
   RiBarChartLine,
   RiPriceTagLine,
+  RiArrowDownSLine,
+  RiSchoolLine,
+  RiUploadLine,
+  RiFileLine,
+  RiCloseCircleLine,
 } from "@remixicon/react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -27,18 +32,53 @@ export default function CreateAssignmentPage() {
   const [maxMarks, setMaxMarks] = useState("")
   const [subjectId, setSubjectId] = useState("")
   const [sectionId, setSectionId] = useState("")
+  const [allowedContexts, setAllowedContexts] = useState<any[]>([])
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [isLoadingContexts, setIsLoadingContexts] = useState(true)
+  const [selectedContextId, setSelectedContextId] = useState("")
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+
+  useEffect(() => {
+    const fetchContexts = async () => {
+      try {
+        const data = await apiFetch('/academics/assignments/allowed-contexts')
+        setAllowedContexts(data)
+      } catch (err: any) {
+        console.error("Failed to fetch contexts:", err)
+        setError("Failed to load your assigned subjects and sections. Please try again.")
+      } finally {
+        setIsLoadingContexts(false)
+      }
+    }
+    fetchContexts()
+  }, [])
+
+  const handleContextChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const contextId = e.target.value
+    setSelectedContextId(contextId)
+    setError(null)
+    
+    if (contextId) {
+      const context = allowedContexts.find(c => c.id === contextId)
+      if (context) {
+        setSubjectId(context.subject.id)
+        setSectionId(context.section.id)
+      }
+    } else {
+      setSubjectId("")
+      setSectionId("")
+    }
+  }
 
   const validate = () => {
     if (!title.trim()) return "Title is required"
     if (!description.trim()) return "Description is required"
     if (!dueDate) return "Due date is required"
     if (!maxMarks || isNaN(Number(maxMarks)) || Number(maxMarks) <= 0) return "Enter a valid max marks"
-    if (!subjectId.trim()) return "Subject ID is required"
-    if (!sectionId.trim()) return "Section ID is required"
+    if (!selectedContextId) return "Please select a subject and section"
     return null
   }
 
@@ -50,16 +90,21 @@ export default function CreateAssignmentPage() {
     setIsSubmitting(true)
     setError(null)
     try {
+      const formData = new FormData()
+      formData.append('title', title.trim())
+      formData.append('description', description.trim())
+      formData.append('dueDate', dueDate)
+      formData.append('maxMarks', maxMarks)
+      formData.append('subject_id', subjectId.trim())
+      formData.append('section_id', sectionId.trim())
+      
+      selectedFiles.forEach(file => {
+        formData.append('files', file)
+      })
+
       const data = await apiFetch('/academics/assignments', {
         method: 'POST',
-        body: JSON.stringify({
-          title: title.trim(),
-          description: description.trim(),
-          dueDate,
-          maxMarks: Number(maxMarks),
-          subject_id: subjectId.trim(),
-          section_id: sectionId.trim(),
-        }),
+        body: formData,
       })
       setSuccess(true)
       // Reset form
@@ -69,7 +114,9 @@ export default function CreateAssignmentPage() {
       setMaxMarks("")
       setSubjectId("")
       setSectionId("")
-      setTimeout(() => setSuccess(false), 3000)
+      setSelectedContextId("")
+      setSelectedFiles([])
+      setTimeout(() => router.push('/teacher/homework'), 2000)
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -169,31 +216,86 @@ export default function CreateAssignmentPage() {
           </div>
         </div>
 
-        {/* Subject ID + Section ID */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-              <RiPriceTagLine className="w-3.5 h-3.5 text-primary" /> Subject ID *
-            </label>
-            <input
-              type="text"
-              value={subjectId}
-              onChange={e => { setSubjectId(e.target.value); setError(null) }}
-              placeholder="cuid_of_subject"
-              className="w-full h-12 rounded-2xl bg-muted/40 border border-border/50 px-4 text-sm font-medium font-mono focus:ring-4 focus:ring-primary/10 focus:bg-background outline-none transition-all"
-            />
+        {/* Subject & Section Selection */}
+        <div className="space-y-2">
+          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+            <RiSchoolLine className="w-3.5 h-3.5 text-primary" /> Target Class & Subject *
+          </label>
+          <div className="relative group">
+            <select
+              value={selectedContextId}
+              onChange={handleContextChange}
+              disabled={isLoadingContexts || isSubmitting}
+              className={cn(
+                "w-full h-14 rounded-2xl bg-muted/40 border border-border/50 px-4 pr-10 text-sm font-bold appearance-none outline-none transition-all",
+                "focus:ring-4 focus:ring-primary/10 focus:bg-background focus:border-primary/30",
+                "disabled:opacity-50 disabled:cursor-not-allowed",
+                !selectedContextId && "text-muted-foreground font-medium"
+              )}
+            >
+              <option value="">{isLoadingContexts ? "Loading your classes..." : "Select Class & Subject"}</option>
+              {allowedContexts.map((ctx) => (
+                <option key={ctx.id} value={ctx.id}>
+                  {ctx.subject.name} — {ctx.section.grade.name} {ctx.section.name}
+                </option>
+              ))}
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground group-focus-within:text-primary transition-colors">
+              {isLoadingContexts ? (
+                <RiLoader4Line className="w-5 h-5 animate-spin" />
+              ) : (
+                <RiArrowDownSLine className="w-5 h-5" />
+              )}
+            </div>
           </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-              <RiPriceTagLine className="w-3.5 h-3.5 text-primary" /> Section ID *
+          {allowedContexts.length === 0 && !isLoadingContexts && (
+            <p className="text-[10px] font-bold text-destructive/80 pl-1">
+              No subjects or sections assigned to you. Contact administration.
+            </p>
+          )}
+        </div>
+
+        {/* Resource Upload */}
+        <div className="space-y-3">
+          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5 px-1">
+            <RiUploadLine className="w-3.5 h-3.5 text-primary" /> Resource Documents <span className="font-normal opacity-60">(optional)</span>
+          </label>
+          <div className="space-y-4">
+            <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-border/60 rounded-3xl bg-muted/20 hover:bg-muted/40 hover:border-primary/40 transition-all cursor-pointer group">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                <RiUploadLine className="w-6 h-6 text-muted-foreground group-hover:text-primary mb-2 transition-colors" />
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Add Resources / PDFs</p>
+                <p className="text-[8px] font-bold text-muted-foreground/40 mt-1 uppercase tracking-tighter">Multiple files supported</p>
+              </div>
+              <input 
+                type="file" 
+                className="hidden" 
+                multiple 
+                onChange={e => {
+                  if (e.target.files) {
+                    setSelectedFiles(prev => [...prev, ...Array.from(e.target.files!)])
+                  }
+                }}
+              />
             </label>
-            <input
-              type="text"
-              value={sectionId}
-              onChange={e => { setSectionId(e.target.value); setError(null) }}
-              placeholder="cuid_of_section"
-              className="w-full h-12 rounded-2xl bg-muted/40 border border-border/50 px-4 text-sm font-medium font-mono focus:ring-4 focus:ring-primary/10 focus:bg-background outline-none transition-all"
-            />
+
+            {selectedFiles.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {selectedFiles.map((file, i) => (
+                  <div key={i} className="flex items-center gap-2 px-3 py-2 bg-background border border-border/50 rounded-2xl text-[10px] font-bold shadow-sm animate-in zoom-in-95 duration-200">
+                    <RiFileLine className="w-3.5 h-3.5 text-primary" />
+                    <span className="max-w-[150px] truncate">{file.name}</span>
+                    <button 
+                      type="button"
+                      onClick={() => setSelectedFiles(prev => prev.filter((_, idx) => idx !== i))}
+                      className="text-muted-foreground hover:text-rose-500 transition-colors ml-1"
+                    >
+                      <RiCloseCircleLine className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

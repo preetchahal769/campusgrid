@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
 import { setBroadcasts } from "@/lib/store/slices/studentSlice"
-import { apiFetch } from "@/lib/api"
+import { apiFetch, getImageUrl } from "@/lib/api"
 import {
   RiArrowLeftLine,
   RiMegaphoneLine,
@@ -13,6 +13,8 @@ import {
   RiImageLine,
   RiTimeLine,
   RiUserLine,
+  RiCloseCircleLine,
+  RiFileLine,
 } from "@remixicon/react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -26,13 +28,15 @@ export default function NoticesPage() {
 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [selectedBroadcast, setSelectedBroadcast] = useState<any | null>(null)
+  const [isOpening, setIsOpening] = useState(false)
 
   useEffect(() => {
     const fetch = async () => {
       setIsLoading(true)
       setError(null)
       try {
-        const data = await apiFetch('/broadcast')
+        const data = await apiFetch('/communications/broadcasts')
         dispatch(setBroadcasts(data))
       } catch (err: any) {
         setError(err.message)
@@ -42,6 +46,18 @@ export default function NoticesPage() {
     }
     fetch()
   }, [dispatch])
+
+  const handleOpenDetail = async (id: string) => {
+    setIsOpening(true)
+    try {
+      const data = await apiFetch(`/communications/broadcasts/${id}`)
+      setSelectedBroadcast(data)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setIsOpening(false)
+    }
+  }
 
   const getRoleBadgeStyle = (role: string) => {
     if (role === 'ALL') return 'bg-primary/10 text-primary border-primary/20'
@@ -102,8 +118,9 @@ export default function NoticesPage() {
           broadcasts.map((broadcast, index) => (
             <Card
               key={broadcast.id}
+              onClick={() => handleOpenDetail(broadcast.id)}
               className={cn(
-                "rounded-3xl border-border/50 bg-background/60 backdrop-blur-md overflow-hidden",
+                "rounded-3xl border-border/50 bg-background/60 backdrop-blur-md overflow-hidden cursor-pointer hover:border-primary/30 transition-all active:scale-[0.98]",
                 "animate-in fade-in slide-in-from-bottom-4 duration-500",
               )}
               style={{ animationDelay: `${index * 80}ms` }}
@@ -166,6 +183,83 @@ export default function NoticesPage() {
           ))
         )}
       </div>
+
+      {/* Detail Modal */}
+      {selectedBroadcast && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-md" onClick={() => setSelectedBroadcast(null)} />
+          <Card className="relative w-full max-w-lg rounded-3xl border-border/50 shadow-2xl animate-in zoom-in-95 duration-200">
+            <CardContent className="p-6 space-y-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <RiMegaphoneLine className="w-6 h-6 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0 pt-1">
+                  <h2 className="text-lg font-black leading-tight">{selectedBroadcast.title}</h2>
+                  <Badge className={cn("mt-2 text-[9px] font-bold uppercase tracking-wider border", getRoleBadgeStyle(selectedBroadcast.targetrole))}>
+                    {getTargetLabel(selectedBroadcast.targetrole)}
+                  </Badge>
+                </div>
+                <button onClick={() => setSelectedBroadcast(null)} className="p-1 hover:bg-muted rounded-lg transition-colors">
+                  <RiCloseCircleLine className="w-6 h-6 text-muted-foreground" />
+                </button>
+              </div>
+
+              <div className="max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap font-medium">
+                  {selectedBroadcast.message}
+                </p>
+              </div>
+
+              {selectedBroadcast.attachments && selectedBroadcast.attachments.length > 0 && (
+                <div className="space-y-3">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Attachments ({selectedBroadcast.attachments.length})</p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {selectedBroadcast.attachments.map((att: any) => (
+                      <a
+                        key={att.id}
+                        href={getImageUrl(att.fileurl)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-3 rounded-2xl bg-muted/40 border border-border/40 hover:border-primary/30 hover:bg-muted/60 transition-colors group"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <RiFileLine className="w-4 h-4 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] font-black truncate group-hover:text-primary transition-colors">{att.filename}</p>
+                          <p className="text-[8px] font-bold text-muted-foreground uppercase opacity-60">{att.filetype}</p>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center gap-3 pt-4 border-t border-border/30">
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground uppercase">
+                  {selectedBroadcast.author.name[0]}
+                </div>
+                <div>
+                  <p className="text-xs font-black">{selectedBroadcast.author.name}</p>
+                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{selectedBroadcast.author.role.replace('_', ' ')}</p>
+                </div>
+                <div className="ml-auto flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground/60 uppercase">
+                  <RiTimeLine className="w-3.5 h-3.5" />
+                  Posted recently
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Opening Overlay */}
+      {isOpening && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/20 backdrop-blur-[2px]">
+          <RiLoader4Line className="w-10 h-10 animate-spin text-primary opacity-50" />
+        </div>
+      )}
     </div>
   )
 }

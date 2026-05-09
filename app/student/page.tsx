@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
-import { apiFetch } from "@/lib/api"
+import { apiFetch, getImageUrl } from "@/lib/api"
 import { 
   setLoading, 
   setProfile, 
@@ -23,7 +23,8 @@ import {
   RiDashboard3Line,
   RiFocus2Line,
   RiChatSmile3Line,
-  RiUserLine
+  RiUserLine,
+  RiCheckLine,
 } from "@remixicon/react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -35,6 +36,7 @@ export default function StudentDashboardPage() {
   const router = useRouter()
   const { user } = useAppSelector((state) => state.auth)
   const { profile, assignments, broadcasts, attendance, isLoading } = useAppSelector((state) => state.student)
+  const [mounted, setMounted] = useState(false)
   
   // Real attendance % computed from Redux state
   const totalDays = attendance.length
@@ -49,13 +51,20 @@ export default function StudentDashboardPage() {
   const greeting = hour < 12 ? "Good Morning" : hour < 18 ? "Good Afternoon" : "Good Evening"
 
   useEffect(() => {
+    setMounted(true)
+    // Role-based protection
+    if (user && user.role !== 'STUDENT') {
+      router.replace(`/${user.role.toLowerCase()}`)
+      return
+    }
+
     const fetchData = async () => {
       dispatch(setLoading(true))
       try {
         const [profileData, assignmentsData, broadcastsData, timetableData, attendanceData] = await Promise.all([
           apiFetch('/students/me'),
           apiFetch('/academics/assignments'),
-          apiFetch('/broadcast'),
+          apiFetch('/communications/broadcasts'),
           apiFetch('/academics/timetable/section/me').catch(async () => {
             const p = await apiFetch('/students/me')
             return apiFetch(`/academics/timetable/section/${p.section.id}`)
@@ -77,6 +86,9 @@ export default function StudentDashboardPage() {
 
     fetchData()
   }, [dispatch])
+
+  if (!mounted) return null
+  if (user && user.role !== 'STUDENT') return null
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -106,9 +118,13 @@ export default function StudentDashboardPage() {
             </button>
             <button
               onClick={() => router.push('/profile')}
-              className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center font-bold text-primary-foreground shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-transform"
+              className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center font-bold text-primary-foreground shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-transform overflow-hidden"
             >
-              {firstName[0]}
+              {user?.photoUrl ? (
+                <img src={getImageUrl(user.photoUrl)} alt={firstName} className="w-full h-full object-cover" />
+              ) : (
+                firstName[0]
+              )}
             </button>
           </div>
         </div>
@@ -186,21 +202,43 @@ export default function StudentDashboardPage() {
               ))
             ) : (
               assignments.map((assignment) => (
-                <Card key={assignment.id} className="min-w-[280px] rounded-3xl border-border/50 bg-gradient-to-br from-background to-muted/20 hover:border-primary/40 transition-colors overflow-hidden group">
+                <Card 
+                  key={assignment.id} 
+                  className={cn(
+                    "min-w-[280px] rounded-3xl border-border/50 bg-gradient-to-br from-background to-muted/20 hover:border-primary/40 transition-all overflow-hidden group",
+                    assignment.isSubmitted && "opacity-60 grayscale-[30%]"
+                  )}
+                >
                   <CardContent className="p-5 flex flex-col justify-between h-full">
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <Badge variant="secondary" className="rounded-full px-3 py-0.5 bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-tighter">
                           {assignment.subject.name}
                         </Badge>
-                        <span className="text-[10px] font-bold text-muted-foreground">Due in 2 days</span>
+                        <span className="text-[10px] font-bold text-muted-foreground">
+                          {assignment.isSubmitted ? "Completed" : "Due in 2 days"}
+                        </span>
                       </div>
                       <h4 className="font-bold text-base leading-tight group-hover:text-primary transition-colors">
                         {assignment.title}
                       </h4>
                     </div>
-                    <Button variant="outline" className="w-full mt-4 rounded-xl border-border/50 font-bold text-xs h-10 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all">
-                      Submit Work
+                    <Button 
+                      variant={assignment.isSubmitted ? "outline" : "default"}
+                      onClick={() => router.push('/homework')}
+                      className={cn(
+                        "w-full mt-4 rounded-xl font-bold text-xs h-10 transition-all",
+                        assignment.isSubmitted ? "border-emerald-500/20 text-emerald-600 hover:bg-emerald-500/5" : "shadow-md shadow-primary/20"
+                      )}
+                    >
+                      {assignment.isSubmitted ? (
+                        <>
+                          <RiCheckLine className="w-4 h-4 mr-1.5" />
+                          Submitted
+                        </>
+                      ) : (
+                        "Submit Work"
+                      )}
                     </Button>
                   </CardContent>
                 </Card>

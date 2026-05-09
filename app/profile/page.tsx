@@ -4,8 +4,8 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
 import { setProfile, setAttendance } from "@/lib/store/slices/studentSlice"
-import { logout } from "@/lib/store/slices/authSlice"
-import { apiFetch } from "@/lib/api"
+import { logout, updateUser } from "@/lib/store/slices/authSlice"
+import { apiFetch, getImageUrl } from "@/lib/api"
 import {
   RiUserLine,
   RiMailLine,
@@ -19,6 +19,7 @@ import {
   RiLogoutBoxLine,
   RiShieldCheckLine,
   RiGlobalLine,
+  RiCameraLine,
 } from "@remixicon/react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -36,6 +37,7 @@ export default function ProfilePage() {
   const [isLoadingAttendance, setIsLoadingAttendance] = useState(false)
   const [profileError, setProfileError] = useState<string | null>(null)
   const [attendanceError, setAttendanceError] = useState<string | null>(null)
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
 
   // Fetch profile if not in Redux
   useEffect(() => {
@@ -76,6 +78,33 @@ export default function ProfilePage() {
     router.push('/login')
   }
 
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsUploadingPhoto(true)
+    setProfileError(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const data = await apiFetch('/users/profile/photo', {
+        method: 'PATCH',
+        body: formData,
+      })
+
+      const photoUrl = data.photoUrl || data.user?.photoUrl
+      if (photoUrl) {
+        dispatch(updateUser({ photoUrl }))
+      }
+    } catch (err: any) {
+      setProfileError(err.message)
+    } finally {
+      setIsUploadingPhoto(false)
+    }
+  }
+
   // /attendance/me returns only the current user's records
   const totalDays = attendance.length
   const presentDays = attendance.filter(a => a.status === 'PRESENT').length
@@ -110,9 +139,23 @@ export default function ProfilePage() {
           <Card className="rounded-3xl border-border/50 bg-background/60 backdrop-blur-md overflow-hidden">
             <CardContent className="p-6">
               <div className="flex items-center gap-5">
-                <div className="relative">
-                  <div className="w-20 h-20 rounded-3xl bg-primary flex items-center justify-center text-primary-foreground text-3xl font-black shadow-xl shadow-primary/30">
-                    {(profile?.users.name || user?.name || 'S')[0].toUpperCase()}
+                <div className="relative group">
+                  <div className="w-20 h-20 rounded-3xl bg-primary flex items-center justify-center text-primary-foreground text-3xl font-black shadow-xl shadow-primary/30 overflow-hidden relative">
+                    {user?.photoUrl ? (
+                      <img src={getImageUrl(user.photoUrl)} alt={profile?.users.name || user?.name} className="w-full h-full object-cover" />
+                    ) : (
+                      (profile?.users.name || user?.name || 'S')[0].toUpperCase()
+                    )}
+
+                    {/* Upload Overlay */}
+                    <label className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                      {isUploadingPhoto ? (
+                        <RiLoader4Line className="w-6 h-6 animate-spin text-white" />
+                      ) : (
+                        <RiCameraLine className="w-6 h-6 text-white" />
+                      )}
+                      <input type="file" className="hidden" accept="image/*" onChange={handlePhotoUpload} disabled={isUploadingPhoto} />
+                    </label>
                   </div>
                   <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-background flex items-center justify-center">
                     <RiShieldCheckLine className="w-3 h-3 text-white" />
