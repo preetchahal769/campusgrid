@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={cn("antialiased", fontMono.variable, outfit.variable, "font-sans")} >
-      <body>
+      <body suppressHydrationWarning>
         <StoreProvider>
           <ThemeProvider>
             <main className="min-h-screen">
