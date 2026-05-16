@@ -62,10 +62,47 @@ All APIs (except Login) require an `Authorization` header: `Bearer <access_token
 - **Endpoint**: `GET /users/global`
 - **Description**: List all administrative users (Super Admin, Admin, Principal) across the entire grid.
 
+### Administrative Governance
+#### Create Administrative User (Super Admin / Admin)
+- **Endpoint**: `POST /users`
+- **Body**: 
+```json
+{
+  "email": "admin@campusgrid.com",
+  "password": "...",
+  "name": "Admin Name",
+  "role": "SUPER_ADMIN | ADMIN | PRINCIPAL | MANAGEMENT",
+  "School_id": "optional-school-id"
+}
+```
+- **Permission**: Super Admin only for `SUPER_ADMIN` role. Super Admin / Admin for others.
+
+#### Assign Principal to Existing School
+- **Endpoint**: `POST /schools/:id/assign-principal`
+- **Body**: 
+```json
+{
+  "userId": "user-uuid",
+  "qualification": "M.Ed",
+  "experienceYears": 10
+}
+```
+- **Description**: Promotes an existing user to Principal and links them to the specified school.
+
 ### Infrastructure Billing
 #### Global Subscription Overview
 - **Endpoint**: `GET /finance/subscriptions/overview`
-- **Description**: High-level summary stats (Revenue, Active Nodes) + Recent 50 bills.
+- **Description**: High-level summary stats (Total Billing, Collected Revenue, Active Nodes) + Recent 50 invoices.
+- **Response Shape**:
+```json
+{
+  "totalRevenue": 100000,
+  "collectedRevenue": 20000,
+  "activeSubscriptions": 15,
+  "pendingInvoices": 5,
+  "recentInvoices": [...]
+}
+```
 
 #### List All Subscriptions
 - **Endpoint**: `GET /finance/subscriptions`

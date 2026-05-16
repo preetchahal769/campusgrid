@@ -48,8 +48,11 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
         // Retry the original request
         response = await fetch(url, defaultOptions);
       } catch (refreshError) {
-        // Refresh failed, redirect to login
         if (typeof window !== 'undefined') {
+          // Clear persisted auth state to prevent redirect loops
+          localStorage.removeItem('cg_user');
+          localStorage.removeItem('cg_role');
+          
           // Only redirect if we're not already on the login page
           if (window.location.pathname !== '/login') {
             window.location.href = '/login';

@@ -29,6 +29,8 @@ interface AuditLog {
   timestamp: string
   details: string
   status: "SUCCESS" | "FAILURE" | "WARNING"
+  severity?: string
+  actorAvatar?: string
 }
 
 export default function AuditLogsPage() {
@@ -96,11 +98,11 @@ export default function AuditLogsPage() {
       <div className="fixed top-0 left-0 w-full h-64 bg-gradient-to-br from-cyan-600/20 via-primary/5 to-transparent -z-10" />
 
       {/* Header */}
-      <div className="px-6 pt-12 pb-6 space-y-6">
+      <div className="px-6 md:px-12 lg:px-24 xl:px-40 pt-12 pb-6 space-y-6 max-w-[1200px] mx-auto">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => router.back()}
+              onClick={() => router.push('/super_admin')}
               className="w-10 h-10 rounded-2xl bg-muted/50 border border-border/40 flex items-center justify-center hover:bg-muted transition-colors shrink-0 active:scale-95"
             >
               <RiArrowLeftLine className="w-5 h-5" />
@@ -128,13 +130,13 @@ export default function AuditLogsPage() {
 
       {/* Error Banner */}
       {error && (
-        <div className="mx-6 p-4 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-[10px] font-black uppercase tracking-widest animate-in shake-1 mb-6">
+        <div className="mx-6 md:mx-12 lg:mx-24 xl:mx-40 max-w-[1200px] xl:mx-auto p-4 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-[10px] font-black uppercase tracking-widest animate-in shake-1 mb-6">
           {typeof error === 'string' ? error : 'Ledger Synchronization Fault'}
         </div>
       )}
 
       {/* Logs List */}
-      <div className="px-6 space-y-4">
+      <div className="px-6 md:px-12 lg:px-24 xl:px-40 max-w-[1200px] mx-auto space-y-4">
         {isLoading ? (
           <div className="py-20 flex flex-col items-center justify-center gap-4 text-muted-foreground">
             <RiLoader4Line className="w-10 h-10 animate-spin text-cyan-500" />
@@ -165,9 +167,13 @@ export default function AuditLogsPage() {
                   
                   <div className="flex items-start justify-between relative z-10">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-600">
-                        <ActionIcon className="w-5 h-5" />
-                      </div>
+                      {log.actorAvatar ? (
+                        <img src={log.actorAvatar} alt={log.actorName} className="w-10 h-10 md:w-12 md:h-12 rounded-xl object-cover border border-cyan-500/20" />
+                      ) : (
+                        <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-600">
+                          <ActionIcon className="w-5 h-5 md:w-6 md:h-6" />
+                        </div>
+                      )}
                       <div>
                         <h3 className="text-xs font-black tracking-widest uppercase">{typeof log.action === 'string' ? log.action.replace(/_/g, ' ') : 'Grid Event'}</h3>
                         <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-medium mt-0.5">

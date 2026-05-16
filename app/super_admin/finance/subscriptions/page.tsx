@@ -16,7 +16,8 @@ import {
   RiLoader4Line,
   RiErrorWarningLine,
   RiFileList3Line,
-  RiCalendarEventLine
+  RiCalendarEventLine,
+  RiShieldCheckLine
 } from "@remixicon/react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -45,7 +46,10 @@ export default function SubscriptionOverviewPage() {
   const dispatch = useAppDispatch()
   const { finance: data, isLoading, error, schools } = useAppSelector(state => state.nexus)
 
+  const [mounted, setMounted] = useState(false)
+
   useEffect(() => {
+    setMounted(true)
     loadFinance()
     loadSchools()
   }, [])
@@ -73,7 +77,7 @@ export default function SubscriptionOverviewPage() {
   }
 
   // Fallback for active nodes if finance API returns 0 or undefined
-  const activeNodesCount = data?.activeSubscriptions || schools.filter(s => (typeof s.status === 'string' ? s.status : s.status?.status) === 'ACTIVE').length
+  const activeNodesCount = (mounted && (data?.activeSubscriptions || schools.filter(s => (typeof s.status === 'string' ? s.status : s.status?.status) === 'ACTIVE').length)) || 0
 
   if (isLoading && !data) {
     return (
@@ -87,7 +91,8 @@ export default function SubscriptionOverviewPage() {
   }
 
   const stats = [
-    { label: "Total Revenue", value: `₹${data?.totalRevenue?.toLocaleString() || '0'}`, icon: RiMoneyDollarCircleLine, color: "text-emerald-500 bg-emerald-500/10", trend: "+12.5%" },
+    { label: "Total Billed", value: `₹${(data?.totalRevenue || data?.revenue || data?.totalAmount || 0).toLocaleString()}`, icon: RiMoneyDollarCircleLine, color: "text-indigo-500 bg-indigo-500/10", trend: "Gross" },
+    { label: "Actually Collected", value: `₹${(data?.collectedRevenue || 0).toLocaleString()}`, icon: RiShieldCheckLine, color: "text-emerald-500 bg-emerald-500/10", trend: "Net" },
     { label: "Active Nodes", value: activeNodesCount.toString(), icon: RiPieChartLine, color: "text-blue-500 bg-blue-500/10", trend: `+${activeNodesCount}` },
     { label: "Pending Bills", value: data?.pendingInvoices?.toString() || '0', icon: RiFileList3Line, color: "text-amber-500 bg-amber-500/10", trend: "Critical" },
   ]
@@ -99,7 +104,7 @@ export default function SubscriptionOverviewPage() {
       {/* Header */}
       <div className="px-6 pt-12 pb-8 flex items-center gap-4">
         <button
-          onClick={() => router.back()}
+          onClick={() => router.push('/super_admin')}
           className="w-10 h-10 rounded-2xl bg-muted/50 border border-border/40 flex items-center justify-center hover:bg-muted transition-colors shrink-0 active:scale-95"
         >
           <RiArrowLeftLine className="w-5 h-5" />
@@ -119,7 +124,7 @@ export default function SubscriptionOverviewPage() {
         )}
 
         {/* Main Stats Grid */}
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((stat, idx) => (
             <Card key={stat.label} className="p-5 rounded-[2.5rem] bg-background/60 backdrop-blur-xl border-border/40 animate-in slide-in-from-right-8 duration-500" style={{ animationDelay: `${idx * 100}ms` }}>
               <div className="flex items-center justify-between">
@@ -156,7 +161,8 @@ export default function SubscriptionOverviewPage() {
             {data?.recentInvoices?.map((inv, idx) => (
               <div 
                 key={inv.id} 
-                className="p-5 rounded-3xl bg-muted/20 border border-border/30 flex items-center justify-between animate-in fade-in slide-in-from-bottom-4 duration-500"
+                onClick={() => router.push(`/super_admin/finance/payments?id=${inv.id}&school=${inv.schoolName}&amount=${inv.amountDue || inv.amount}`)}
+                className="p-5 rounded-3xl bg-muted/20 border border-border/30 flex items-center justify-between animate-in fade-in slide-in-from-bottom-4 duration-500 hover:bg-muted/40 transition-colors cursor-pointer group"
                 style={{ animationDelay: `${idx * 150}ms` }}
               >
                 <div className="flex items-center gap-4">

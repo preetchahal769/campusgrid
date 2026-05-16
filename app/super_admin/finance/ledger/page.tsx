@@ -34,8 +34,10 @@ export default function DetailedLedgerPage() {
   const [statusFilter, setStatusFilter] = useState<string>("ALL")
   const [schoolFilter, setSchoolFilter] = useState<string>("ALL")
   const [searchQuery, setSearchQuery] = useState("")
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     loadLedger()
     if (schools.length === 0) loadSchools()
   }, [])
@@ -89,7 +91,7 @@ export default function DetailedLedgerPage() {
       <div className="px-6 pt-12 pb-8 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push('/super_admin')}
             className="w-10 h-10 rounded-2xl bg-muted/50 border border-border/40 flex items-center justify-center hover:bg-muted transition-colors shrink-0 active:scale-95"
           >
             <RiArrowLeftLine className="w-5 h-5" />
@@ -137,7 +139,7 @@ export default function DetailedLedgerPage() {
               className="bg-transparent text-[10px] font-black uppercase tracking-widest text-indigo-600 focus:outline-none cursor-pointer max-w-[150px]"
             >
               <option value="ALL">All Nodes</option>
-              {schools.map(s => (
+              {mounted && schools.map(s => (
                 <option key={s.id} value={s.id}>{s.name}</option>
               ))}
             </select>
@@ -205,7 +207,7 @@ export default function DetailedLedgerPage() {
                 </button>
                 {inv.status !== 'PAID' && (
                   <button 
-                    onClick={() => router.push(`/super_admin/finance/payments?id=${inv.id}`)}
+                    onClick={() => router.push(`/super_admin/finance/payments?id=${inv.id}&school=${inv.schoolName}&amount=${inv.amountDue || inv.amount || 0}`)}
                     className="h-10 w-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 active:scale-95 transition-transform"
                   >
                     <RiCheckLine className="w-5 h-5" />

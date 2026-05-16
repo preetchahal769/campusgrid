@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, use } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { apiFetch } from "@/lib/api"
 import {
@@ -11,6 +11,7 @@ import {
   RiErrorWarningLine,
   RiShieldCheckLine,
   RiMoneyDollarBoxLine,
+  RiMoneyDollarCircleLine,
   RiHashtag,
   RiBuildingLine,
   RiInformationLine
@@ -31,7 +32,7 @@ export default function RecordPaymentPage() {
   const searchParams = useSearchParams()
   
   // Try to get invoice details from query params if coming from overview
-  const invoiceId = searchParams.get("invoiceId") || ""
+  const invoiceId = searchParams.get("id") || searchParams.get("invoiceId") || ""
   const schoolName = searchParams.get("school") || "Select School Node"
   const amount = searchParams.get("amount") || "0.00"
 
@@ -39,10 +40,27 @@ export default function RecordPaymentPage() {
     invoiceId: invoiceId,
     paymentMethod: "BANK_TRANSFER",
     transactionId: "",
+    amount: amount || "0"
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [success, setSuccess] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (invoiceId) {
+      checkInvoiceStatus()
+    }
+  }, [invoiceId])
+
+  const checkInvoiceStatus = async () => {
+    try {
+      const data = await apiFetch(`/finance/subscriptions/${invoiceId}`)
+      if (data.status === 'PAID') {
+        setError("This invoice has already been settled.")
+        setTimeout(() => router.push('/super_admin/finance/ledger'), 3000)
+      }
+    } catch {}
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -55,6 +73,7 @@ export default function RecordPaymentPage() {
     
     if (!formData.invoiceId.trim()) return setError("Invoice ID is required")
     if (!formData.transactionId.trim()) return setError("Transaction/Reference ID is required")
+    if (parseFloat(formData.amount) <= 0) return setError("A valid payment amount is required")
 
     setIsSubmitting(true)
     setError(null)
@@ -63,6 +82,7 @@ export default function RecordPaymentPage() {
       const data = await apiFetch(endpoint, {
         method: "PATCH",
         body: JSON.stringify({
+          amount: parseFloat(formData.amount),
           paymentMethod: formData.paymentMethod,
           transactionId: formData.transactionId
         }),
@@ -123,7 +143,7 @@ export default function RecordPaymentPage() {
                 <RiBuildingLine className="w-4 h-4 text-blue-500" />
                 <p className="text-xs font-black uppercase tracking-tight">{schoolName}</p>
               </div>
-              <p className="text-sm font-black text-blue-600">${amount}</p>
+              <p className="text-sm font-black text-blue-600">₹{amount}</p>
             </div>
             <div className="flex items-center gap-2 pt-2 border-t border-blue-500/10">
               <RiInformationLine className="w-3.5 h-3.5 text-blue-500/60" />
@@ -157,8 +177,23 @@ export default function RecordPaymentPage() {
             name="invoiceId"
             value={formData.invoiceId}
             onChange={handleChange}
-            placeholder="e.g. INV-2024-001"
+            placeholder="e.g. cmoth3zqg000..."
             className="w-full h-14 rounded-2xl bg-muted/40 border border-border/50 px-5 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:bg-background outline-none transition-all placeholder:text-muted-foreground/30"
+          />
+        </div>
+
+        {/* Payment Amount */}
+        <div className="space-y-2">
+          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5 ml-1">
+            <RiMoneyDollarCircleLine className="w-3.5 h-3.5 text-blue-500" /> Payment Amount (₹)
+          </label>
+          <input
+            type="number"
+            name="amount"
+            value={formData.amount}
+            onChange={handleChange}
+            placeholder="0.00"
+            className="w-full h-14 rounded-2xl bg-muted/40 border border-border/50 px-5 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:bg-background outline-none transition-all"
           />
         </div>
 

@@ -37,6 +37,11 @@ interface NexusState {
   finance: SubscriptionStats | null
   auditLogs: AuditLog[]
   analytics: any | null
+  health: any | null
+  storage: any | null
+  traffic: any | null
+  escalations: any[]
+  projections: any | null
   isLoading: boolean
   error: string | null
 }
@@ -50,6 +55,11 @@ const getInitialState = (): NexusState => {
       finance: savedFinance ? JSON.parse(savedFinance) : null,
       auditLogs: [],
       analytics: null,
+      health: null,
+      storage: null,
+      traffic: null,
+      escalations: [],
+      projections: null,
       isLoading: false,
       error: null,
     }
@@ -59,6 +69,11 @@ const getInitialState = (): NexusState => {
     finance: null,
     auditLogs: [],
     analytics: null,
+    health: null,
+    storage: null,
+    traffic: null,
+    escalations: [],
+    projections: null,
     isLoading: false,
     error: null,
   }
@@ -79,19 +94,32 @@ export const nexusSlice = createSlice({
       state.error = null
       localStorage.setItem('nexus_schools', JSON.stringify(action.payload))
     },
-    setFinance: (state, action: PayloadAction<SubscriptionStats>) => {
-      state.finance = action.payload
+    setFinance: (state, action: PayloadAction<any>) => {
+      // Handle nested data or summary objects
+      const data = action.payload.data || action.payload.summary || action.payload
+      state.finance = data
       state.isLoading = false
       state.error = null
-      localStorage.setItem('nexus_finance', JSON.stringify(action.payload))
+      localStorage.setItem('nexus_finance', JSON.stringify(data))
     },
-    setAuditLogs: (state, action: PayloadAction<AuditLog[]>) => {
-      state.auditLogs = action.payload
+    setAuditLogs: (state, action: PayloadAction<any>) => {
+      const data = action.payload.data || action.payload.logs || action.payload
+      state.auditLogs = Array.isArray(data) ? data : []
       state.isLoading = false
       state.error = null
     },
     setAnalytics: (state, action: PayloadAction<any>) => {
-      state.analytics = action.payload
+      const data = action.payload.data || action.payload.analytics || action.payload
+      state.analytics = data
+      state.isLoading = false
+      state.error = null
+    },
+    setTelemetry: (state, action: PayloadAction<{ health: any, storage: any, traffic: any, escalations: any[], projections: any }>) => {
+      state.health = action.payload.health
+      state.storage = action.payload.storage
+      state.traffic = action.payload.traffic
+      state.escalations = action.payload.escalations
+      state.projections = action.payload.projections
       state.isLoading = false
       state.error = null
     },
@@ -112,6 +140,11 @@ export const nexusSlice = createSlice({
         finance: null,
         auditLogs: [],
         analytics: null,
+        health: null,
+        storage: null,
+        traffic: null,
+        escalations: [],
+        projections: null,
         isLoading: false,
         error: null,
       }
@@ -125,6 +158,7 @@ export const {
   setFinance, 
   setAuditLogs, 
   setAnalytics, 
+  setTelemetry,
   setError,
   updateSchoolInStore,
   clearNexusData
