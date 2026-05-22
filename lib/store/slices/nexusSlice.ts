@@ -1,47 +1,107 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
-interface School {
+export interface School {
   id: string
   name: string
   address: string
   contactEmail: string
-  status: any
+  status: string | { status: string }
   createdAt: string
   region?: string
 }
 
-interface SubscriptionStats {
+export interface Invoice {
+  id: string
+  schoolName: string
+  amount: number
+  amountDue?: number
+  status: string | { status: string }
+  dueDate: string
+}
+
+export interface SubscriptionStats {
   totalRevenue: number
+  revenue?: number
+  totalAmount?: number
   activeSubscriptions: number
   pendingInvoices: number
   growthRate: number
-  recentInvoices: any[]
-  trends?: any[]
-  nodesByRegion?: any
+  collectedRevenue?: number
+  recentInvoices: Invoice[]
+  trends?: AnalyticsTrend[]
+  nodesByRegion?: Record<string, number>
 }
 
-interface AuditLog {
+
+export interface AuditLog {
   id: string
   action: string
   actorName: string
   actorRole: string
   timestamp: string
   details: string
-  status: any
+  status: string | { status: string }
   severity?: string
   actorAvatar?: string
+}
+
+export interface SystemHealth {
+  status: 'healthy' | 'degraded' | string
+  details?: string
+}
+
+export interface StorageInfo {
+  usagePercent: number
+  totalBytes?: number
+  usedBytes?: number
+}
+
+export interface LiveTraffic {
+  totalActiveUsers: number
+}
+
+export interface EscalationTicket {
+  id: string
+  title?: string
+  severity: 'high' | 'medium' | 'low' | string
+  status: string
+  createdAt?: string
+}
+
+export interface FinancialProjections {
+  currentMRR: number
+  growthRate?: number
+}
+
+export interface AnalyticsTrend {
+  month: string
+  revenue: number
+  nodeCount: number
+  userCount: number
+}
+
+export interface AnalyticsStats {
+  totalStudents: number
+  totalTeachers: number
+  activeSchools: number
+}
+
+export interface GlobalAnalytics {
+  trends?: AnalyticsTrend[]
+  stats?: AnalyticsStats
+  nodesByRegion?: Record<string, number> | { region: string; count: number }[]
 }
 
 interface NexusState {
   schools: School[]
   finance: SubscriptionStats | null
   auditLogs: AuditLog[]
-  analytics: any | null
-  health: any | null
-  storage: any | null
-  traffic: any | null
-  escalations: any[]
-  projections: any | null
+  analytics: GlobalAnalytics | null
+  health: SystemHealth | null
+  storage: StorageInfo | null
+  traffic: LiveTraffic | null
+  escalations: EscalationTicket[]
+  projections: FinancialProjections | null
   isLoading: boolean
   error: string | null
 }
@@ -94,27 +154,27 @@ export const nexusSlice = createSlice({
       state.error = null
       localStorage.setItem('nexus_schools', JSON.stringify(action.payload))
     },
-    setFinance: (state, action: PayloadAction<any>) => {
+    setFinance: (state, action: PayloadAction<SubscriptionStats | { data: SubscriptionStats } | { summary: SubscriptionStats }>) => {
       // Handle nested data or summary objects
-      const data = action.payload.data || action.payload.summary || action.payload
+      const data = (action.payload as any).data || (action.payload as any).summary || action.payload
       state.finance = data
       state.isLoading = false
       state.error = null
       localStorage.setItem('nexus_finance', JSON.stringify(data))
     },
-    setAuditLogs: (state, action: PayloadAction<any>) => {
-      const data = action.payload.data || action.payload.logs || action.payload
+    setAuditLogs: (state, action: PayloadAction<AuditLog[] | { data: AuditLog[] } | { logs: AuditLog[] }>) => {
+      const data = (action.payload as any).data || (action.payload as any).logs || action.payload
       state.auditLogs = Array.isArray(data) ? data : []
       state.isLoading = false
       state.error = null
     },
-    setAnalytics: (state, action: PayloadAction<any>) => {
-      const data = action.payload.data || action.payload.analytics || action.payload
+    setAnalytics: (state, action: PayloadAction<GlobalAnalytics | { data: GlobalAnalytics } | { analytics: GlobalAnalytics }>) => {
+      const data = (action.payload as any).data || (action.payload as any).analytics || action.payload
       state.analytics = data
       state.isLoading = false
       state.error = null
     },
-    setTelemetry: (state, action: PayloadAction<{ health: any, storage: any, traffic: any, escalations: any[], projections: any }>) => {
+    setTelemetry: (state, action: PayloadAction<{ health: SystemHealth | null, storage: StorageInfo | null, traffic: LiveTraffic | null, escalations: EscalationTicket[], projections: FinancialProjections | null }>) => {
       state.health = action.payload.health
       state.storage = action.payload.storage
       state.traffic = action.payload.traffic

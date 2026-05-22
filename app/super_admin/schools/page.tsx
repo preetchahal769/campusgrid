@@ -84,7 +84,7 @@ export default function SchoolsListPage() {
     }
   }
 
-  const toggleStatus = async (id: string, currentStatus: any) => {
+  const toggleStatus = async (id: string, currentStatus: string | { status: string }) => {
     setStatusUpdating(id)
     const statusStr = typeof currentStatus === 'string' ? currentStatus : currentStatus?.status || ''
     
@@ -106,7 +106,7 @@ export default function SchoolsListPage() {
     }
   }
 
-  const getStatusConfig = (status: any) => {
+  const getStatusConfig = (status: string | { status: string }) => {
     const statusStr = typeof status === 'string' ? status : status?.status || ''
     switch (statusStr) {
       case "ACTIVE":

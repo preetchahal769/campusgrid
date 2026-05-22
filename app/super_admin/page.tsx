@@ -105,7 +105,13 @@ export default function SuperAdminDashboardPage() {
   }
 
   const handleLogout = async () => {
-    try { await apiFetch("/auth/logout", { method: "POST" }) } catch {}
+    try {
+      await apiFetch("/auth/logout", { method: "POST" })
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Failed to terminate session on backend during logout:', error)
+      }
+    }
     dispatch(logout())
     router.push("/login")
   }

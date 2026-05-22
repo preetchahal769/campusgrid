@@ -65,7 +65,7 @@ export default function SubstitutionPage() {
     setLoadingSubs(true)
     setAvailableSubs([])
     try {
-      const day = new Date().toLocaleDateString('en-US', { weekday: 'Monday' }) // Dynamic in production
+      const day = new Date().toLocaleDateString('en-US', { weekday: 'long' }) // Dynamic in production
       const data = await apiFetch(`/academics/substitutions/available-teachers?lectureNo=${slot.lectureNo}&dayOfWeek=${day}`)
       setAvailableSubs(data)
     } catch (err: any) {

@@ -33,8 +33,10 @@ export function useSchoolInfo() {
           const name = me.School_name || me.school?.name
           dispatch(updateUser({ School_name: name }))
         }
-      } catch {
-        // Silently fail — the UI will fall back to School_id
+      } catch (error) {
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Failed to enrichment school information profile:', error)
+        }
       } finally {
         setIsLoading(false)
       }

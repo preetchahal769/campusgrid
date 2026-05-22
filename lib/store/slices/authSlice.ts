@@ -4,7 +4,7 @@ export interface User {
   id: string
   name: string
   email: string
-  role: 'STUDENT' | 'TEACHER' | 'PRINCIPAL' | 'ADMIN'
+  role: 'STUDENT' | 'TEACHER' | 'PRINCIPAL' | 'ADMIN' | 'SUPER_ADMIN'
   School_id?: string
   School_name?: string
   photoUrl?: string
@@ -13,7 +13,7 @@ export interface User {
 
 interface AuthState {
   user: User | null
-  userRole: 'student' | 'teacher' | 'principal' | null
+  userRole: 'student' | 'teacher' | 'principal' | 'admin' | 'super_admin' | null
   isAuthenticated: boolean
   isLoading: boolean
   error: string | null
@@ -28,7 +28,7 @@ const getInitialState = (): AuthState => {
     if (savedUser && savedRole) {
       return {
         user: JSON.parse(savedUser),
-        userRole: savedRole as any,
+        userRole: savedRole as 'student' | 'teacher' | 'principal' | 'admin' | 'super_admin',
         isAuthenticated: true,
         isLoading: false,
         error: null,
@@ -57,7 +57,7 @@ export const authSlice = createSlice({
     setAuthSuccess: (state, action: PayloadAction<{ user: User; access_token: string }>) => {
       const { user } = action.payload
       state.user = user
-      state.userRole = user.role.toLowerCase() as any
+      state.userRole = user.role.toLowerCase() as 'student' | 'teacher' | 'principal' | 'admin' | 'super_admin'
       state.isAuthenticated = true
       state.isLoading = false
       state.error = null

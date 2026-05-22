@@ -13,7 +13,7 @@ import { updateLeaveStatusByName } from "@/lib/store/slices/attendanceSlice"
 
 export default function LeaveApprovalsPage() {
   const dispatch = useAppDispatch()
-  const requests = useAppSelector((state: any) => state.leaves.pendingRequests as LeaveRequest[])
+  const requests = useAppSelector((state) => state.leaves.pendingRequests)
 
   const handleAction = (id: string, name: string, action: "approve" | "decline") => {
     // 1. Remove from local queue

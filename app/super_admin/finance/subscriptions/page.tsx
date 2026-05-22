@@ -58,7 +58,11 @@ export default function SubscriptionOverviewPage() {
     try {
       const data = await apiFetch("/schools")
       dispatch(setSchools(data))
-    } catch {}
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Failed to fetch school list on finance subscriptions page:', error)
+      }
+    }
   }
 
   const loadFinance = async () => {

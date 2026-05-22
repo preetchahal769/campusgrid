@@ -57,7 +57,7 @@ export default function SubscriptionOverridePage({ params }: { params: Promise<{
     }
   }
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = <K extends keyof typeof formData>(field: K, value: typeof formData[K]) => {
     setFormData(prev => {
       const newData = { ...prev, [field]: value }
       // Auto-calculate amountDue if count or rate changes

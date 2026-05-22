@@ -46,7 +46,11 @@ export default function DetailedLedgerPage() {
     try {
       const data = await apiFetch("/schools")
       dispatch(setSchools(data))
-    } catch {}
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Failed to fetch school list on detailed ledger page:', error)
+      }
+    }
   }
 
   const loadLedger = async () => {

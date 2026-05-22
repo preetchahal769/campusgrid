@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, use } from "react"
+import { useState, useEffect, use, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { apiFetch } from "@/lib/api"
 import {
@@ -27,7 +27,7 @@ const PAYMENT_METHODS = [
   { label: "Digital Wallet", value: "WALLET" },
 ]
 
-export default function RecordPaymentPage() {
+function RecordPaymentPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   
@@ -59,7 +59,11 @@ export default function RecordPaymentPage() {
         setError("This invoice has already been settled.")
         setTimeout(() => router.push('/super_admin/finance/ledger'), 3000)
       }
-    } catch {}
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Failed to verify status of invoice:', error)
+      }
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -251,5 +255,20 @@ export default function RecordPaymentPage() {
         </div>
       </form>
     </div>
+  )
+}
+
+export default function RecordPaymentPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <RiLoader4Line className="w-10 h-10 animate-spin text-blue-500" />
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Loading Payment Form...</p>
+        </div>
+      </div>
+    }>
+      <RecordPaymentPageContent />
+    </Suspense>
   )
 }

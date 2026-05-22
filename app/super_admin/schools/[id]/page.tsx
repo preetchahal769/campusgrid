@@ -41,6 +41,7 @@ interface SchoolDetail {
   region: string
   principal?: {
     user: {
+      id: string
       name: string
       email: string
       phoneNo: string
@@ -63,14 +64,28 @@ interface User {
   createdAt: string
 }
 
+interface SchoolFinance {
+  currentMRR: number
+}
+
+interface StudentGrowthEntry {
+  month: string
+  count: number
+}
+
+interface SchoolAnalytics {
+  studentGrowth?: StudentGrowthEntry[]
+  criticalEscalations?: number
+}
+
 export default function SchoolDetailPage() {
   const router = useRouter()
   const params = useParams()
   const schoolId = params.id as string
 
   const [school, setSchool] = useState<SchoolDetail | null>(null)
-  const [finance, setFinance] = useState<any>(null)
-  const [analytics, setAnalytics] = useState<any>(null)
+  const [finance, setFinance] = useState<SchoolFinance | null>(null)
+  const [analytics, setAnalytics] = useState<SchoolAnalytics | null>(null)
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
@@ -273,7 +288,7 @@ export default function SchoolDetailPage() {
                 <Button 
                   variant="outline" 
                   disabled={resettingPassword}
-                  onClick={() => handleResetPassword((school.principal as any).user.id)}
+                  onClick={() => handleResetPassword(school.principal!.user.id)}
                   className="w-full rounded-2xl h-12 font-bold border-indigo-500/20 text-indigo-600 hover:bg-indigo-500 hover:text-white transition-all shadow-sm"
                 >
                   {resettingPassword ? <RiLoader4Line className="w-5 h-5 animate-spin mx-auto" /> : "Reset Password"}
@@ -349,7 +364,7 @@ export default function SchoolDetailPage() {
                 {/* Y-Axis */}
                 <div className="flex flex-col justify-between h-[calc(100%-1.2rem)] text-[8px] font-black text-foreground/70 w-6 text-right pb-1">
                   {(() => {
-                    const max = Math.max(...(analytics?.studentGrowth || []).map((g: any) => g.count)) || 10
+                    const max = Math.max(...(analytics?.studentGrowth || []).map((g: StudentGrowthEntry) => g.count)) || 10
                     return [max, Math.floor(max * 0.5), 0].map(v => <span key={v}>{v}</span>)
                   })()}
                 </div>
@@ -358,10 +373,10 @@ export default function SchoolDetailPage() {
                   {chartType === "line" && (analytics?.studentGrowth || []).length > 0 && (
                     <svg className="absolute inset-0 w-full h-[calc(100%-1.2rem)] overflow-visible pointer-events-none z-0" viewBox="0 0 100 100" preserveAspectRatio="none">
                       <path 
-                        d={`M ${analytics.studentGrowth.map((item: any, i: number) => {
-                          const max = Math.max(...analytics.studentGrowth.map((g: any) => g.count)) || 1;
+                        d={`M ${analytics!.studentGrowth!.map((item: StudentGrowthEntry, i: number) => {
+                          const max = Math.max(...analytics!.studentGrowth!.map((g: StudentGrowthEntry) => g.count)) || 1;
                           const height = (item.count / max) * 100;
-                          const x = (i / (analytics.studentGrowth.length - 1)) * 100;
+                          const x = (i / (analytics!.studentGrowth!.length - 1)) * 100;
                           const y = 100 - height;
                           return `${x} ${y}`;
                         }).join(' L ')}`}
@@ -374,8 +389,8 @@ export default function SchoolDetailPage() {
                     </svg>
                   )}
 
-                  {(analytics?.studentGrowth || []).map((item: any, i: number) => {
-                    const max = Math.max(...analytics.studentGrowth.map((g: any) => g.count)) || 1
+                  {(analytics?.studentGrowth || []).map((item: StudentGrowthEntry, i: number) => {
+                    const max = Math.max(...analytics!.studentGrowth!.map((g: StudentGrowthEntry) => g.count)) || 1
                     const height = (item.count / max) * 100
                     const dateObj = new Date(`${item.month}-01`)
                     const monthLabel = isNaN(dateObj.getTime()) ? '...' : dateObj.toLocaleString('default', { month: 'short' })

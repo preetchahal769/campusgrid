@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
-import { setAnalytics, setLoading, setError } from "@/lib/store/slices/nexusSlice"
+import { setAnalytics, setLoading, setError, type AnalyticsTrend } from "@/lib/store/slices/nexusSlice"
 import { apiFetch } from "@/lib/api"
 import {
   RiArrowLeftLine,
@@ -48,7 +48,7 @@ export default function GlobalAnalyticsPage() {
   const [chartMetric, setChartMetric] = useState<"revenue" | "nodeCount" | "userCount">("revenue")
   const [chartType, setChartType] = useState<"bar" | "line">("line")
 
-  const MOCK_TRENDS = [
+  const MOCK_TRENDS: AnalyticsTrend[] = [
     { month: "2025-06", revenue: 15000, nodeCount: 2, userCount: 450 },
     { month: "2025-07", revenue: 18000, nodeCount: 3, userCount: 600 },
     { month: "2025-08", revenue: 22000, nodeCount: 5, userCount: 1100 },
@@ -110,7 +110,7 @@ export default function GlobalAnalyticsPage() {
   }
 
   const totalUsers = useDemoMode ? 18000 : (data?.stats?.totalStudents || 0) + (data?.stats?.totalTeachers || 0);
-  const totalRevenue = activeTrends.reduce((sum: number, t: any) => sum + (t.revenue || 0), 0) || 0;
+  const totalRevenue = activeTrends.reduce((sum: number, t: AnalyticsTrend) => sum + (t.revenue || 0), 0) || 0;
   const activeSchools = useDemoMode ? 50 : (data?.stats?.activeSchools || 0);
 
   const primaryStats = [
@@ -229,7 +229,7 @@ export default function GlobalAnalyticsPage() {
             {/* Y-Axis Scale */}
             <div className="flex flex-col justify-between h-[calc(100%-1.5rem)] text-[9px] font-bold text-foreground/70 pb-2 w-10 text-right">
               {(() => {
-                const maxVal = activeTrends.length > 0 ? Math.max(...activeTrends.map((t: any) => t[chartMetric] || 0)) || 1 : 100;
+                const maxVal = activeTrends.length > 0 ? Math.max(...activeTrends.map((t: AnalyticsTrend) => t[chartMetric] || 0)) || 1 : 100;
                 const formatLabel = (val: number) => {
                   if (val === 0) return '0';
                   if (chartMetric === "revenue") {
@@ -258,8 +258,8 @@ export default function GlobalAnalyticsPage() {
                   </linearGradient>
                 </defs>
                 <path 
-                  d={`M ${activeTrends.map((item: any, i: number) => {
-                    const maxVal = Math.max(...activeTrends.map((t: any) => t[chartMetric] || 0)) || 1;
+                  d={`M ${activeTrends.map((item: AnalyticsTrend, i: number) => {
+                    const maxVal = Math.max(...activeTrends.map((t: AnalyticsTrend) => t[chartMetric] || 0)) || 1;
                     const val = typeof item[chartMetric] === 'number' ? item[chartMetric] : 0;
                     const height = (val / maxVal) * 100;
                     const x = (i / (activeTrends.length - 1)) * 100;
@@ -273,8 +273,8 @@ export default function GlobalAnalyticsPage() {
                   vectorEffect="non-scaling-stroke"
                 />
                 <path 
-                  d={`M 0 100 L ${activeTrends.map((item: any, i: number) => {
-                    const maxVal = Math.max(...activeTrends.map((t: any) => t[chartMetric] || 0)) || 1;
+                  d={`M 0 100 L ${activeTrends.map((item: AnalyticsTrend, i: number) => {
+                    const maxVal = Math.max(...activeTrends.map((t: AnalyticsTrend) => t[chartMetric] || 0)) || 1;
                     const val = typeof item[chartMetric] === 'number' ? item[chartMetric] : 0;
                     const height = (val / maxVal) * 100;
                     const x = (i / (activeTrends.length - 1)) * 100;
@@ -286,8 +286,8 @@ export default function GlobalAnalyticsPage() {
               </svg>
             )}
 
-            {(activeTrends.length > 0 ? activeTrends : Array(12).fill({ [chartMetric]: undefined, month: '...' })).map((item: any, idx: number) => {
-              const maxVal = activeTrends.length > 0 ? Math.max(...activeTrends.map((t: any) => t[chartMetric] || 0)) : 100;
+            {(activeTrends.length > 0 ? activeTrends : (Array(12).fill({ month: '...' }) as Partial<AnalyticsTrend>[])).map((item: Partial<AnalyticsTrend>, idx: number) => {
+              const maxVal = activeTrends.length > 0 ? Math.max(...activeTrends.map((t: AnalyticsTrend) => t[chartMetric] || 0)) : 100;
               const val = item[chartMetric];
               const height = typeof val === 'number' ? (val / (maxVal || 1)) * 100 : 0;
               const dateObj = new Date(`${item.month}-01`);
@@ -325,7 +325,7 @@ export default function GlobalAnalyticsPage() {
             {(Array.isArray(data?.nodesByRegion) 
               ? data.nodesByRegion 
               : Object.entries(data?.nodesByRegion || { "Global": 100 }).map(([region, count]) => ({ region, count: count as number }))
-            ).map((item: any, idx: number) => (
+            ).map((item: { region?: string; count: number }, idx: number) => (
               <Card key={item.region || idx} className="p-5 rounded-[2rem] bg-background/60 backdrop-blur-xl border-border/40 flex flex-col items-center text-center space-y-2 animate-in zoom-in-95" style={{ animationDelay: `${idx * 100}ms` }}>
                 <RiMapPinLine className="w-5 h-5 text-indigo-500" />
                 <div>
