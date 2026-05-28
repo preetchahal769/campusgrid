@@ -18,11 +18,26 @@ import {
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 
+interface StudentRosterItem {
+  id: string
+  name: string
+  rollNumber: string
+  isOnLeave: boolean
+  leaveReason?: string
+}
+
+interface SectionRosterData {
+  sectionId: string
+  sectionName: string
+  gradeName: string
+  students: StudentRosterItem[]
+}
+
 export default function RapidAttendancePage() {
   const router = useRouter()
   
-  const [sectionData, setSectionData] = useState<any | null>(null)
-  const [students, setStudents] = useState<any[]>([])
+  const [sectionData, setSectionData] = useState<SectionRosterData | null>(null)
+  const [students, setStudents] = useState<StudentRosterItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -37,7 +52,7 @@ export default function RapidAttendancePage() {
         
         // Initialize attendance state with defaults (On-leave students are ABSENT by default but shown differently)
         const initial: Record<string, 'PRESENT' | 'ABSENT'> = {}
-        data.students.forEach((s: any) => {
+        data.students.forEach((s: StudentRosterItem) => {
           initial[s.id] = s.isOnLeave ? 'ABSENT' : 'PRESENT'
         })
         setAttendance(initial)
@@ -129,7 +144,7 @@ export default function RapidAttendancePage() {
 
       <ScrollArea className="flex-1 w-full p-4">
         <div className="space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150 fill-mode-both">
-          {students.map((student: any) => (
+          {students.map((student: StudentRosterItem) => (
             <div key={student.id} className="relative">
                <Card className={cn(
                   "p-3 rounded-2xl border transition-colors shadow-sm bg-background/60 backdrop-blur-md",

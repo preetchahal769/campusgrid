@@ -20,6 +20,10 @@ export interface TimetableEntry {
   endTime: string
   section: { name: string; grade: { name: string } }
   subject: { name: string }
+  teachersubjectsection?: {
+    subject?: { name: string; code?: string }
+    section?: { name: string; grade?: { name: string } }
+  }
 }
 
 export interface LeaveRequest {

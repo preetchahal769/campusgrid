@@ -14,7 +14,7 @@ export default function MorningRollPage() {
   const dispatch = useAppDispatch()
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const students = useAppSelector((state: any) => state.attendance.class10A as Student[])
+  const students = useAppSelector((state) => state.attendance.class10A)
 
   const toggleStatus = (id: string, newStatus: "present" | "absent") => {
     dispatch(toggleStudentStatus({ id, newStatus, isMorningRoll: true }))

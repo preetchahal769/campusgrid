@@ -60,7 +60,7 @@ export default function RegisterUserPage() {
     setIsSubmitting(true)
     setError(null)
     try {
-      const data = await apiFetch("/users/register", {
+      const data = await apiFetch("/users", {
         method: "POST",
         body: JSON.stringify(formData),
       })

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
-import { setAssignments } from "@/lib/store/slices/studentSlice"
+import { setAssignments, Assignment } from "@/lib/store/slices/studentSlice"
 import { apiFetch, getImageUrl } from "@/lib/api"
 import {
   RiArrowLeftLine,
@@ -25,6 +25,15 @@ import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { format, formatDistanceToNow, isPast, isToday, isTomorrow } from "date-fns"
 
+interface AssignmentDetail extends Assignment {
+  attachments?: {
+    id: string
+    fileurl: string
+    filetype: string
+    filename: string
+  }[]
+}
+
 export default function HomeworkPage() {
   const router = useRouter()
   const dispatch = useAppDispatch()
@@ -40,7 +49,7 @@ export default function HomeworkPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [viewDetailId, setViewDetailId] = useState<string | null>(null)
-  const [detailData, setDetailData] = useState<any | null>(null)
+  const [detailData, setDetailData] = useState<AssignmentDetail | null>(null)
   const [isOpening, setIsOpening] = useState(false)
   const [activeFilter, setActiveFilter] = useState<'ALL' | 'PENDING' | 'SUBMITTED' | 'OVERDUE'>('ALL')
 
@@ -145,15 +154,15 @@ export default function HomeworkPage() {
       {/* Filters */}
       <div className="px-5 mb-6">
         <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-          {[
+          {([
             { id: 'ALL', label: 'All', count: assignments.length },
             { id: 'PENDING', label: 'Pending', count: assignments.filter(a => !a.isSubmitted && !isPast(new Date(a.dueDate))).length },
             { id: 'SUBMITTED', label: 'Submitted', count: assignments.filter(a => a.isSubmitted).length },
             { id: 'OVERDUE', label: 'Overdue', count: assignments.filter(a => !a.isSubmitted && isPast(new Date(a.dueDate))).length },
-          ].map((f) => (
+          ] as const).map((f) => (
             <button
               key={f.id}
-              onClick={() => setActiveFilter(f.id as any)}
+              onClick={() => setActiveFilter(f.id)}
               className={cn(
                 "px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border",
                 activeFilter === f.id 
@@ -428,7 +437,7 @@ export default function HomeworkPage() {
                   <div className="space-y-3 pt-2">
                     <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Resources ({detailData.attachments.length})</p>
                     <div className="grid grid-cols-1 gap-2">
-                      {detailData.attachments.map((att: any) => (
+                      {detailData.attachments.map((att) => (
                         <a
                           key={att.id}
                           href={getImageUrl(att.fileurl)}

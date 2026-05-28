@@ -20,7 +20,12 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-const ROLE_ASSETS: Record<string, { icon: any; color: string; desc: string }> = {
+interface TargetRole {
+  value: string
+  label: string
+}
+
+const ROLE_ASSETS: Record<string, { icon: React.ComponentType<any>; color: string; desc: string }> = {
   STUDENT: { icon: RiUserLine, color: 'border-primary/30 bg-primary/5 text-primary', desc: 'Visible to students' },
   TEACHER: { icon: RiGroupLine, color: 'border-amber-500/30 bg-amber-500/5 text-amber-600', desc: 'Visible to teachers' },
   ADMIN: { icon: RiGlobalLine, color: 'border-emerald-500/30 bg-emerald-500/5 text-emerald-600', desc: 'Visible to admins' },
@@ -28,7 +33,7 @@ const ROLE_ASSETS: Record<string, { icon: any; color: string; desc: string }> = 
   PRINCIPAL: { icon: RiGlobalLine, color: 'border-rose-500/30 bg-rose-500/5 text-rose-600', desc: 'Visible to principal' },
 }
 
-const FALLBACK_ASSET = { icon: RiMegaphoneLine, color: 'border-border/50 bg-muted/20 text-muted-foreground', desc: 'Selected role' }
+const FALLBACK_ASSET: { icon: React.ComponentType<any>; color: string; desc: string } = { icon: RiMegaphoneLine, color: 'border-border/50 bg-muted/20 text-muted-foreground', desc: 'Selected role' }
 
 export default function BroadcastPage() {
   const router = useRouter()
@@ -36,7 +41,7 @@ export default function BroadcastPage() {
   const [title, setTitle] = useState("")
   const [message, setMessage] = useState("")
   const [targetrole, setTargetrole] = useState("")
-  const [roles, setRoles] = useState<any[]>([])
+  const [roles, setRoles] = useState<TargetRole[]>([])
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [isLoadingRoles, setIsLoadingRoles] = useState(true)
 

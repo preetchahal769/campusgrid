@@ -22,15 +22,65 @@ import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 
+interface Attachment {
+  id?: string
+  fileurl: string
+  filename: string
+  filetype?: string
+}
+
+interface Section {
+  name: string
+  grade: {
+    name: string
+  }
+}
+
+interface Assignment {
+  id: string
+  title: string
+  description: string
+  dueDate: string
+  maxMarks: number
+  subject: {
+    name: string
+  }
+  section?: Section
+  _count?: {
+    submissions: number
+  }
+  attachments?: Attachment[]
+}
+
+interface Submission {
+  id: string
+  status: string
+  content?: string
+  submittedAt?: string
+  attachments?: Attachment[]
+  student?: {
+    users?: { name: string }
+    user?: { name: string }
+    name?: string
+  }
+  user?: { name: string }
+  name?: string
+  studentProfile?: {
+    users?: { name: string }
+    name?: string
+  }
+  studentId?: string
+}
+
 export default function TeacherHomeworkPage() {
   const router = useRouter()
-  const [assignments, setAssignments] = useState<any[]>([])
+  const [assignments, setAssignments] = useState<Assignment[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   // Detail / Submissions Modal State
-  const [selectedAssignment, setSelectedAssignment] = useState<any | null>(null)
-  const [submissions, setSubmissions] = useState<any[]>([])
+  const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null)
+  const [submissions, setSubmissions] = useState<Submission[]>([])
   const [isLoadingSubmissions, setIsLoadingSubmissions] = useState(false)
   const [viewMode, setViewMode] = useState<'DETAILS' | 'SUBMISSIONS'>('DETAILS')
 
@@ -232,7 +282,7 @@ export default function TeacherHomeworkPage() {
                       <div className="space-y-3">
                         <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Resources ({selectedAssignment.attachments.length})</p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          {selectedAssignment.attachments.map((att: any) => (
+                          {selectedAssignment.attachments.map((att: Attachment) => (
                             <a
                               key={att.id}
                               href={getImageUrl(att.fileurl)}
@@ -304,7 +354,7 @@ export default function TeacherHomeworkPage() {
 
                             {sub.attachments && sub.attachments.length > 0 && (
                               <div className="flex flex-wrap gap-2 mt-3">
-                                {sub.attachments.map((att: any, i: number) => (
+                                {sub.attachments.map((att: Attachment, i: number) => (
                                   <a
                                     key={i}
                                     href={getImageUrl(att.fileurl)}
