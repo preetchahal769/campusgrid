@@ -48,7 +48,7 @@ export default function GenerateInvoicesPage() {
       // If 404, we'll try the flatter pattern since that's what worked for schools
       if (err.message?.includes('404')) {
         try {
-          const fallbackData = await apiFetch("/subscriptions/process-monthly", {
+          const fallbackData = await apiFetch("/finance/subscriptions/process-monthly", {
             method: "POST",
             body: JSON.stringify({ month: monthKey })
           })

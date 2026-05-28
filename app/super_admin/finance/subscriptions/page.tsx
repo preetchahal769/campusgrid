@@ -72,7 +72,7 @@ export default function SubscriptionOverviewPage() {
       try {
         result = await apiFetch("/finance/subscriptions/overview")
       } catch {
-        result = await apiFetch("/subscriptions/overview")
+        result = await apiFetch("/finance/subscriptions/overview")
       }
       dispatch(setFinance(result))
     } catch (err: any) {

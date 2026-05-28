@@ -83,7 +83,7 @@ export default function SuperAdminDashboardPage() {
     try {
       const [schoolsData, financeData, healthData, storageData, trafficData, escalationsData, projectionsData] = await Promise.all([
         apiFetch("/schools"),
-        apiFetch("/finance/subscriptions/overview").catch(() => apiFetch("/subscriptions/overview")),
+        apiFetch("/finance/subscriptions/overview").catch(() => apiFetch("/finance/subscriptions/overview")),
         apiFetch("/system/health").catch(() => null),
         apiFetch("/infrastructure/storage").catch(() => null),
         apiFetch("/analytics/live-sessions").catch(() => null),

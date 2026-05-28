@@ -99,7 +99,7 @@ function RecordPaymentPageContent() {
       // Fallback check for flatter route pattern
       if (err.message?.includes('404')) {
         try {
-          await apiFetch(`/subscriptions/${formData.invoiceId}/pay`, {
+          await apiFetch(`/finance/subscriptions/${formData.invoiceId}/pay`, {
             method: "PATCH",
             body: JSON.stringify({
               paymentMethod: formData.paymentMethod,
