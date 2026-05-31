@@ -20,6 +20,8 @@ CMD ["npm", "run", "dev"]
 
 # 4. Production Builder
 FROM dependencies AS builder
+ARG APP_ENV=production
+COPY .env.${APP_ENV}* ./.env.production
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
