@@ -1,0 +1,42 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# CampusGrid — Production Server Compose File
+# ─────────────────────────────────────────────────────────────────────────────
+# This file lives at /opt/campusgrid/docker-compose.yml on the PRODUCTION server.
+# It is NOT used by CI directly — CI SSHes in and runs:
+#   FRONTEND_TAG=prod-{sha} docker compose up -d --no-deps frontend
+#   BACKEND_TAG=prod-{sha}  docker compose up -d --no-deps backend
+#
+# Rolling back to a previous deploy:
+#   ssh deploy@prod-server-ip
+#   cd /opt/campusgrid
+#   docker pull ghcr.io/preetchahal769/campusgrid:prod-a1b2c3d
+#   docker pull ghcr.io/preetchahal769/campusgrid-engine:prod-a1b2c3d
+#   FRONTEND_TAG=prod-a1b2c3d BACKEND_TAG=prod-a1b2c3d docker compose up -d
+#   # Takes ~10 seconds. No code changes, no pipeline run needed.
+#
+# How secrets work:
+#   The .env.production file on THIS server contains all backend secrets:
+#     DATABASE_URL, JWT_SECRET, REDIS_URL, FIREBASE_PROJECT_ID,
+#     FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY
+#   These secrets are NEVER in the image, NEVER in GitHub, NEVER in this file.
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  frontend:
+    image: ghcr.io/preetchahal769/campusgrid:${FRONTEND_TAG:-latest}
+    container_name: campusgrid-frontend-prod
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+
+  backend:
+    image: ghcr.io/preetchahal769/campusgrid-engine:${BACKEND_TAG:-latest}
+    container_name: campusgrid-backend-prod
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    env_file: .env.production
+    environment:
+      - NODE_ENV=production

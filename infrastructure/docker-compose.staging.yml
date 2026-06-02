@@ -1,0 +1,38 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# CampusGrid — Staging Server Compose File
+# ─────────────────────────────────────────────────────────────────────────────
+# This file lives at /opt/campusgrid/docker-compose.yml on the STAGING server.
+# It is NOT used by CI directly — CI SSHes in and runs:
+#   FRONTEND_TAG=staging-{sha} docker compose up -d --no-deps frontend
+#   BACKEND_TAG=staging-{sha}  docker compose up -d --no-deps backend
+#
+# How IMAGE_TAG works:
+#   Each service has its own tag variable (FRONTEND_TAG / BACKEND_TAG).
+#   CI sets only the variable for the service it is deploying.
+#   The other service keeps running unchanged — zero cross-service downtime.
+#
+# How secrets work:
+#   The .env.staging file on THIS server contains all backend secrets:
+#     DATABASE_URL, JWT_SECRET, REDIS_URL, FIREBASE_PROJECT_ID,
+#     FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY
+#   These secrets are NEVER in the image, NEVER in GitHub, NEVER in this file.
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  frontend:
+    image: ghcr.io/preetchahal769/campusgrid:${FRONTEND_TAG:-latest}
+    container_name: campusgrid-frontend-staging
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+
+  backend:
+    image: ghcr.io/preetchahal769/campusgrid-engine:${BACKEND_TAG:-latest}
+    container_name: campusgrid-backend-staging
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    env_file: .env.staging
+    environment:
+      # Allow self-signed certs on staging — never set this on production
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
