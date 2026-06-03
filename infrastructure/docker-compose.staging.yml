@@ -24,14 +24,14 @@ services:
     container_name: campusgrid-frontend-staging
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
 
   backend:
     image: ghcr.io/preetchahal769/campusgrid-engine:${BACKEND_TAG:-latest}
     container_name: campusgrid-backend-staging
     restart: unless-stopped
     ports:
-      - "4000:4000"
+      - "127.0.0.1:4000:4000"
     env_file: .env.staging
     environment:
       # Allow self-signed certs on staging — never set this on production
