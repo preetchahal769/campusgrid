@@ -27,7 +27,7 @@ services:
     container_name: campusgrid-frontend-prod
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     environment:
       - NODE_ENV=production
 
@@ -36,7 +36,7 @@ services:
     container_name: campusgrid-backend-prod
     restart: unless-stopped
     ports:
-      - "4000:4000"
+      - "127.0.0.1:4000:4000"
     env_file: .env.production
     environment:
       - NODE_ENV=production
