@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@next/third-parties": "^16.2.7",
     "@reduxjs/toolkit": "^2.11.2",
     "@remixicon/react": "^4.9.0",
     "@sentry/nextjs": "10",
