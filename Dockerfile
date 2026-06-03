@@ -5,9 +5,8 @@
 # ─────────────────────────────────────────────────────────────────
 # Stage 1 — Base: shared Alpine foundation + package manifests
 # ─────────────────────────────────────────────────────────────────
-FROM node:20-alpine AS base
+FROM node:20-bookworm-slim AS base
 WORKDIR /app
-RUN apk add --no-cache libc6-compat
 COPY package*.json ./
 
 # ─────────────────────────────────────────────────────────────────
