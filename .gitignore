@@ -66,3 +66,5 @@ pnpm-debug.log*
 next-env.d.ts
 # documentation
 docs/
+# Sentry Config File
+.env.sentry-build-plugin

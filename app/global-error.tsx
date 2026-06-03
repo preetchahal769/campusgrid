@@ -1,6 +1,7 @@
 "use client"; // 🌟 CRUCIAL: Must be a client component
 
 import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
 
 export default function GlobalError({
   error,
@@ -12,6 +13,7 @@ export default function GlobalError({
   useEffect(() => {
     // Log the error locally to your server monitor console
     console.error("Global Error Boundary Caught:", error);
+    Sentry.captureException(error);
   }, [error]);
 
   return (
