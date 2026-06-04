@@ -25,8 +25,8 @@ export default function LoginPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      const role = user.role.toLowerCase()
-      router.replace(`/${role}`)
+      const role = (user?.role || '').toLowerCase()
+      if (role) router.replace(`/${role}`)
     }
   }, [user, router])
 
@@ -53,7 +53,7 @@ export default function LoginPage() {
       
       dispatch(setAuthSuccess(data))
       
-      const role = data.user.role.toLowerCase()
+      const role = (data?.user?.role || '').toLowerCase()
       
       // Auto-load and persist profile for students
       if (role === 'student') {
@@ -61,7 +61,7 @@ export default function LoginPage() {
         dispatch(setProfile(profileData))
       }
       
-      router.push(`/${role}`)
+      if (role) router.push(`/${role}`)
     } catch (err: any) {
       dispatch(setAuthFailure(err.message || "Failed to sign in"))
     }
