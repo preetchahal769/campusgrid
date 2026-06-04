@@ -13,7 +13,7 @@ COPY package*.json ./
 # Stage 2 — Dependencies: installs all node_modules (dev + prod)
 # ─────────────────────────────────────────────────────────────────
 FROM base AS dependencies
-RUN npm install
+RUN rm -f package-lock.json && npm install
 COPY . .
 
 # ─────────────────────────────────────────────────────────────────
