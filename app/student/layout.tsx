@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation"
 import { useAppSelector } from "@/lib/store/hooks"
 import { RiLoader4Line } from "@remixicon/react"
 
+import { AppShell } from "@/components/layout/app-shell"
+
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const { isAuthenticated, userRole } = useAppSelector((state) => state.auth)
@@ -35,5 +37,5 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
     )
   }
 
-  return <>{children}</>
+  return <AppShell>{children}</AppShell>
 }

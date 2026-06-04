@@ -15,7 +15,7 @@ export default function Register() {
             </svg>
           </div>
           <h1 className="text-3xl font-bold tracking-tight mb-2">Create Account</h1>
-          <p className="text-muted-foreground">Join CampusGrid to connect with your peers</p>
+          <p className="text-muted-foreground">Join SikshaTantar to connect with your peers</p>
         </div>
 
         <Card className="shadow-2xl border-border/50 bg-background/60 backdrop-blur-xl">

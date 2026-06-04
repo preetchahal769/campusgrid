@@ -26,6 +26,7 @@ import {
   RiCloseLine
 } from "@remixicon/react"
 import { cn } from "@/lib/utils"
+import { AnimatedCard } from "@/components/ui/animated-card"
 
 const NEXUS_ACTIONS = [
   {
@@ -120,8 +121,8 @@ export default function SuperAdminDashboardPage() {
   if (user && user.role !== 'SUPER_ADMIN') return null
 
   return (
-    <div className="min-h-screen bg-background pb-24 overflow-x-hidden">
-      <div className="fixed top-0 left-0 w-full h-80 bg-gradient-to-br from-blue-600/20 via-primary/5 to-transparent -z-10" />
+    <div className="relative overflow-x-hidden">
+      <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-br from-blue-600/20 via-primary/5 to-transparent -z-10" />
 
       {/* Urgent Alerts Banner */}
       {!hideBanner && escalations && escalations.length > 0 && (
@@ -245,48 +246,46 @@ export default function SuperAdminDashboardPage() {
       </section>
 
       {/* Action Groups */}
-      <main className="px-6 md:px-12 lg:px-24 xl:px-40 space-y-10 md:space-y-12 pb-10 max-w-[1600px] mx-auto">
+      <main className="space-y-10 md:space-y-12">
         {NEXUS_ACTIONS.map(({ group, items }, idx) => (
           <section key={group} className="animate-in fade-in slide-in-from-bottom-6 duration-700 space-y-4" style={{ animationDelay: `${idx * 100}ms` }}>
-            <h2 className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-muted-foreground px-1">{group}</h2>
+            <h2 className="text-lg font-bold tracking-tight text-zinc-900">{group}</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              {items.map(({ label, icon: Icon, route, color, border }) => (
-                <button
-                  key={label}
-                  onClick={() => router.push(route)}
-                  className={cn(
-                    "rounded-[2rem] border border-border/40 bg-background/60 backdrop-blur-xl p-5 md:p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5 active:scale-[0.96]",
-                    border
-                  )}
-                >
-                  <div className="space-y-4 md:space-y-6">
-                    <div className={cn("w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center shadow-inner", color)}>
-                      <Icon className="w-6 h-6 md:w-7 md:h-7" />
-                    </div>
-                    <p className="font-black text-sm md:text-base leading-tight tracking-tight">{label}</p>
-                  </div>
-                </button>
-              ))}
+              {items.map(({ label, icon: Icon, route, color, border }, itemIdx) => {
+                // Determine vibrant color based on previous CSS classes
+                let vibrantBg = "bg-white text-zinc-900"
+                let iconColor = "text-zinc-900"
+                if (color.includes('blue')) { vibrantBg = "bg-[#42A5F5] text-white"; iconColor = "text-white" }
+                if (color.includes('indigo')) { vibrantBg = "bg-[#7E57C2] text-white"; iconColor = "text-white" }
+                if (color.includes('emerald')) { vibrantBg = "bg-[#66BB6A] text-white"; iconColor = "text-white" }
+                if (color.includes('amber')) { vibrantBg = "bg-[#FFB74D] text-white"; iconColor = "text-white" }
+                if (color.includes('rose')) { vibrantBg = "bg-[#FF5252] text-white"; iconColor = "text-white" }
+                if (color.includes('purple')) { vibrantBg = "bg-[#AB47BC] text-white"; iconColor = "text-white" }
+
+                return (
+                  <AnimatedCard key={label} delay={(idx * 0.2) + (itemIdx * 0.1)}>
+                    <button
+                      onClick={() => router.push(route)}
+                      className={cn(
+                        "w-full h-full rounded-3xl p-6 text-left transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-1 active:scale-[0.96]",
+                        vibrantBg
+                      )}
+                    >
+                      <div className="space-y-6">
+                        <div className={cn("w-12 h-12 rounded-full flex items-center justify-center bg-white/20 backdrop-blur-sm", iconColor)}>
+                          <Icon className="w-6 h-6" />
+                        </div>
+                        <p className="font-bold text-base md:text-lg leading-tight tracking-tight">{label}</p>
+                      </div>
+                    </button>
+                  </AnimatedCard>
+                )
+              })}
             </div>
           </section>
         ))}
       </main>
 
-      {/* Bottom Navigation - Hidden on md and up, using side nav or just header in real app, but for now we keep it visible on small screens */}
-      <nav className="fixed md:hidden bottom-0 left-0 w-full h-20 bg-background/80 backdrop-blur-2xl border-t border-border/40 px-10 flex items-center justify-between z-50">
-        <button onClick={() => router.push("/super_admin")} className="flex flex-col items-center gap-1.5 text-blue-600 transition-all scale-110">
-          <RiDashboard3Line className="w-6 h-6" />
-          <span className="text-[9px] font-black uppercase tracking-widest">Nexus</span>
-        </button>
-        <button onClick={() => router.push("/super_admin/schools")} className="flex flex-col items-center gap-1.5 text-muted-foreground hover:text-blue-500 transition-all">
-          <RiBuilding2Line className="w-6 h-6" />
-          <span className="text-[9px] font-black uppercase tracking-widest">Nodes</span>
-        </button>
-        <button onClick={() => router.push("/super_admin/profile")} className="flex flex-col items-center gap-1.5 text-muted-foreground hover:text-blue-500 transition-all">
-          <RiUserLine className="w-6 h-6" />
-          <span className="text-[9px] font-black uppercase tracking-widest">Config</span>
-        </button>
-      </nav>
     </div>
   )
 }

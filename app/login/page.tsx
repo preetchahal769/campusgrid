@@ -68,12 +68,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-background to-background overflow-hidden relative">
-      {/* Decorative Circles */}
-      <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-3xl animate-pulse" />
-      <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/10 blur-3xl" />
-
-      <Card className="w-full max-w-[420px] bg-background/60 backdrop-blur-xl border-border/50 shadow-2xl rounded-3xl overflow-hidden animate-in fade-in zoom-in duration-700">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-[#F8F9FA] overflow-hidden relative">
+      <Card className="w-full max-w-[420px] bg-white border-zinc-100 shadow-xl rounded-3xl overflow-hidden animate-in fade-in zoom-in duration-700">
         <CardHeader className="space-y-3 pt-10 pb-6 text-center">
           <div className="mx-auto w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30 rotate-3 hover:rotate-0 transition-transform duration-500">
             <RiLockPasswordLine className="w-8 h-8 text-primary-foreground" />
@@ -110,7 +106,7 @@ export default function LoginPage() {
                       setEmail(e.target.value)
                       setValidationError(null)
                     }}
-                    className="h-14 pl-12 rounded-2xl bg-muted/30 border-border/50 focus:bg-background focus:ring-4 focus:ring-primary/10 transition-all font-medium"
+                    className="pl-12"
                   />
                 </div>
               </div>
@@ -130,7 +126,7 @@ export default function LoginPage() {
                       setPassword(e.target.value)
                       setValidationError(null)
                     }}
-                    className="h-14 pl-12 pr-12 rounded-2xl bg-muted/30 border-border/50 focus:bg-background focus:ring-4 focus:ring-primary/10 transition-all font-medium"
+                    className="pl-12 pr-12"
                   />
                   <button 
                     type="button"
@@ -146,7 +142,7 @@ export default function LoginPage() {
             <Button 
               type="submit" 
               disabled={isLoading}
-              className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg shadow-xl shadow-primary/20 transition-all active:scale-[0.98] group"
+              className="w-full h-14 text-lg mt-4 group"
             >
               {isLoading ? (
                 <RiLoader4Line className="w-6 h-6 animate-spin" />

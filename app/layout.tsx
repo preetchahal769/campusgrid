@@ -9,7 +9,7 @@ const outfit = Outfit({subsets:['latin'],variable:'--font-sans'})
 const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" })
 
 export const metadata = {
-  title: "CampusGrid",
+  title: "SikshaTantar",
   description: "Connect. Collaborate. Excel.",
 }
 
