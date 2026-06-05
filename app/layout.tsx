@@ -9,8 +9,35 @@ const outfit = Outfit({subsets:['latin'],variable:'--font-sans'})
 const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" })
 
 export const metadata = {
-  title: "CampusGrid",
-  description: "Connect. Collaborate. Excel.",
+  title: "SikshaTantar | The Modern School Operating System",
+  description: "A beautiful, lightning-fast platform that connects students, empowers teachers, and gives administrators total control. Built for schools of all sizes.",
+  keywords: ["School ERP", "School Management System", "EdTech", "Student Portal", "Teacher Dashboard", "SikshaTantar", "CampusGrid"],
+  openGraph: {
+    title: "SikshaTantar | The Modern School Operating System",
+    description: "A beautiful, lightning-fast platform that connects students, empowers teachers, and gives administrators total control.",
+    url: "https://sikshatantar.app",
+    siteName: "SikshaTantar",
+    images: [
+      {
+        url: "https://sikshatantar.app/og-image.jpg",
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 }
 
 export default function RootLayout({

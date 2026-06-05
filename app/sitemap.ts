@@ -1,4 +1,4 @@
-import { MetadataRoute } from 'next';
+import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
@@ -9,16 +9,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
-      url: 'https://sikshatantar.app/login',
+      url: 'https://sikshatantar.app/features',
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
-      url: 'https://sikshatantar.app/register',
+      url: 'https://sikshatantar.app/pricing',
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
-  ];
+  ]
 }
