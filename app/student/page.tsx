@@ -29,6 +29,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { WelcomeBoard } from "@/components/ui/welcome-board"
 import { cn } from "@/lib/utils"
 
 export default function StudentDashboardPage() {
@@ -99,13 +100,11 @@ export default function StudentDashboardPage() {
         {/* School Updates Banner */}
         <section className="animate-in fade-in slide-in-from-bottom-8 duration-700">
           <h2 className="text-sm font-bold text-white mb-3 px-1">School Updates</h2>
-          <Card className="rounded-3xl border-none shadow-lg bg-white overflow-hidden flex flex-col md:flex-row gap-4">
-            <div className="p-6 md:p-8 flex-1">
-              <h3 className="text-xl md:text-2xl font-black text-zinc-900 mb-2">Exam Date</h3>
-              <p className="text-sm md:text-base text-zinc-600 font-medium">Your exam start date is 10 Aug 2025</p>
-            </div>
-            <div className="w-full md:w-1/3 bg-blue-50/50 min-h-[120px]" />
-          </Card>
+          <WelcomeBoard 
+            title="Exam Date"
+            subtitle="Your exam start date is 10 Aug 2025"
+            illustrationSrc="/student-illustration.png"
+          />
         </section>
 
         {/* Academics Grid (3 Column) */}

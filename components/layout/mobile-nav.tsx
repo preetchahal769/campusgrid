@@ -21,9 +21,14 @@ export function MobileNav() {
   const isStudent = user?.role === 'STUDENT'
   const rolePath = user?.role === 'SUPER_ADMIN' ? 'super_admin' : user?.role?.toLowerCase() || 'student'
   
+  let secondTabHref = `/${rolePath}/schedule`
+  if (isStudent) secondTabHref = "/timetable"
+  if (user?.role === 'PRINCIPAL') secondTabHref = "/principal/staff-attendance"
+  if (user?.role === 'SUPER_ADMIN') secondTabHref = "/super_admin/schools"
+  
   const navItems: NavItem[] = [
     { label: "Dashboard", icon: RiDashboard3Line, href: `/${rolePath}` },
-    { label: "Academics", icon: RiBuilding2Line, href: isStudent ? "/timetable" : `/${rolePath}/schedule` },
+    { label: "Operations", icon: RiBuilding2Line, href: secondTabHref },
     { label: "Profile", icon: RiUserLine, href: isStudent ? "/profile" : `/${rolePath}/profile` },
   ]
 
