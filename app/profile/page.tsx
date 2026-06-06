@@ -81,7 +81,7 @@ export default function ProfilePage() {
       }
     }
     dispatch(logout())
-    router.push('/login')
+    window.location.href = '/login'
   }
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

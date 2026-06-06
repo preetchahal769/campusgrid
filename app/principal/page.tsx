@@ -80,7 +80,7 @@ export default function PrincipalDashboardPage() {
       }
     }
     dispatch(logout())
-    router.push("/login")
+    window.location.href = "/login"
   }
 
   if (!mounted) return null

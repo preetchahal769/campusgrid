@@ -113,7 +113,7 @@ export default function SuperAdminDashboardPage() {
       }
     }
     dispatch(logout())
-    router.push("/login")
+    window.location.href = "/login"
   }
 
   if (!mounted) return null

@@ -66,7 +66,7 @@ export default function PrincipalProfilePage() {
       }
     }
     dispatch(logout())
-    router.push('/login')
+    window.location.href = '/login'
   }
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
