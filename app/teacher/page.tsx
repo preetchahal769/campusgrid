@@ -81,7 +81,7 @@ export default function TeacherDashboardPage() {
       }
     }
     dispatch(logout())
-    router.push('/login')
+    window.location.href = '/login'
   }
 
   if (!mounted) return null

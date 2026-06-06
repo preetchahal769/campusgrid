@@ -68,7 +68,7 @@ export default function TeacherProfilePage() {
       }
     }
     dispatch(logout())
-    router.push('/login')
+    window.location.href = '/login'
   }
 
   const startEditing = () => {
