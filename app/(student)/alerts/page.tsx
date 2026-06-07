@@ -9,21 +9,21 @@ export default function AlertsPage() {
   ]
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-5rem)] p-6 bg-gradient-to-tr from-background via-muted/10 to-primary/5">
-      <div className="space-y-6 pt-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <h1 className="text-4xl font-extrabold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
-              Alerts
-            </h1>
-            <p className="text-muted-foreground font-medium">Stay updated with your campus life.</p>
-          </div>
-          <button className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors">
-            <RiCheckDoubleLine className="w-5 h-5 text-muted-foreground" />
-          </button>
-        </div>
+    <div className="min-h-screen pb-10 relative z-0">
+      <div className="absolute top-0 left-0 w-full h-[220px] bg-[#0A4EA6] rounded-b-[3rem] -z-10" />
 
-        <div className="space-y-4 pt-2">
+      {/* Top Bar */}
+      <div className="px-5 pt-12 pb-6 flex items-center justify-between">
+        <div className="space-y-1">
+          <h1 className="text-xl font-black tracking-tight text-white">Alerts</h1>
+          <p className="text-xs text-white/70 font-medium">Stay updated with your campus life</p>
+        </div>
+        <button className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors shrink-0 text-white">
+          <RiCheckDoubleLine className="w-5 h-5" />
+        </button>
+      </div>
+
+      <div className="px-5 space-y-4 pt-2">
           {alerts.map((alert, index) => {
             const Icon = alert.icon;
             return (
@@ -49,7 +49,6 @@ export default function AlertsPage() {
             )
           })}
         </div>
-      </div>
     </div>
   )
 }

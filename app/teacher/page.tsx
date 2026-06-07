@@ -89,7 +89,7 @@ export default function TeacherDashboardPage() {
   if (user && user.role !== 'TEACHER') return null
 
   return (
-    <div className="relative overflow-x-hidden min-h-full pb-10">
+    <div className="relative overflow-x-hidden min-h-full pb-10 z-0">
       {/* Blue Sweeping Header Background */}
       <div className="absolute top-0 left-0 w-full h-[280px] bg-[#0A4EA6] rounded-b-[3rem] -z-10" />
 

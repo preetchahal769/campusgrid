@@ -127,17 +127,19 @@ export default function RapidAttendancePage() {
   return (
     <div className="flex flex-col min-h-[100dvh] bg-background relative pb-28 text-foreground animate-in slide-in-from-right-8 duration-300">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border/40 px-6 py-4 flex items-center justify-between">
+      <div className="absolute top-0 left-0 w-full h-[180px] bg-[#0A4EA6] rounded-b-[3rem] -z-10" />
+
+      <div className="sticky top-0 z-10 px-6 pt-12 pb-6 flex items-center justify-between">
         <div className="flex items-center gap-4 min-w-0 pr-2">
           <button 
             onClick={() => router.back()}
-            className="w-10 h-10 rounded-full bg-muted/50 border border-border/50 flex items-center justify-center hover:bg-muted transition-colors shrink-0"
+            className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors shrink-0 text-white"
           >
             <RiArrowLeftLine className="w-5 h-5" />
           </button>
           <div className="min-w-0 pr-2">
-            <h1 className="text-xl font-bold tracking-tight truncate">Class Attendance</h1>
-            <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-widest mt-0.5 truncate">Mark Morning Roll Call</p>
+            <h1 className="text-xl font-black tracking-tight text-white truncate">Class Attendance</h1>
+            <p className="text-[10px] sm:text-xs font-semibold text-white/70 uppercase tracking-widest mt-0.5 truncate">Mark Morning Roll Call</p>
           </div>
         </div>
       </div>

@@ -27,15 +27,21 @@ export default function PerformancePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-5rem)] p-6 bg-gradient-to-b from-blue-500/10 via-background to-background">
-      <div className="space-y-6 pt-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        
-        <div className="flex items-center gap-4">
-          <Link href="/" className="w-10 h-10 rounded-full bg-background/50 border border-border/50 flex items-center justify-center hover:bg-muted transition-colors">
-            <RiArrowLeftLine className="w-5 h-5" />
-          </Link>
-          <h1 className="text-2xl font-bold tracking-tight">Performance Rating</h1>
+    <div className="min-h-screen pb-10 relative z-0">
+      <div className="absolute top-0 left-0 w-full h-[220px] bg-[#0A4EA6] rounded-b-[3rem] -z-10" />
+
+      {/* Top Bar */}
+      <div className="px-5 pt-12 pb-6 flex items-center gap-4">
+        <Link href="/" className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors shrink-0 text-white">
+          <RiArrowLeftLine className="w-5 h-5" />
+        </Link>
+        <div>
+          <h1 className="text-xl font-black tracking-tight text-white">Performance Rating</h1>
+          <p className="text-xs text-white/70 font-medium">Your academic metrics</p>
         </div>
+      </div>
+
+      <div className="px-5 space-y-6 pt-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
         <Card className="p-6 rounded-3xl border-blue-500/20 bg-background/60 backdrop-blur-md shadow-lg shadow-blue-500/5 text-center relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-blue-600"></div>

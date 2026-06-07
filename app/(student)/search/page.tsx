@@ -3,15 +3,18 @@ import { RiSearchLine, RiFilter3Line } from "@remixicon/react"
 
 export default function SearchPage() {
   return (
-    <div className="flex flex-col min-h-[calc(100vh-5rem)] p-6 bg-gradient-to-br from-background via-muted/10 to-primary/5">
-      <div className="space-y-6 pt-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <div className="space-y-2">
-          <h1 className="text-4xl font-extrabold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
-            Discover
-          </h1>
-          <p className="text-muted-foreground font-medium">Find students, groups, and events.</p>
-        </div>
+    <div className="min-h-screen pb-10 relative z-0">
+      <div className="absolute top-0 left-0 w-full h-[220px] bg-[#0A4EA6] rounded-b-[3rem] -z-10" />
 
+      {/* Top Bar */}
+      <div className="px-5 pt-12 pb-6 flex items-center justify-between">
+        <div className="space-y-1">
+          <h1 className="text-xl font-black tracking-tight text-white">Discover</h1>
+          <p className="text-xs text-white/70 font-medium">Find students, groups, and events</p>
+        </div>
+      </div>
+
+      <div className="px-5 space-y-6 pt-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="relative group">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
             <RiSearchLine className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />

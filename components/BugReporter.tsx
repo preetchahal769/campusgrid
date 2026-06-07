@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { RiBugLine, RiCloseLine, RiLoader4Line, RiCheckLine, RiErrorWarningLine } from "@remixicon/react"
 import { useAppSelector } from "@/lib/store/hooks"
 import * as htmlToImage from "html-to-image"
@@ -14,6 +14,11 @@ export function BugReporter() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [hasMoved, setHasMoved] = useState(false)
+  const dragRef = useRef<{ startX: number; startY: number } | null>(null)
 
   const { user } = useAppSelector((state) => state.auth)
 
@@ -115,14 +120,48 @@ export function BugReporter() {
     }
   }
 
+  const handlePointerDown = (e: any) => {
+    e.currentTarget.setPointerCapture(e.pointerId)
+    setIsDragging(true)
+    setHasMoved(false)
+    dragRef.current = {
+      startX: e.clientX - position.x,
+      startY: e.clientY - position.y
+    }
+  }
+
+  const handlePointerMove = (e: any) => {
+    if (!isDragging || !dragRef.current) return
+    setHasMoved(true)
+    setPosition({
+      x: e.clientX - dragRef.current.startX,
+      y: e.clientY - dragRef.current.startY
+    })
+  }
+
+  const handlePointerUp = (e: any) => {
+    setIsDragging(false)
+    e.currentTarget.releasePointerCapture(e.pointerId)
+  }
+
+  const handleClick = (e: any) => {
+    if (hasMoved) return // Prevent click if user dragged the button
+    handleOpenReporter()
+  }
+
   return (
     <>
       {/* Floating Button */}
       <button
         id="bug-reporter-btn"
-        onClick={handleOpenReporter}
+        onClick={handleClick}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
         disabled={isCapturing}
-        className="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-rose-600 text-white flex items-center justify-center shadow-lg shadow-rose-600/30 hover:bg-rose-700 hover:scale-105 disabled:opacity-50 transition-all z-[9999]"
+        style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
+        className="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-rose-600 text-white flex items-center justify-center shadow-lg shadow-rose-600/30 hover:bg-rose-700 hover:scale-105 disabled:opacity-50 transition-colors z-[9999] touch-none cursor-grab active:cursor-grabbing"
         title="Report a bug"
       >
         {isCapturing ? <RiLoader4Line className="w-5 h-5 animate-spin" /> : <RiBugLine className="w-6 h-6" />}

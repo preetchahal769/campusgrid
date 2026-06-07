@@ -55,24 +55,24 @@ export default function AttendancePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-10">
-      <div className="fixed top-0 left-0 w-full h-48 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent -z-10" />
+    <div className="min-h-screen pb-10 relative z-0">
+      <div className="absolute top-0 left-0 w-full h-[220px] bg-[#0A4EA6] rounded-b-[3rem] -z-10" />
 
       {/* Top Bar */}
       <div className="px-5 pt-12 pb-6 flex items-center gap-4">
         <button
           onClick={() => router.back()}
-          className="w-10 h-10 rounded-2xl bg-muted/50 border border-border/40 flex items-center justify-center hover:bg-muted transition-colors shrink-0"
+          className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors shrink-0 text-white"
         >
           <RiArrowLeftLine className="w-5 h-5" />
         </button>
         <div className="flex-1">
-          <h1 className="text-xl font-black tracking-tight">Attendance</h1>
-          <p className="text-xs text-muted-foreground font-medium">Your full attendance record</p>
+          <h1 className="text-xl font-black tracking-tight text-white">Attendance</h1>
+          <p className="text-xs text-white/70 font-medium">Your full attendance record</p>
         </div>
         <button
           onClick={() => router.push('/leave')}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-primary/10 border border-primary/20 text-primary font-bold text-xs hover:bg-primary hover:text-primary-foreground transition-all"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-white text-[#0A4EA6] font-bold text-xs hover:bg-white/90 shadow-lg shadow-black/10 transition-all"
         >
           Leave
         </button>
