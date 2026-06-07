@@ -178,8 +178,7 @@ export default function FeesPage() {
               <div className="flex flex-col items-center justify-center py-6 space-y-6">
                 <div className="p-4 bg-white rounded-2xl shadow-sm border-2 border-dashed border-muted-foreground/30 relative">
                   <div className="w-48 h-48 bg-black/5 rounded flex items-center justify-center flex-col gap-2">
-                     <RiQrCodeLine className="w-24 h-24 text-black opacity-80" />
-                     <span className="text-xs font-bold text-black opacity-50 uppercase tracking-widest">CampusGrid Pay</span>
+                     <span className="text-xs font-bold text-black opacity-50 uppercase tracking-widest">SikshaTantar Pay</span>
                   </div>
                   
                   {paymentStatus === "submitted" && (

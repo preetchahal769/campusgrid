@@ -15,39 +15,22 @@ import {
   RiCalendarCheckLine,
   RiTimeLine,
   RiLogoutBoxLine,
-  RiDashboard3Line,
-  RiMegaphoneLine,
-  RiUserLine,
-  RiBuildingLine,
   RiUserSharedLine,
 } from "@remixicon/react"
 import { cn } from "@/lib/utils"
+import { Card } from "@/components/ui/card"
+import { WelcomeBoard } from "@/components/ui/welcome-board"
 
 const ACTIONS = [
-  {
-    group: "🏗️ School Structure",
-    items: [
-      { label: "Create Grade",   icon: RiGraduationCapLine, route: "/principal/create-grade",   color: "bg-violet-500/10 text-violet-600",  border: "hover:border-violet-500/40" },
-      { label: "Create Section", icon: RiLayoutGridLine,    route: "/principal/create-section", color: "bg-indigo-500/10 text-indigo-600",  border: "hover:border-indigo-500/40" },
-      { label: "Create Subject", icon: RiBookOpenLine,      route: "/principal/create-subject", color: "bg-blue-500/10 text-blue-600",      border: "hover:border-blue-500/40" },
-    ],
-  },
-  {
-    group: "👨‍💼 Personnel",
-    items: [
-      { label: "Register User",     icon: RiUserAddLine,    route: "/principal/register-user",    color: "bg-emerald-500/10 text-emerald-600", border: "hover:border-emerald-500/40" },
-      { label: "Assign Teacher",    icon: RiTeamLine,       route: "/principal/assign-teacher",   color: "bg-amber-500/10 text-amber-600",    border: "hover:border-amber-500/40" },
-      { label: "Set Class In-Charge", icon: RiShieldUserLine, route: "/principal/set-incharge", color: "bg-rose-500/10 text-rose-600",      border: "hover:border-rose-500/40" },
-    ],
-  },
-  {
-    group: "⚖️ Oversight",
-    items: [
-      { label: "Leave Appeals",     icon: RiCalendarCheckLine, route: "/principal/leaves",          color: "bg-orange-500/10 text-orange-600", border: "hover:border-orange-500/40" },
-      { label: "Staff Substitutions", icon: RiUserSharedLine, route: "/principal/substitutions", color: "bg-fuchsia-500/10 text-fuchsia-600", border: "hover:border-fuchsia-500/40" },
-      { label: "Staff Availability", icon: RiTimeLine,         route: "/principal/staff-attendance", color: "bg-cyan-500/10 text-cyan-600",    border: "hover:border-cyan-500/40" },
-    ],
-  },
+  { label: "Create Grade",   icon: RiGraduationCapLine, route: "/principal/create-grade",   color: "text-[#825CD6]",  bg: "bg-[#825CD6]/10" },
+  { label: "Create Section", icon: RiLayoutGridLine,    route: "/principal/create-section", color: "text-[#45A3F5]",  bg: "bg-[#45A3F5]/10" },
+  { label: "Create Subject", icon: RiBookOpenLine,      route: "/principal/create-subject", color: "text-[#6FCA72]",  bg: "bg-[#6FCA72]/10" },
+  { label: "Register User",     icon: RiUserAddLine,    route: "/principal/register-user",    color: "text-[#FDB543]",  bg: "bg-[#FDB543]/10" },
+  { label: "Assign Teacher",    icon: RiTeamLine,       route: "/principal/assign-teacher",   color: "text-[#FA5D5D]",  bg: "bg-[#FA5D5D]/10" },
+  { label: "Set In-Charge", icon: RiShieldUserLine, route: "/principal/set-incharge", color: "text-[#0A4EA6]",  bg: "bg-[#0A4EA6]/10" },
+  { label: "Leave Appeals",     icon: RiCalendarCheckLine, route: "/principal/leaves",          color: "text-[#AB47BC]",  bg: "bg-[#AB47BC]/10" },
+  { label: "Substitutions", icon: RiUserSharedLine, route: "/principal/substitutions", color: "text-[#825CD6]",  bg: "bg-[#825CD6]/10" },
+  { label: "Availability", icon: RiTimeLine,         route: "/principal/staff-attendance", color: "text-[#45A3F5]",  bg: "bg-[#45A3F5]/10" },
 ]
 
 export default function PrincipalDashboardPage() {
@@ -71,101 +54,47 @@ export default function PrincipalDashboardPage() {
 
   const firstName = user?.name?.split(" ")[0] || "Principal"
 
-  const handleLogout = async () => {
-    try {
-      await apiFetch("/auth/logout", { method: "POST" })
-    } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('Failed to terminate session on backend during logout:', error)
-      }
-    }
-    dispatch(logout())
-    window.location.href = "/login"
-  }
 
   if (!mounted) return null
   if (user && user.role !== 'PRINCIPAL') return null
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      <div className="fixed top-0 left-0 w-full h-72 bg-gradient-to-br from-violet-500/15 via-primary/5 to-transparent -z-10" />
+    <div className="relative overflow-x-hidden min-h-full pb-10">
+      {/* Blue Sweeping Header Background */}
+      <div className="absolute top-0 left-0 w-full h-[280px] bg-[#0A4EA6] rounded-b-[3rem] -z-10" />
 
-      {/* Header */}
-      <header className="px-6 pt-12 pb-8">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-violet-500 animate-in fade-in slide-in-from-left-4 duration-500">
-              {greeting}
-            </p>
-            <h1 className="text-3xl font-black tracking-tight animate-in fade-in slide-in-from-left-6 duration-700">
-              {firstName} <span className="text-muted-foreground/30">.</span>
-            </h1>
-            <p className="text-xs text-muted-foreground font-medium">Principal Portal</p>
-          </div>
-          <div className="flex items-center gap-3 pt-1">
-            {mounted && user?.School_id && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-500/10 border border-violet-500/20">
-                <RiBuildingLine className="w-3.5 h-3.5 text-violet-500" />
-                <span className="text-[10px] font-black text-violet-600 uppercase tracking-wider">School Linked</span>
-              </div>
-            )}
-            <button
-              onClick={handleLogout}
-              className="w-10 h-10 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center justify-center text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors"
-            >
-              <RiLogoutBoxLine className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      </header>
+      <main className="px-5 md:px-8 pt-6 space-y-8">
+        
+        {/* Welcome Board */}
+        <section className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+          <h2 className="text-sm font-bold text-white mb-3 px-1">Principal Portal</h2>
+          <WelcomeBoard 
+            title={`${greeting}, ${firstName}!`}
+            subtitle="Your school's daily operations are ready to be managed."
+            illustrationSrc="/principal-illustration.png"
+          />
+        </section>
 
-      {/* Action Groups */}
-      <main className="px-6 space-y-8">
-        {ACTIONS.map(({ group, items }) => (
-          <section key={group} className="animate-in fade-in slide-in-from-bottom-6 duration-700 space-y-3">
-            <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground px-1">{group}</h2>
-            <div className="grid grid-cols-2 gap-4">
-              {items.map(({ label, icon: Icon, route, color, border }) => (
-                <button
-                  key={label}
-                  onClick={() => router.push(route)}
-                  className={cn(
-                    "rounded-3xl border border-border/50 bg-background/60 backdrop-blur-md p-5 text-left transition-all duration-200 active:scale-[0.97]",
-                    border
-                  )}
-                >
-                  <div className="space-y-4">
-                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", color)}>
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <p className="font-black text-sm leading-tight">{label}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </section>
-        ))}
+        {/* Operations Grid (3 Column) */}
+        <section className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 mt-8">
+          <h2 className="text-lg font-bold tracking-tight text-zinc-900 mb-4 px-1">Administration</h2>
+          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+            {ACTIONS.map(({ label, icon: Icon, route, color, bg }) => (
+              <Card
+                key={label}
+                className="cursor-pointer hover:shadow-md transition-all rounded-3xl border border-zinc-100 shadow-sm aspect-square flex flex-col items-center justify-center p-3 relative group bg-white"
+                onClick={() => router.push(route)}
+              >
+                <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform", bg, color)}>
+                  <Icon className="w-6 h-6" />
+                </div>
+                <p className="font-bold text-[11px] md:text-sm text-center text-zinc-700 leading-tight">{label}</p>
+              </Card>
+            ))}
+          </div>
+        </section>
+
       </main>
-
-      {/* Bottom Nav */}
-      <nav className="fixed bottom-0 left-0 w-full h-20 bg-background/80 backdrop-blur-xl border-t border-border/40 px-8 flex items-center justify-between z-50">
-        <button onClick={() => router.push("/principal")} className="flex flex-col items-center gap-1 text-primary">
-          <RiDashboard3Line className="w-6 h-6" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Dashboard</span>
-        </button>
-        <button onClick={() => router.push("/principal/leaves")} className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
-          <RiCalendarCheckLine className="w-6 h-6" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Leaves</span>
-        </button>
-        <button onClick={() => router.push("/principal/staff-attendance")} className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
-          <RiTeamLine className="w-6 h-6" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Staff</span>
-        </button>
-        <button onClick={() => router.push("/principal/profile")} className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
-          <RiUserLine className="w-6 h-6" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Profile</span>
-        </button>
-      </nav>
     </div>
   )
 }

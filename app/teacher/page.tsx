@@ -22,6 +22,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { WelcomeBoard } from "@/components/ui/welcome-board"
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 
@@ -88,74 +89,47 @@ export default function TeacherDashboardPage() {
   if (user && user.role !== 'TEACHER') return null
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      <div className="fixed top-0 left-0 w-full h-64 bg-primary/10 blur-[120px] -z-10" />
+    <div className="relative overflow-x-hidden min-h-full pb-10">
+      {/* Blue Sweeping Header Background */}
+      <div className="absolute top-0 left-0 w-full h-[280px] bg-[#0A4EA6] rounded-b-[3rem] -z-10" />
 
-      {/* Header */}
-      <header className="px-6 pt-12 pb-8 space-y-2">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-primary animate-in fade-in slide-in-from-left-4 duration-500">
-              {greeting}
-            </p>
-            <h1 className="text-3xl font-black tracking-tight animate-in fade-in slide-in-from-left-6 duration-700">
-              {firstName} <span className="text-muted-foreground/30">.</span>
-            </h1>
-            <p className="text-xs text-muted-foreground font-medium">Teacher Portal</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => router.push('/teacher/leaves')}
-              className="w-10 h-10 rounded-2xl bg-muted/50 border border-border/50 flex items-center justify-center hover:bg-muted transition-colors relative"
-            >
-              <RiCalendarCheckLine className="w-5 h-5" />
-              {pendingLeaves.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground rounded-full text-[9px] font-black flex items-center justify-center">
-                  {pendingLeaves.length}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={handleLogout}
-              className="w-10 h-10 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center justify-center text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors"
-            >
-              <RiLogoutBoxLine className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      </header>
+      <main className="px-5 md:px-8 pt-6 space-y-8">
+        {/* School Updates Banner (Overlapping) */}
+        <section className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+          <h2 className="text-sm font-bold text-white mb-3 px-1">School Updates</h2>
+          <WelcomeBoard 
+            title="Welcome Back!"
+            subtitle={`Your schedule is ready for today. You have ${todayClasses.length} classes scheduled.`}
+            illustrationSrc="/teacher-illustration.png"
+          />
+        </section>
 
-      <main className="px-6 space-y-8">
-        {/* Quick Action Cards */}
-        <section className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
-          <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-4 px-1">Quick Actions</h2>
-          <div className="grid grid-cols-2 gap-4">
+        {/* Academics Grid (3 Column) */}
+        <section className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 mt-8">
+          <h2 className="text-lg font-bold tracking-tight text-zinc-900 mb-4 px-1">Academics</h2>
+          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
             {[
-              { label: 'Manage Homework', icon: RiBookOpenLine, route: '/teacher/homework', color: 'bg-primary/10 text-primary', border: 'hover:border-primary/40' },
-              { label: 'Mark Attendance', icon: RiCheckLine, route: '/teacher/attendance', color: 'bg-blue-500/10 text-blue-600', border: 'hover:border-blue-500/40' },
-              { label: 'Leave Requests', icon: RiCalendarCheckLine, route: '/teacher/leaves', color: 'bg-amber-500/10 text-amber-600', border: 'hover:border-amber-500/40', badge: pendingLeaves.length },
-              { label: 'Send Broadcast', icon: RiMegaphoneLine, route: '/teacher/broadcast', color: 'bg-emerald-500/10 text-emerald-600', border: 'hover:border-emerald-500/40' },
-              { label: 'My Schedule', icon: RiTimeLine, route: '/teacher/schedule', color: 'bg-purple-500/10 text-purple-600', border: 'hover:border-purple-500/40' },
-            ].map(({ label, icon: Icon, route, color, border, badge }) => (
-              <button
+              { label: 'Homework', icon: RiBookOpenLine, route: '/teacher/homework', color: 'text-[#FA5D5D]', bg: 'bg-[#FA5D5D]/10' },
+              { label: 'Attendance', icon: RiCheckLine, route: '/teacher/attendance', color: 'text-[#6FCA72]', bg: 'bg-[#6FCA72]/10' },
+              { label: 'Leaves', icon: RiCalendarCheckLine, route: '/teacher/leaves', badge: pendingLeaves.length, color: 'text-[#FDB543]', bg: 'bg-[#FDB543]/10' },
+              { label: 'Broadcast', icon: RiMegaphoneLine, route: '/teacher/broadcast', color: 'text-[#45A3F5]', bg: 'bg-[#45A3F5]/10' },
+              { label: 'Schedule', icon: RiTimeLine, route: '/teacher/schedule', color: 'text-[#825CD6]', bg: 'bg-[#825CD6]/10' },
+            ].map(({ label, icon: Icon, route, color, bg, badge }) => (
+              <Card
                 key={label}
+                className="cursor-pointer hover:shadow-md transition-all rounded-3xl border border-zinc-100 shadow-sm aspect-square flex flex-col items-center justify-center p-3 relative group"
                 onClick={() => router.push(route)}
-                className={cn("rounded-3xl border border-border/50 bg-background/60 backdrop-blur-md p-5 text-left transition-all duration-200 active:scale-[0.97]", border)}
               >
-                <div className="space-y-4">
-                  <div className="relative inline-flex">
-                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", color)}>
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    {badge != null && badge > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-primary text-primary-foreground rounded-full text-[9px] font-black flex items-center justify-center">
-                        {badge}
-                      </span>
-                    )}
-                  </div>
-                  <p className="font-black text-sm leading-tight">{label}</p>
+                {badge != null && badge > 0 && (
+                  <span className="absolute top-2 right-2 w-5 h-5 bg-[#FA5D5D] text-white rounded-full text-[10px] font-black flex items-center justify-center shadow-md z-10">
+                    {badge}
+                  </span>
+                )}
+                <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform", bg, color)}>
+                  <Icon className="w-6 h-6" />
                 </div>
-              </button>
+                <p className="font-bold text-[11px] md:text-sm text-center text-zinc-700 leading-tight">{label}</p>
+              </Card>
             ))}
           </div>
         </section>
@@ -209,30 +183,6 @@ export default function TeacherDashboardPage() {
         </section>
       </main>
 
-      {/* Bottom Nav */}
-      <nav className="fixed bottom-0 left-0 w-full h-20 bg-background/80 backdrop-blur-xl border-t border-border/40 px-6 flex items-center justify-between z-50">
-        <button onClick={() => router.push('/teacher')} className="flex flex-col items-center gap-1 text-primary">
-          <RiDashboard3Line className="w-6 h-6" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Dash</span>
-        </button>
-        <button onClick={() => router.push('/teacher/homework')} className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
-          <RiBookOpenLine className="w-6 h-6" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Homework</span>
-        </button>
-        <button onClick={() => router.push('/teacher/leaves')} className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors relative">
-          <RiCalendarCheckLine className="w-6 h-6" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Leaves</span>
-          {pendingLeaves.length > 0 && <span className="absolute top-0 right-2 w-2 h-2 bg-primary rounded-full" />}
-        </button>
-        <button onClick={() => router.push('/teacher/broadcast')} className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
-          <RiMegaphoneLine className="w-6 h-6" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Broadcast</span>
-        </button>
-        <button onClick={() => router.push('/teacher/profile')} className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
-          <RiUserLine className="w-6 h-6" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Profile</span>
-        </button>
-      </nav>
     </div>
   )
 }

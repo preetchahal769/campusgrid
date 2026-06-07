@@ -59,6 +59,7 @@ export default function Home() {
             >
               Access Your Portal <RiArrowRightLine className="w-5 h-5 ml-2" />
             </Button>
+
           </div>
         </div>
 
@@ -143,12 +144,18 @@ export default function Home() {
             <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-zinc-100 flex flex-col hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
               <h3 className="text-2xl font-black text-zinc-900">Starter</h3>
               <p className="text-zinc-500 font-medium mt-2">For small, standalone schools.</p>
+<<<<<<< HEAD
               <div className="mt-6 mb-8 flex flex-col items-start gap-2">
                 <span className="bg-amber-100 text-amber-700 text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full">Coming Soon</span>
                 <div>
                   <span className="text-5xl font-black tracking-tighter">₹50</span>
                   <span className="text-zinc-400 font-bold">/student/mo</span>
                 </div>
+=======
+              <div className="mt-6 mb-8">
+                <span className="text-5xl font-black tracking-tighter">₹50</span>
+                <span className="text-zinc-400 font-bold">/student/mo</span>
+>>>>>>> design-update
               </div>
               <ul className="space-y-4 flex-1">
                 <li className="flex items-center gap-3 text-zinc-600 font-medium"><RiCheckLine className="w-5 h-5 text-emerald-500" /> Digital Attendance</li>
@@ -164,12 +171,18 @@ export default function Home() {
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-400 to-orange-500 text-white px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest shadow-lg">Most Popular</div>
               <h3 className="text-2xl font-black">Standard</h3>
               <p className="text-blue-200 font-medium mt-2">For growing, modern schools.</p>
+<<<<<<< HEAD
               <div className="mt-6 mb-8 flex flex-col items-start gap-2">
                 <span className="bg-white/20 text-white text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full">Coming Soon</span>
                 <div>
                   <span className="text-5xl font-black tracking-tighter">₹100</span>
                   <span className="text-blue-300 font-bold">/student/mo</span>
                 </div>
+=======
+              <div className="mt-6 mb-8">
+                <span className="text-5xl font-black tracking-tighter">₹100</span>
+                <span className="text-blue-300 font-bold">/student/mo</span>
+>>>>>>> design-update
               </div>
               <ul className="space-y-4 flex-1">
                 <li className="flex items-center gap-3 font-medium"><RiCheckLine className="w-5 h-5 text-blue-200" /> Everything in Starter</li>
@@ -184,11 +197,16 @@ export default function Home() {
             <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-zinc-100 flex flex-col hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
               <h3 className="text-2xl font-black text-zinc-900">Enterprise</h3>
               <p className="text-zinc-500 font-medium mt-2">For multi-branch institutions.</p>
+<<<<<<< HEAD
               <div className="mt-6 mb-8 flex flex-col items-start gap-2">
                 <span className="bg-amber-100 text-amber-700 text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full">Coming Soon</span>
                 <div>
                   <span className="text-5xl font-black tracking-tighter">Custom</span>
                 </div>
+=======
+              <div className="mt-6 mb-8">
+                <span className="text-5xl font-black tracking-tighter">Custom</span>
+>>>>>>> design-update
               </div>
               <ul className="space-y-4 flex-1">
                 <li className="flex items-center gap-3 text-zinc-600 font-medium"><RiCheckLine className="w-5 h-5 text-emerald-500" /> Multi-Branch P&L</li>

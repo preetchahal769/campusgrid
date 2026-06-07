@@ -217,7 +217,7 @@ export default function UserGovernancePage() {
                       type="email" 
                       value={formData.email}
                       onChange={e => setFormData({...formData, email: e.target.value})}
-                      placeholder="admin@campusgrid.com"
+                      placeholder="admin@sikshatantar.com"
                       className="w-full h-12 bg-muted/30 border border-border/40 rounded-2xl pl-12 pr-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-rose-500/20"
                     />
                   </div>
