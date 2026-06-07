@@ -52,6 +52,9 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
           // Clear persisted auth state to prevent redirect loops
           localStorage.removeItem('cg_user');
           localStorage.removeItem('cg_role');
+          localStorage.removeItem('cg_profile');
+          localStorage.removeItem('nexus_schools');
+          localStorage.removeItem('nexus_finance');
           
           // Only redirect if we're not already on the login page
           if (window.location.pathname !== '/login') {
@@ -68,6 +71,13 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     }
 
     if (response.status === 204 || endpoint === '/auth/logout') {
+      if (endpoint === '/auth/logout' && typeof window !== 'undefined') {
+        localStorage.removeItem('cg_user');
+        localStorage.removeItem('cg_role');
+        localStorage.removeItem('cg_profile');
+        localStorage.removeItem('nexus_schools');
+        localStorage.removeItem('nexus_finance');
+      }
       return null;
     }
 

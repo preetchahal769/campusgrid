@@ -81,6 +81,9 @@ export const authSlice = createSlice({
       // Clear localStorage
       localStorage.removeItem('cg_user')
       localStorage.removeItem('cg_role')
+      localStorage.removeItem('cg_profile')
+      localStorage.removeItem('nexus_schools')
+      localStorage.removeItem('nexus_finance')
     },
     clearError: (state) => {
       state.error = null
