@@ -59,13 +59,6 @@ export default function Home() {
             >
               Access Your Portal <RiArrowRightLine className="w-5 h-5 ml-2" />
             </Button>
-            <Button 
-              variant="outline"
-              onClick={() => router.push('/register')}
-              className="h-14 px-8 rounded-full border-2 border-zinc-200 text-zinc-900 font-bold text-lg hover:bg-zinc-50 w-full sm:w-auto transition-transform hover:scale-105 active:scale-95"
-            >
-              Apply for School
-            </Button>
           </div>
         </div>
 

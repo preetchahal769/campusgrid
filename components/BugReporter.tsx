@@ -1,0 +1,203 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { RiBugLine, RiCloseLine, RiLoader4Line, RiCheckLine, RiErrorWarningLine } from "@remixicon/react"
+import { useAppSelector } from "@/lib/store/hooks"
+import * as htmlToImage from "html-to-image"
+
+export function BugReporter() {
+  const [isVisible, setIsVisible] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
+  const [isCapturing, setIsCapturing] = useState(false)
+  const [screenshotBlob, setScreenshotBlob] = useState<Blob | null>(null)
+  const [description, setDescription] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+
+  const { user } = useAppSelector((state) => state.auth)
+
+  // Only show on staging or development
+  useEffect(() => {
+    const hostname = window.location.hostname
+    if (hostname.includes("staging") || hostname.includes("localhost") || process.env.NODE_ENV === "development") {
+      setIsVisible(true)
+    }
+  }, [])
+
+  if (!isVisible) return null
+
+  const handleOpenReporter = async () => {
+    try {
+      setIsCapturing(true)
+      
+      // Hide the button so it's not in the screenshot
+      const btn = document.getElementById("bug-reporter-btn")
+      if (btn) btn.style.display = "none"
+
+      // Capture screenshot using html-to-image BEFORE opening modal
+      const blob = await htmlToImage.toBlob(document.body, {
+        quality: 0.7,
+        skipFonts: true,
+        filter: (node) => {
+          if (node.id === 'bug-reporter-btn') return false;
+          return true;
+        }
+      })
+
+      if (btn) btn.style.display = "flex"
+
+      if (blob) {
+        setScreenshotBlob(blob)
+      }
+      
+      setIsOpen(true)
+    } catch (err) {
+      console.error("Failed to capture screenshot", err)
+      const btn = document.getElementById("bug-reporter-btn")
+      if (btn) btn.style.display = "flex"
+      setIsOpen(true) // Open it anyway, just without screenshot
+    } finally {
+      setIsCapturing(false)
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!description.trim()) {
+      setError("Please describe the issue")
+      return
+    }
+
+    setIsSubmitting(true)
+    setError(null)
+
+    try {
+      // Prepare payload
+      const formData = new FormData()
+      if (screenshotBlob) {
+        formData.append("screenshot", screenshotBlob, "screenshot.jpg")
+      }
+      formData.append("description", description)
+      formData.append("url", window.location.href)
+      
+      if (user?.email) formData.append("userEmail", user.email)
+      if (user?.role) formData.append("userRole", user.role)
+
+      // Send to backend
+      // Note: Not using apiFetch here because we might want to allow this even if token is expired/missing
+      const token = localStorage.getItem("access_token")
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000"
+      
+      const res = await fetch(`${backendUrl}/bug-reports`, {
+        method: "POST",
+        headers: token ? { "Authorization": `Bearer ${token}` } : {},
+        body: formData,
+      })
+
+      if (!res.ok) {
+        throw new Error("Failed to submit bug report")
+      }
+
+      setSuccess(true)
+      setTimeout(() => {
+        setIsOpen(false)
+        setSuccess(false)
+        setDescription("")
+      }, 3000)
+
+    } catch (err: any) {
+      setError(err.message || "An error occurred")
+      const btn = document.getElementById("bug-reporter-btn")
+      if (btn) btn.style.display = "flex"
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <>
+      {/* Floating Button */}
+      <button
+        id="bug-reporter-btn"
+        onClick={handleOpenReporter}
+        disabled={isCapturing}
+        className="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-rose-600 text-white flex items-center justify-center shadow-lg shadow-rose-600/30 hover:bg-rose-700 hover:scale-105 disabled:opacity-50 transition-all z-[9999]"
+        title="Report a bug"
+      >
+        {isCapturing ? <RiLoader4Line className="w-5 h-5 animate-spin" /> : <RiBugLine className="w-6 h-6" />}
+      </button>
+
+      {/* Modal */}
+      {isOpen && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-background w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-border/50">
+            <div className="px-6 py-4 border-b border-border/50 flex justify-between items-center bg-muted/30">
+              <div className="flex items-center gap-2 text-rose-600">
+                <RiBugLine className="w-5 h-5" />
+                <h3 className="font-black tracking-tight text-foreground">Report an Issue</h3>
+              </div>
+              <button 
+                onClick={() => !isSubmitting && setIsOpen(false)}
+                className="w-8 h-8 rounded-xl bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
+              >
+                <RiCloseLine className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              {success ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center animate-in zoom-in-95">
+                  <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mb-4">
+                    <RiCheckLine className="w-8 h-8" />
+                  </div>
+                  <h4 className="font-black text-lg mb-1">Got it!</h4>
+                  <p className="text-sm text-muted-foreground">The screenshot and details have been sent to the developers.</p>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  {error && (
+                    <div className="flex items-start gap-2 p-3 rounded-xl bg-rose-500/10 text-rose-600 text-xs font-semibold">
+                      <RiErrorWarningLine className="w-4 h-4 shrink-0" />
+                      <p>{error}</p>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">What went wrong?</label>
+                    <textarea
+                      value={description}
+                      onChange={e => setDescription(e.target.value)}
+                      placeholder="e.g. I clicked the save button but nothing happened..."
+                      className="w-full h-32 rounded-2xl bg-muted/40 border border-border/50 p-4 text-sm resize-none focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500/30 outline-none transition-all"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+
+                  <div className="bg-muted/30 rounded-xl p-3 space-y-1">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                      <RiCheckLine className="w-3 h-3 text-emerald-500" /> Auto-Capturing
+                    </p>
+                    <p className="text-xs font-medium text-muted-foreground line-clamp-1 flex gap-2">
+                      <span className="shrink-0">• Screenshot</span>
+                      <span className="shrink-0">• URL</span>
+                      <span className="shrink-0">• Email</span>
+                    </p>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full h-12 rounded-xl bg-rose-600 text-white font-bold flex items-center justify-center gap-2 hover:bg-rose-700 disabled:opacity-50 transition-colors shadow-lg shadow-rose-600/20"
+                  >
+                    {isSubmitting ? <RiLoader4Line className="w-5 h-5 animate-spin" /> : "Submit Report"}
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}

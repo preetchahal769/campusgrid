@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 import { StoreProvider } from "@/lib/store/StoreProvider"
 import { GoogleAnalytics } from "@next/third-parties/google"
+import { BugReporter } from "@/components/BugReporter"
 
 const outfit = Outfit({subsets:['latin'],variable:'--font-sans'})
 const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" })
@@ -54,6 +55,7 @@ export default function RootLayout({
               {children}
             </main>
           </ThemeProvider>
+          <BugReporter />
         </StoreProvider>
         <GoogleAnalytics gaId="G-N8L8H47Y5Y" />
       </body>
