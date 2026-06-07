@@ -125,24 +125,24 @@ export default function PrincipalProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-10">
+    <div className="min-h-screen pb-10 relative z-0">
       {/* Decorative header bg */}
-      <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-br from-violet-500/20 via-primary/5 to-transparent -z-10" />
+      <div className="absolute top-0 left-0 w-full h-[220px] bg-[#0A4EA6] rounded-b-[3rem] -z-10" />
 
       {/* Top Bar */}
       <div className="px-5 pt-12 pb-4 flex items-center justify-between">
         <button 
           onClick={() => router.back()} 
-          className="w-10 h-10 rounded-2xl bg-muted/50 border border-border/40 flex items-center justify-center hover:bg-muted transition-colors"
+          className="w-10 h-10 rounded-2xl bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors shrink-0"
         >
           <RiArrowLeftLine className="w-5 h-5" />
         </button>
-        <h1 className="text-base font-black tracking-tight">Principal Profile</h1>
+        <h1 className="text-base font-black tracking-tight text-white">Principal Profile</h1>
         <button 
           onClick={() => setIsEditing(!isEditing)} 
           className={cn(
-            "w-10 h-10 rounded-2xl flex items-center justify-center transition-all",
-            isEditing ? "bg-rose-500 text-white" : "bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20"
+            "w-10 h-10 rounded-2xl flex items-center justify-center transition-all shrink-0",
+            isEditing ? "bg-white text-rose-600 shadow-sm" : "bg-white/10 text-white border border-white/20 hover:bg-white/20"
           )}
         >
           {isEditing ? <RiCloseLine className="w-5 h-5" /> : <RiEdit2Line className="w-5 h-5" />}
