@@ -23,7 +23,8 @@ import {
   RiDatabase2Line,
   RiFlashlightLine,
   RiAlertFill,
-  RiCloseLine
+  RiCloseLine,
+  RiBugLine
 } from "@remixicon/react"
 import { cn } from "@/lib/utils"
 
@@ -47,6 +48,7 @@ const NEXUS_ACTIONS = [
     items: [
       { label: "Global Users",    icon: RiShieldUserLine, route: "/super_admin/users", color: "bg-rose-500/10 text-rose-600", border: "hover:border-rose-500/40" },
       { label: "Audit Logs",      icon: RiHistoryLine, route: "/super_admin/audit-logs", color: "bg-cyan-500/10 text-cyan-600", border: "hover:border-cyan-500/40" },
+      { label: "Bug Reports",     icon: RiBugLine, route: "/super_admin/bug-reports", color: "bg-orange-500/10 text-orange-600", border: "hover:border-orange-500/40" },
     ],
   },
   {

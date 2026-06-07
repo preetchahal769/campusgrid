@@ -1,9 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { RiBugLine, RiExternalLinkLine, RiTimeLine, RiImageLine, RiArrowRightSLine, RiRefreshLine } from "@remixicon/react"
+import { RiBugLine, RiExternalLinkLine, RiTimeLine, RiImageLine, RiArrowRightSLine, RiRefreshLine, RiDownload2Line } from "@remixicon/react"
 import { apiFetch } from "@/lib/api"
 import { format } from "date-fns"
+import jsPDF from "jspdf"
 
 interface BugReport {
   id: string
@@ -59,6 +60,93 @@ export default function BugReportsPage() {
       case "SOLVED": return "bg-emerald-500/10 text-emerald-600 border-emerald-200"
       default: return "bg-slate-100 text-slate-600"
     }
+  }
+
+  const handleExportPDF = async (report: BugReport) => {
+    const doc = new jsPDF()
+    
+    // Title
+    doc.setFontSize(22)
+    doc.setTextColor(225, 29, 72) // rose-600
+    doc.text("Bug Report", 20, 20)
+    
+    doc.setFontSize(10)
+    doc.setTextColor(100)
+    doc.text(`Report ID: ${report.id}`, 20, 28)
+    doc.text(`Date: ${format(new Date(report.createdAt), 'PPpp')}`, 20, 34)
+    doc.text(`Status: ${report.status}`, 20, 40)
+    
+    // Details
+    doc.setFontSize(14)
+    doc.setTextColor(15, 23, 42)
+    doc.text("Reporter Info", 20, 55)
+    doc.setFontSize(11)
+    doc.setTextColor(80)
+    doc.text(`Email: ${report.userEmail || "Anonymous"}`, 20, 63)
+    doc.text(`Role: ${report.userRole || "Unknown"}`, 20, 70)
+    
+    doc.setFontSize(14)
+    doc.setTextColor(15, 23, 42)
+    doc.text("Context", 20, 85)
+    doc.setFontSize(11)
+    doc.setTextColor(80)
+    doc.text(`URL: ${report.url || "Unknown"}`, 20, 93)
+    
+    // Description
+    doc.setFontSize(14)
+    doc.setTextColor(15, 23, 42)
+    doc.text("Description", 20, 108)
+    doc.setFontSize(11)
+    doc.setTextColor(80)
+    
+    const splitDesc = doc.splitTextToSize(report.description || "No description provided.", 170)
+    doc.text(splitDesc, 20, 116)
+    
+    let currentY = 116 + (splitDesc.length * 5) + 15
+    
+    // Try to attach image if present
+    if (report.screenshotUrl) {
+      try {
+        if (currentY > 250) {
+          doc.addPage()
+          currentY = 20
+        }
+        
+        doc.setFontSize(14)
+        doc.setTextColor(15, 23, 42)
+        doc.text("Screenshot Evidence", 20, currentY)
+        
+        const img = new Image()
+        img.crossOrigin = "Anonymous"
+        img.src = report.screenshotUrl
+        
+        await new Promise((resolve, reject) => {
+          img.onload = resolve
+          img.onerror = reject
+        })
+        
+        const canvas = document.createElement("canvas")
+        canvas.width = img.width
+        canvas.height = img.height
+        const ctx = canvas.getContext("2d")
+        ctx?.drawImage(img, 0, 0)
+        const imgData = canvas.toDataURL("image/jpeg")
+        
+        // Calculate aspect ratio to fit width
+        const maxWidth = 170
+        const scale = maxWidth / img.width
+        const height = img.height * scale
+        
+        doc.addImage(imgData, "JPEG", 20, currentY + 10, maxWidth, height)
+      } catch (err) {
+        console.error("Failed to add image to PDF", err)
+        doc.setFontSize(10)
+        doc.setTextColor(225, 29, 72)
+        doc.text("Failed to attach screenshot to PDF due to CORS or image load error.", 20, currentY + 10)
+      }
+    }
+    
+    doc.save(`bug-report-${report.id}.pdf`)
   }
 
   return (
@@ -133,8 +221,16 @@ export default function BugReportsPage() {
                   <p className="text-sm text-slate-500">{format(new Date(selectedReport.createdAt), 'MMMM d, yyyy • HH:mm:ss')}</p>
                 </div>
 
-                {/* Status Switcher */}
-                <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
+                {/* Status Switcher & Actions */}
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => handleExportPDF(selectedReport)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800 transition-colors shadow-sm"
+                  >
+                    <RiDownload2Line className="w-4 h-4" />
+                    Export PDF
+                  </button>
+                  <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
                   {["OPEN", "WORKING", "SOLVED"].map((status) => (
                     <button
                       key={status}
@@ -150,6 +246,7 @@ export default function BugReportsPage() {
                       {status}
                     </button>
                   ))}
+                  </div>
                 </div>
               </div>
 
