@@ -92,15 +92,17 @@ export function BugReporter() {
       // Send to backend
       // Note: Not using apiFetch here because we might want to allow this even if token is expired/missing
       const token = localStorage.getItem("access_token")
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000"
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
       
-      const res = await fetch(`${backendUrl}/bug-reports`, {
-        method: "POST",
+      console.log('Sending bug report to:', `${backendUrl}/bug-reports`)
+      
+      const response = await fetch(`${backendUrl}/bug-reports`, {
+        method: 'POST',
         headers: token ? { "Authorization": `Bearer ${token}` } : {},
         body: formData,
       })
 
-      if (!res.ok) {
+      if (!response.ok) {
         throw new Error("Failed to submit bug report")
       }
 
