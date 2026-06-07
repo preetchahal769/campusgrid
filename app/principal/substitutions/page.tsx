@@ -105,29 +105,31 @@ export default function SubstitutionPage() {
   if (!mounted) return null
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen pb-24 relative z-0">
+      <div className="absolute top-0 left-0 w-full h-[220px] bg-[#0A4EA6] rounded-b-[3rem] -z-10" />
+
       {/* Header */}
-      <header className="px-6 pt-12 pb-8 bg-gradient-to-b from-primary/5 to-transparent">
+      <header className="px-6 pt-12 pb-8">
         <div className="flex items-center gap-4 mb-6">
           <button 
             onClick={() => router.back()}
-            className="w-10 h-10 rounded-2xl bg-background border border-border/40 flex items-center justify-center hover:bg-muted transition-colors shadow-sm"
+            className="w-10 h-10 rounded-2xl bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors shrink-0"
           >
             <RiArrowLeftLine className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-black tracking-tight">Staff Substitutions</h1>
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Manage Absentee Coverage</p>
+            <h1 className="text-2xl font-black tracking-tight text-white">Staff Substitutions</h1>
+            <p className="text-xs text-white/70 font-medium uppercase tracking-widest">Manage Absentee Coverage</p>
           </div>
         </div>
 
         {/* Legend */}
         <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 px-3 py-1 rounded-full whitespace-nowrap">
+          <Badge variant="outline" className="bg-emerald-500 text-white border-emerald-500 px-3 py-1 rounded-full whitespace-nowrap shadow-sm">
             <RiCheckLine className="w-3 h-3 mr-1.5" />
             Covered
           </Badge>
-          <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/20 px-3 py-1 rounded-full whitespace-nowrap">
+          <Badge variant="outline" className="bg-rose-500 text-white border-rose-500 px-3 py-1 rounded-full whitespace-nowrap shadow-sm">
             <RiErrorWarningLine className="w-3 h-3 mr-1.5" />
             Urgent: Unassigned
           </Badge>

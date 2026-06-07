@@ -63,7 +63,7 @@ export default function PrincipalDashboardPage() {
       {/* Blue Sweeping Header Background */}
       <div className="absolute top-0 left-0 w-full h-[280px] bg-[#0A4EA6] rounded-b-[3rem] -z-10" />
 
-      <main className="px-5 md:px-8 pt-6 space-y-8">
+      <main className="px-5 md:px-8 pt-24 space-y-8">
         
         {/* Welcome Board */}
         <section className="animate-in fade-in slide-in-from-bottom-8 duration-700">

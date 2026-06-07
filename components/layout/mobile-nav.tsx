@@ -34,7 +34,7 @@ export function MobileNav() {
 
   return (
     <div className="fixed md:hidden bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] z-[100]">
-      <nav className="flex items-center justify-around bg-[#1A1A1A] p-2 rounded-full shadow-2xl h-[70px]">
+      <nav className="flex items-center justify-around bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-2xl border border-zinc-200/50 dark:border-zinc-800 p-2 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.08)] h-[70px]">
         {navItems.map((item, idx) => {
           const isActive = pathname === item.href
           return (
@@ -42,12 +42,10 @@ export function MobileNav() {
               key={item.href}
               onClick={() => router.push(item.href)}
               className={cn(
-                "relative flex items-center justify-center rounded-full transition-all duration-300",
+                "relative flex items-center justify-center rounded-[1.5rem] transition-all duration-300",
                 isActive 
-                  ? "text-white" 
-                  : "text-zinc-500 hover:text-zinc-300",
-                // First item gets the special circle look from the mockup
-                idx === 0 && isActive ? "bg-black border border-white/10 w-[54px] h-[54px]" : "w-[54px] h-[54px]"
+                  ? "bg-[#0A4EA6] text-white shadow-md scale-105 w-[54px] h-[54px]" 
+                  : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 w-[54px] h-[54px]"
               )}
             >
               <item.icon className="w-6 h-6" strokeWidth={isActive ? 2 : 1.5} />
