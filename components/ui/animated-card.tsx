@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { motion, HTMLMotionProps } from "framer-motion"
+import { motion, HTMLMotionProps, Variants } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 interface AnimatedCardProps extends HTMLMotionProps<"div"> {
@@ -9,7 +9,7 @@ interface AnimatedCardProps extends HTMLMotionProps<"div"> {
   staggerChildren?: boolean
 }
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: { 
     opacity: 0, 
     y: 20,
