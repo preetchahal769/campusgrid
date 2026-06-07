@@ -38,19 +38,23 @@ export default function NewHomeworkPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-blue-500/5 via-background to-background relative pb-28">
+    <div className="min-h-screen pb-10 relative z-0">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border/40 px-6 py-4 flex items-center justify-between">
+      <div className="absolute top-0 left-0 w-full h-[220px] bg-[#0A4EA6] rounded-b-[3rem] -z-10" />
+
+      <div className="px-5 pt-12 pb-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/" className="w-10 h-10 rounded-full bg-muted/50 border border-border/50 flex items-center justify-center hover:bg-muted transition-colors">
+          <Link href="/" className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors shrink-0 text-white">
             <RiArrowLeftLine className="w-5 h-5" />
           </Link>
-          <h1 className="text-xl font-bold tracking-tight">New Assignment</h1>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl font-black tracking-tight text-white">New Assignment</h1>
+            <p className="text-[10px] sm:text-xs font-semibold text-white/70 uppercase tracking-widest mt-0.5 truncate">Create and broadcast</p>
+          </div>
         </div>
       </div>
 
-      <div className="p-6">
-        <p className="text-muted-foreground text-sm mb-6">Create and broadcast a new homework assignment to your students.</p>
+      <div className="px-5">
         
         <form id="homework-form" onSubmit={handlePublish} className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <Card className="p-1 rounded-3xl border-border/50 bg-background/60 backdrop-blur-md shadow-sm">

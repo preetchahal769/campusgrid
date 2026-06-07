@@ -113,24 +113,24 @@ export default function LeavePage() {
   const pendingCount = leaves.filter(l => l.status === 'PENDING').length
 
   return (
-    <div className="min-h-screen bg-background pb-10">
-      <div className="fixed top-0 left-0 w-full h-48 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent -z-10" />
+    <div className="min-h-screen pb-10 relative z-0">
+      <div className="absolute top-0 left-0 w-full h-[220px] bg-[#0A4EA6] rounded-b-[3rem] -z-10" />
 
       {/* Top Bar */}
       <div className="px-5 pt-12 pb-6 flex items-center gap-4">
         <button
           onClick={() => router.back()}
-          className="w-10 h-10 rounded-2xl bg-muted/50 border border-border/40 flex items-center justify-center hover:bg-muted transition-colors shrink-0"
+          className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors shrink-0 text-white"
         >
           <RiArrowLeftLine className="w-5 h-5" />
         </button>
         <div className="flex-1">
-          <h1 className="text-xl font-black tracking-tight">Leave Management</h1>
-          <p className="text-xs text-muted-foreground font-medium">Apply and track your leave requests</p>
+          <h1 className="text-xl font-black tracking-tight text-white">Leave Management</h1>
+          <p className="text-xs text-white/70 font-medium">Apply and track your leave requests</p>
         </div>
         <button
           onClick={() => { setShowForm(true); setSubmitError(null) }}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-primary text-primary-foreground font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary/90 active:scale-95 transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white text-[#0A4EA6] font-bold text-sm shadow-lg shadow-black/10 hover:bg-white/90 active:scale-95 transition-all"
         >
           <RiAddLine className="w-4 h-4" />
           Apply
@@ -138,8 +138,8 @@ export default function LeavePage() {
       </div>
 
       {/* Stats Row */}
-      <div className="px-5 mb-6">
-        <div className="grid grid-cols-4 gap-3">
+      <div className="px-5 mb-6 relative z-10">
+        <div className="grid grid-cols-4 gap-3 bg-background/80 backdrop-blur-md p-3 rounded-3xl border border-border/50 shadow-sm">
           {(['PENDING', 'APPROVED', 'REJECTED', 'ESCALATED'] as const).map((status) => {
             const count = leaves.filter(l => l.status === status).length
             const cfg = statusConfig[status]

@@ -65,21 +65,21 @@ export default function TimetablePage() {
     .sort((a, b) => a.lectureNo - b.lectureNo)
 
   return (
-    <div className="min-h-screen bg-background pb-10">
+    <div className="min-h-screen pb-10 relative z-0">
       {/* Decorative header bg */}
-      <div className="fixed top-0 left-0 w-full h-48 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent -z-10" />
+      <div className="absolute top-0 left-0 w-full h-[220px] bg-[#0A4EA6] rounded-b-[3rem] -z-10" />
 
       {/* Top Bar */}
       <div className="px-5 pt-12 pb-6 flex items-center gap-4">
         <button
           onClick={() => router.back()}
-          className="w-10 h-10 rounded-2xl bg-muted/50 border border-border/40 flex items-center justify-center hover:bg-muted transition-colors shrink-0"
+          className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors shrink-0 text-white"
         >
           <RiArrowLeftLine className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-xl font-black tracking-tight">Schedule</h1>
-          <p className="text-xs text-muted-foreground font-medium">Your weekly academic journey</p>
+          <h1 className="text-xl font-black tracking-tight text-white">Schedule</h1>
+          <p className="text-xs text-white/70 font-medium">Your weekly academic journey</p>
         </div>
       </div>
 
@@ -95,8 +95,8 @@ export default function TimetablePage() {
                 className={cn(
                   "px-6 py-3 rounded-2xl font-bold text-sm whitespace-nowrap transition-all duration-300 border",
                   isSelected 
-                    ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20 scale-105" 
-                    : "bg-background/40 border-border/50 text-muted-foreground hover:border-primary/30"
+                    ? "bg-white text-[#0A4EA6] border-white shadow-lg shadow-black/10 scale-105" 
+                    : "bg-white/10 border-white/20 text-white hover:bg-white/20"
                 )}
               >
                 {day.substring(0, 3)}

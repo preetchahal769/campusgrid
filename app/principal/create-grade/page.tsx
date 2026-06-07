@@ -52,20 +52,20 @@ export default function CreateGradePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-12">
-      <div className="fixed top-0 left-0 w-full h-52 bg-gradient-to-br from-violet-500/15 via-primary/5 to-transparent -z-10" />
+    <div className="min-h-screen pb-12 relative z-0">
+      <div className="absolute top-0 left-0 w-full h-[220px] bg-[#0A4EA6] rounded-b-[3rem] -z-10" />
 
       {/* Top Bar */}
       <div className="px-5 pt-12 pb-8 flex items-center gap-4">
         <button
           onClick={() => router.back()}
-          className="w-10 h-10 rounded-2xl bg-muted/50 border border-border/40 flex items-center justify-center hover:bg-muted transition-colors shrink-0"
+          className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors shrink-0 text-white"
         >
           <RiArrowLeftLine className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-xl font-black tracking-tight">Create Grade</h1>
-          <p className="text-xs text-muted-foreground font-medium">Add a new class level to your school</p>
+          <h1 className="text-xl font-black tracking-tight text-white">Create Grade</h1>
+          <p className="text-xs text-white/70 font-medium">Add a new class level to your school</p>
         </div>
       </div>
 

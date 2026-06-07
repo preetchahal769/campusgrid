@@ -51,16 +51,18 @@ export default function TeacherAttendanceHistoryPage() {
   const leaveCount = activeStudents.filter(s => s.status === "leave").length
 
   return (
-    <div className="flex flex-col min-h-[100dvh] bg-blue-500/5 relative text-foreground">
+    <div className="flex flex-col min-h-[100dvh] relative z-0 text-foreground">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border/40 px-6 py-4 flex flex-col gap-4">
+      <div className="absolute top-0 left-0 w-full h-[220px] bg-[#0A4EA6] rounded-b-[3rem] -z-10" />
+
+      <div className="sticky top-0 z-10 px-6 pt-12 pb-6 flex flex-col gap-4">
         <div className="flex items-center gap-4">
-           <Link href="/" className="w-10 h-10 rounded-full bg-muted/50 border border-border/50 flex items-center justify-center hover:bg-muted transition-colors shrink-0">
+           <Link href="/" className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors shrink-0 text-white">
              <RiArrowLeftLine className="w-5 h-5" />
            </Link>
            <div className="flex-1 min-w-0">
-             <h1 className="text-xl font-bold tracking-tight">Attendance Ledger</h1>
-             <p className="text-[10px] sm:text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-widest mt-0.5 truncate">{selectedClass?.name} History</p>
+             <h1 className="text-xl font-black tracking-tight text-white">Attendance Ledger</h1>
+             <p className="text-[10px] sm:text-xs font-semibold text-white/70 uppercase tracking-widest mt-0.5 truncate">{selectedClass?.name} History</p>
            </div>
         </div>
 
