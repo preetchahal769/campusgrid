@@ -185,16 +185,11 @@ export default function Home() {
             <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-zinc-100 flex flex-col hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
               <h3 className="text-2xl font-black text-zinc-900">Enterprise</h3>
               <p className="text-zinc-500 font-medium mt-2">For multi-branch institutions.</p>
-<<<<<<< HEAD
               <div className="mt-6 mb-8 flex flex-col items-start gap-2">
                 <span className="bg-amber-100 text-amber-700 text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full">Coming Soon</span>
                 <div>
                   <span className="text-5xl font-black tracking-tighter">Custom</span>
                 </div>
-=======
-              <div className="mt-6 mb-8">
-                <span className="text-5xl font-black tracking-tighter">Custom</span>
->>>>>>> design-update
               </div>
               <ul className="space-y-4 flex-1">
                 <li className="flex items-center gap-3 text-zinc-600 font-medium"><RiCheckLine className="w-5 h-5 text-emerald-500" /> Multi-Branch P&L</li>
