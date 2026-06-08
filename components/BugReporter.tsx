@@ -96,7 +96,10 @@ export function BugReporter() {
       // Send to backend
       // Note: Not using apiFetch here because we might want to allow this even if token is expired/missing
       const token = localStorage.getItem("access_token")
-      const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
+      let backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
+      if (!backendUrl.startsWith("http")) {
+        backendUrl = `https://${backendUrl}`
+      }
       
       console.log('Sending bug report to:', `${backendUrl}/bug-reports`)
       
@@ -156,11 +159,10 @@ export function BugReporter() {
   const handlePointerUp = (e: any) => {
     setIsDragging(false)
     e.currentTarget.releasePointerCapture(e.pointerId)
-  }
-
-  const handleClick = (e: any) => {
-    if (hasMoved) return // Prevent click if user dragged the button
-    handleOpenReporter()
+    // On mobile, rely on PointerUp for clicks instead of synthetic onClick which can get swallowed
+    if (!hasMoved) {
+      handleOpenReporter()
+    }
   }
 
   return (
@@ -168,7 +170,6 @@ export function BugReporter() {
       {/* Floating Button */}
       <button
         id="bug-reporter-btn"
-        onClick={handleClick}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
