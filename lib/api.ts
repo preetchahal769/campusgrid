@@ -38,8 +38,11 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
           credentials: 'include',
         }).then(res => {
           isRefreshing = false;
-          if (!res.ok) throw new Error('Refresh failed');
+          if (!res.ok) throw new Error(`Refresh failed with status ${res.status}`);
           return res;
+        }).catch(err => {
+          isRefreshing = false;
+          throw err;
         });
       }
 

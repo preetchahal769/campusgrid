@@ -31,6 +31,14 @@ export function middleware(request: NextRequest) {
   // 1. Route guard protection
   if (isProtected) {
     if (!token) {
+      // If access token is missing but they have a refresh token,
+      // let the request pass so the frontend's apiFetch can intercept the 401
+      // and silently refresh the session!
+      const refreshToken = request.cookies.get('refresh_token')?.value
+      if (refreshToken) {
+        return NextResponse.next()
+      }
+      
       const loginUrl = new URL('/login', request.url)
       return NextResponse.redirect(loginUrl)
     }
@@ -45,7 +53,11 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL(dashboardPrefix, request.url))
       }
     } else {
-      // If token is invalid or malformed, redirect to login
+      // If token is invalid or malformed, but they have a refresh token, let frontend handle it
+      const refreshToken = request.cookies.get('refresh_token')?.value
+      if (refreshToken) {
+        return NextResponse.next()
+      }
       const loginUrl = new URL('/login', request.url)
       return NextResponse.redirect(loginUrl)
     }

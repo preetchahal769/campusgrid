@@ -40,8 +40,14 @@ export default function TeacherProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
   const [editName, setEditName] = useState("")
   const [editPhone, setEditPhone] = useState("")
+  const [editQual, setEditQual] = useState("")
+  const [editSpec, setEditSpec] = useState("")
+  
   const [isUpdating, setIsUpdating] = useState(false)
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
+  
+  const isQualEmpty = !profile?.qualification
+  const isSpecEmpty = !profile?.specilization
 
   useEffect(() => {
     if (profile) return
@@ -74,6 +80,8 @@ export default function TeacherProfilePage() {
   const startEditing = () => {
     setEditName(profile?.users?.name || user?.name || "")
     setEditPhone(profile?.users?.phoneNo || "")
+    setEditQual(profile?.qualification || "")
+    setEditSpec(profile?.specilization || "")
     setIsEditing(true)
     setError(null)
   }
@@ -85,6 +93,7 @@ export default function TeacherProfilePage() {
     setIsUpdating(true)
     setError(null)
     try {
+      // Basic User Profile updates
       const updatedUser = await apiFetch('/users/profile', {
         method: 'PATCH',
         body: JSON.stringify({
@@ -93,10 +102,29 @@ export default function TeacherProfilePage() {
         }),
       })
       
+      // Professional details update (if any)
+      if (editQual !== profile?.qualification || editSpec !== profile?.specilization) {
+        await apiFetch('/teachers/profile', {
+          method: 'PATCH',
+          body: JSON.stringify({
+            qualification: editQual.trim() || undefined,
+            specilization: editSpec.trim() || undefined,
+          }),
+        })
+      }
+
       // Update store
       dispatch(updateUser({ name: updatedUser.name }))
       dispatch(updateUserProfile({ name: updatedUser.name, phoneNo: updatedUser.phoneNo }))
       
+      // Re-fetch profile to get pending approval status and fresh details
+      const freshData = await apiFetch('/teachers/me')
+      dispatch(setTeacherProfile(freshData))
+      
+      if (updatedUser.pendingApproval) {
+        alert("Your changes have been submitted for approval.")
+      }
+
       setIsEditing(false)
     } catch (err: any) {
       setError(err.message)
@@ -221,6 +249,34 @@ export default function TeacherProfilePage() {
                         onChange={e => setEditPhone(e.target.value)}
                         className="w-full h-11 rounded-xl bg-muted/40 border border-border/50 px-4 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:bg-background outline-none transition-all"
                         placeholder="+1 234 567 890"
+                      />
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5 ml-1">
+                        <RiMedalLine className="w-3 h-3 text-primary" /> Qualification
+                        {!isQualEmpty && <span className="text-[9px] text-amber-500 ml-auto">(Requires Approval)</span>}
+                      </label>
+                      <input
+                        type="text"
+                        value={editQual}
+                        onChange={e => setEditQual(e.target.value)}
+                        className="w-full h-11 rounded-xl bg-muted/40 border border-border/50 px-4 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:bg-background outline-none transition-all"
+                        placeholder="e.g. B.Ed, M.Sc"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5 ml-1">
+                        <RiBookOpenLine className="w-3 h-3 text-primary" /> Specialization
+                        {!isSpecEmpty && <span className="text-[9px] text-amber-500 ml-auto">(Requires Approval)</span>}
+                      </label>
+                      <input
+                        type="text"
+                        value={editSpec}
+                        onChange={e => setEditSpec(e.target.value)}
+                        className="w-full h-11 rounded-xl bg-muted/40 border border-border/50 px-4 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:bg-background outline-none transition-all"
+                        placeholder="e.g. Mathematics"
                       />
                     </div>
                   </div>
