@@ -17,13 +17,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-function getCookie(name: string) {
-  if (typeof document === 'undefined') return null
-  const value = `; ${document.cookie}`
-  const parts = value.split(`; ${name}=`)
-  if (parts.length === 2) return parts.pop()?.split(';').shift()
-  return null
-}
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -85,19 +78,11 @@ export default function OnboardingPage() {
         const formData = new FormData()
         formData.append('file', photoFile)
         
-        const token = getCookie('cg_token')
-        
-        // Custom fetch to handle FormData
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/users/profile/photo`, {
+        const photoData = await apiFetch("/users/profile/photo", {
           method: 'PATCH',
-          headers: {
-            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-          },
           body: formData
         })
 
-        if (!res.ok) throw new Error("Failed to upload photo")
-        const photoData = await res.json()
         finalPhotoUrl = photoData.photoUrl
       }
 

@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useRouter, useParams } from "next/navigation"
+import { useState, useEffect, Suspense } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { 
   RiArrowLeftLine, 
   RiShieldUserLine, 
@@ -22,10 +22,22 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { apiFetch } from "@/lib/api"
 
-export default function UserProfilePage() {
+export default function UserProfilePageWrapper() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <RiLoader4Line className="w-10 h-10 animate-spin text-primary" />
+      </div>
+    }>
+      <UserProfileContent />
+    </Suspense>
+  )
+}
+
+function UserProfileContent() {
   const router = useRouter()
-  const params = useParams()
-  const userId = params.id as string
+  const searchParams = useSearchParams()
+  const userId = searchParams.get('id') as string
 
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
