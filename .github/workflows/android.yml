@@ -19,11 +19,8 @@ jobs:
         node-version: '20'
         cache: 'npm'
 
-    - name: Install dependencies
-      run: npm install
-
-    - name: Fix LightningCSS Native Binary for Linux Runner
-      run: npm install lightningcss-linux-x64-gnu
+    - name: Install dependencies (Ignore Windows Lockfile)
+      run: rm -f package-lock.json && npm install
 
     - name: Build Next.js Export
       run: MOBILE_BUILD=true npm run build
