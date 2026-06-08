@@ -7,6 +7,7 @@ export interface User {
   role: 'STUDENT' | 'TEACHER' | 'PRINCIPAL' | 'ADMIN' | 'SUPER_ADMIN'
   School_id?: string
   School_name?: string
+  phoneNo?: string
   photoUrl?: string
   lastLogin?: string
 }
