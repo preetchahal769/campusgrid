@@ -117,8 +117,7 @@ export default function BugReportsPage() {
         doc.text("Screenshot Evidence", 20, currentY)
         
         const img = new Image()
-        img.crossOrigin = "Anonymous"
-        img.src = report.screenshotUrl
+        img.src = `/api/proxy-image?url=${encodeURIComponent(report.screenshotUrl)}`
         
         await new Promise((resolve, reject) => {
           img.onload = resolve
