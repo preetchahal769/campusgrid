@@ -40,6 +40,9 @@ export function BugReporter() {
       const btn = document.getElementById("bug-reporter-btn")
       if (btn) btn.style.display = "none"
 
+      // Wait 50ms so React can render the loading spinner before html2canvas freezes the main thread
+      await new Promise(resolve => setTimeout(resolve, 50))
+
       // Capture screenshot using html-to-image BEFORE opening modal
       const blob = await htmlToImage.toBlob(document.body, {
         quality: 0.7,
@@ -134,7 +137,15 @@ export function BugReporter() {
 
   const handlePointerMove = (e: any) => {
     if (!isDragging || !dragRef.current) return
-    setHasMoved(true)
+    
+    // Only consider it a "drag" if they move more than 5 pixels
+    const moveX = Math.abs(e.clientX - dragRef.current.startX - position.x)
+    const moveY = Math.abs(e.clientY - dragRef.current.startY - position.y)
+    
+    if (moveX > 5 || moveY > 5) {
+      setHasMoved(true)
+    }
+
     setPosition({
       x: e.clientX - dragRef.current.startX,
       y: e.clientY - dragRef.current.startY
