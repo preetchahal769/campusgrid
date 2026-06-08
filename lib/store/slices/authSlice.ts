@@ -7,6 +7,7 @@ export interface User {
   role: 'STUDENT' | 'TEACHER' | 'PRINCIPAL' | 'ADMIN' | 'SUPER_ADMIN'
   School_id?: string
   School_name?: string
+  phoneNo?: string
   photoUrl?: string
   lastLogin?: string
 }
@@ -54,8 +55,8 @@ export const authSlice = createSlice({
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload
     },
-    setAuthSuccess: (state, action: PayloadAction<{ user: User; access_token: string }>) => {
-      const { user } = action.payload
+    setAuthSuccess: (state, action: PayloadAction<{ user: User; tokens?: { accessToken: string; refreshToken: string } }>) => {
+      const { user, tokens } = action.payload
       state.user = user
       state.userRole = user.role.toLowerCase() as 'student' | 'teacher' | 'principal' | 'admin' | 'super_admin'
       state.isAuthenticated = true
@@ -65,6 +66,10 @@ export const authSlice = createSlice({
       // Persist to localStorage
       localStorage.setItem('cg_user', JSON.stringify(user))
       localStorage.setItem('cg_role', state.userRole || '')
+      if (tokens) {
+        localStorage.setItem('cg_access_token', tokens.accessToken)
+        localStorage.setItem('cg_refresh_token', tokens.refreshToken)
+      }
     },
     setAuthFailure: (state, action: PayloadAction<string>) => {
       state.error = action.payload
@@ -84,6 +89,8 @@ export const authSlice = createSlice({
       localStorage.removeItem('cg_profile')
       localStorage.removeItem('nexus_schools')
       localStorage.removeItem('nexus_finance')
+      localStorage.removeItem('cg_access_token')
+      localStorage.removeItem('cg_refresh_token')
     },
     clearError: (state) => {
       state.error = null

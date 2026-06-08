@@ -1,10 +1,18 @@
 import { withSentryConfig } from '@sentry/nextjs';
-/** @type {import('next').NextConfig} */
+
+const isMobileBuild = process.env.MOBILE_BUILD === 'true';
+
 const nextConfig = {
-  // Produces a self-contained .next/standalone output for lean Docker images.
-  // The production container only ships server.js + traced dependencies —
-  // no full node_modules copy needed.
-  output: 'standalone',
+  // Produces a static HTML/JS export required by CapacitorJS when building for mobile
+  // Otherwise uses standalone output for Docker container efficiency on web
+  output: isMobileBuild ? 'export' : 'standalone',
+  
+  // Disable server-side image optimization since Capacitor is static
+  ...(isMobileBuild ? {
+    images: {
+      unoptimized: true,
+    }
+  } : {}),
 }
 
 export default withSentryConfig(nextConfig, {

@@ -6,7 +6,23 @@ import { DesktopSidebar } from "./desktop-sidebar"
 import { TopHeader } from "./top-header"
 import { cn } from "@/lib/utils"
 
+import { usePathname, useRouter } from "next/navigation"
+import { useAppSelector } from "@/lib/store/hooks"
+
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname()
+  const router = useRouter()
+  const { user } = useAppSelector((state) => state.auth)
+  
+  const isDashboardRoot = ["/student", "/teacher", "/principal", "/super_admin"].includes(pathname)
+
+  React.useEffect(() => {
+    // Force onboarding if user hasn't filled out their profile
+    if (user && !user.phoneNo && user.role !== 'SUPER_ADMIN') {
+      router.replace('/onboarding')
+    }
+  }, [user, router])
+
   return (
     <div className="min-h-screen bg-[#F0F2F5] text-zinc-900 flex md:p-4">
       <DesktopSidebar />
@@ -20,7 +36,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         }}
       >
         <div className="w-full h-full bg-[#F8F9FA] md:border md:border-border/40 md:rounded-3xl md:shadow-sm overflow-hidden relative flex flex-col">
-           <TopHeader />
+           {isDashboardRoot && <TopHeader />}
            <div className="flex-1 overflow-y-auto">
              {children}
            </div>

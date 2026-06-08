@@ -96,11 +96,11 @@ export default function SuperAdminDashboardPage() {
   if (user && user.role !== 'SUPER_ADMIN') return null
 
   return (
-    <div className="relative overflow-x-hidden min-h-full pb-10">
+    <div className="relative overflow-x-hidden min-h-full pb-10 z-0">
       {/* Blue Sweeping Header Background */}
       <div className="absolute top-0 left-0 w-full h-[280px] bg-[#0A4EA6] rounded-b-[3rem] -z-10" />
 
-      <main className="px-5 md:px-8 pt-6 space-y-8">
+      <main className="px-5 md:px-8 pt-24 space-y-8">
         
         {/* Urgent Alerts Banner */}
         {!hideBanner && escalations && escalations.length > 0 && (

@@ -9,6 +9,7 @@ export interface StudentProfile {
   users: {
     name: string
     email: string
+    phoneNo?: string
     globalRating: number
     globalRank: number
   }

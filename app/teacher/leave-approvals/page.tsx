@@ -23,16 +23,18 @@ export default function LeaveApprovalsPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-amber-500/5 via-background to-background">
+    <div className="flex flex-col min-h-screen pb-10 relative z-0">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border/40 px-6 py-4 flex items-center justify-between">
+      <div className="absolute top-0 left-0 w-full h-[220px] bg-[#0A4EA6] rounded-b-[3rem] -z-10" />
+
+      <div className="px-5 pt-12 pb-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/" className="w-10 h-10 rounded-full bg-muted/50 border border-border/50 flex items-center justify-center hover:bg-muted transition-colors">
+          <Link href="/" className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors shrink-0 text-white">
             <RiArrowLeftLine className="w-5 h-5" />
           </Link>
-          <h1 className="text-xl font-bold tracking-tight">Leave Approvals</h1>
+          <h1 className="text-xl font-black tracking-tight text-white">Leave Approvals</h1>
         </div>
-        <div className="bg-amber-500/10 text-amber-600 font-bold px-3 py-1 rounded-full text-xs border border-amber-500/20 shadow-sm">
+        <div className="bg-white/20 text-white font-bold px-3 py-1 rounded-full text-xs shadow-sm">
           {requests.length} Pending
         </div>
       </div>

@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 import { StoreProvider } from "@/lib/store/StoreProvider"
 import { GoogleAnalytics } from "@next/third-parties/google"
 import { BugReporter } from "@/components/BugReporter"
+import { DebugMenu } from "@/components/DebugMenu"
 
 const outfit = Outfit({subsets:['latin'],variable:'--font-sans'})
 const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" })
@@ -56,6 +57,7 @@ export default function RootLayout({
             </main>
           </ThemeProvider>
           <BugReporter />
+          <DebugMenu />
         </StoreProvider>
         <GoogleAnalytics gaId="G-N8L8H47Y5Y" />
       </body>
