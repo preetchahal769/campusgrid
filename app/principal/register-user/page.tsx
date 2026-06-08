@@ -50,6 +50,10 @@ export default function RegisterUserPage() {
 
   const [step, setStep] = useState<1 | 2>(1)
   const [createdUser, setCreatedUser] = useState<{ id: string; role: string; name: string } | null>(null)
+  const [mode, setMode] = useState<"CREATE" | "UNASSIGNED">("CREATE")
+  const [unassignedUsers, setUnassignedUsers] = useState<any[]>([])
+  const [unassignedRole, setUnassignedRole] = useState("STUDENT")
+  const [isLoadingUnassigned, setIsLoadingUnassigned] = useState(false)
 
   // Step 2 Data
   const [sections, setSections] = useState<any[]>([])
@@ -62,6 +66,19 @@ export default function RegisterUserPage() {
       setSections(Array.isArray(data) ? data : [])
     } catch (err) {
       console.error("Failed to fetch sections", err)
+    }
+  }
+
+  const fetchUnassigned = async (role: string) => {
+    setIsLoadingUnassigned(true)
+    setError(null)
+    try {
+      const data = await apiFetch(`/users/unassigned?role=${role}`)
+      setUnassignedUsers(Array.isArray(data) ? data : [])
+    } catch (err: any) {
+      setError("Failed to fetch unassigned users: " + err.message)
+    } finally {
+      setIsLoadingUnassigned(false)
     }
   }
 
@@ -187,8 +204,29 @@ export default function RegisterUserPage() {
           </div>
         </div>
 
+        {step === 1 && (
+          <div className="flex p-1 bg-muted/30 border border-border/50 rounded-2xl">
+            <button
+              onClick={() => setMode("CREATE")}
+              className={cn("flex-1 py-3 text-xs font-bold rounded-xl transition-all", mode === "CREATE" ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:bg-white/50")}
+            >
+              Create New
+            </button>
+            <button
+              onClick={() => {
+                setMode("UNASSIGNED")
+                fetchUnassigned(unassignedRole)
+              }}
+              className={cn("flex-1 py-3 text-xs font-bold rounded-xl transition-all", mode === "UNASSIGNED" ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:bg-white/50")}
+            >
+              Unassigned Users
+            </button>
+          </div>
+        )}
+
         {step === 1 ? (
-          <form onSubmit={handleBaseSubmit} className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          mode === "CREATE" ? (
+            <form onSubmit={handleBaseSubmit} className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
                 <RiUserLine className="w-3.5 h-3.5 text-primary" /> Full Name *
@@ -260,6 +298,63 @@ export default function RegisterUserPage() {
               {isSubmitting ? <RiLoader4Line className="w-6 h-6 animate-spin" /> : "Continue to Academic Profile →"}
             </Button>
           </form>
+          ) : (
+            <div className="space-y-5 animate-in fade-in slide-in-from-right-8 duration-500">
+              <div className="flex gap-2">
+                <select
+                  value={unassignedRole}
+                  onChange={(e) => {
+                    setUnassignedRole(e.target.value)
+                    fetchUnassigned(e.target.value)
+                  }}
+                  className="flex-1 h-12 rounded-2xl bg-muted/40 border border-border/50 px-4 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:bg-background outline-none transition-all appearance-none"
+                >
+                  {ROLES.map(role => (
+                    <option key={role.value} value={role.value}>{role.label}</option>
+                  ))}
+                </select>
+                <Button 
+                  onClick={() => fetchUnassigned(unassignedRole)}
+                  className="h-12 px-6 rounded-2xl font-bold bg-primary hover:bg-primary/90 text-white"
+                >
+                  Refresh
+                </Button>
+              </div>
+
+              {isLoadingUnassigned ? (
+                <div className="py-10 flex justify-center">
+                  <RiLoader4Line className="w-8 h-8 animate-spin text-primary opacity-50" />
+                </div>
+              ) : unassignedUsers.length === 0 ? (
+                <div className="py-10 text-center border border-dashed border-border/60 rounded-3xl bg-muted/20">
+                  <RiUserLine className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                  <p className="text-sm font-bold text-muted-foreground">No unassigned {unassignedRole.toLowerCase()}s found.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {unassignedUsers.map(u => (
+                    <div key={u.id} className="p-4 rounded-3xl border border-border/50 bg-white shadow-sm flex items-center justify-between hover:border-primary/30 transition-colors">
+                      <div>
+                        <p className="font-bold text-sm text-zinc-900">{u.name}</p>
+                        <p className="text-xs text-muted-foreground">{u.email}</p>
+                      </div>
+                      <Button 
+                        size="sm"
+                        onClick={() => {
+                          setCreatedUser({ id: u.id, role: u.role, name: u.name })
+                          if (u.role === "STUDENT") fetchSections()
+                          setStep(2)
+                        }}
+                        className="rounded-xl h-9 text-xs font-bold"
+                      >
+                        Assign Profile
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )
         ) : (
           <form onSubmit={handleProfileSubmit} className="space-y-5 animate-in fade-in slide-in-from-right-8 duration-500">
             <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20 mb-6">
