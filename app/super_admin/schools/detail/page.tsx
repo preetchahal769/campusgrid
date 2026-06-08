@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useRouter, useParams } from "next/navigation"
+import { useState, useEffect, Suspense } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { 
   RiArrowLeftLine, 
   RiBuilding2Line, 
@@ -78,10 +78,22 @@ interface SchoolAnalytics {
   criticalEscalations?: number
 }
 
-export default function SchoolDetailPage() {
+export default function SchoolDetailPageWrapper() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <RiLoader4Line className="w-12 h-12 animate-spin text-primary" />
+      </div>
+    }>
+      <SchoolDetailContent />
+    </Suspense>
+  )
+}
+
+function SchoolDetailContent() {
   const router = useRouter()
-  const params = useParams()
-  const schoolId = params.id as string
+  const searchParams = useSearchParams()
+  const schoolId = searchParams.get('id') as string
 
   const [school, setSchool] = useState<SchoolDetail | null>(null)
   const [finance, setFinance] = useState<SchoolFinance | null>(null)
@@ -504,7 +516,7 @@ export default function SchoolDetailPage() {
                       </td>
                       <td className="px-8 py-4 text-right">
                         <button 
-                          onClick={() => router.push(`/super_admin/users/${u.id}`)}
+                          onClick={() => router.push(`/super_admin/users/detail?id=${u.id}`)}
                           className="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 hover:bg-indigo-500 hover:text-white transition-all active:scale-90 flex items-center justify-center shadow-sm ml-auto"
                           title="View Unified Profile"
                         >

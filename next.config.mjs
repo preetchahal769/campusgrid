@@ -1,10 +1,13 @@
 import { withSentryConfig } from '@sentry/nextjs';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Produces a self-contained .next/standalone output for lean Docker images.
-  // The production container only ships server.js + traced dependencies —
-  // no full node_modules copy needed.
-  output: 'standalone',
+  // Produces a static HTML/JS export required by CapacitorJS
+  output: 'export',
+  // Disable server-side image optimization since Capacitor is static
+  images: {
+    unoptimized: true,
+  },
 }
 
 export default withSentryConfig(nextConfig, {

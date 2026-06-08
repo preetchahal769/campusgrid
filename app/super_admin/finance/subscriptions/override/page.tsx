@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect, use } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect, Suspense } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { apiFetch } from "@/lib/api"
 import {
   RiArrowLeftLine,
@@ -18,9 +18,10 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
-export default function SubscriptionOverridePage({ params }: { params: Promise<{ id: string }> }) {
+function SubscriptionOverrideForm() {
   const router = useRouter()
-  const { id } = use(params)
+  const searchParams = useSearchParams()
+  const id = searchParams.get('id') || ''
   
   const [isSaving, setIsSaving] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -212,5 +213,17 @@ export default function SubscriptionOverridePage({ params }: { params: Promise<{
         </form>
       </div>
     </div>
+  )
+}
+
+export default function SubscriptionOverridePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <RiLoader4Line className="w-10 h-10 animate-spin text-indigo-500" />
+      </div>
+    }>
+      <SubscriptionOverrideForm />
+    </Suspense>
   )
 }

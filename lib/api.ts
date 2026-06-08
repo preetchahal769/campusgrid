@@ -13,6 +13,13 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     ...Object.fromEntries(Object.entries(options.headers || {}) as [string, string][]),
   };
 
+  if (typeof window !== 'undefined') {
+    const accessToken = localStorage.getItem('cg_access_token');
+    if (accessToken) {
+      headers['Authorization'] = `Bearer ${accessToken}`;
+    }
+  }
+
   // If body is FormData, fetch will automatically set the correct multipart/form-data header with boundary
   if (!(options.body instanceof FormData)) {
     if (!headers['Content-Type']) {
@@ -33,13 +40,23 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     if (response.status === 401 && endpoint !== '/auth/refresh' && endpoint !== '/auth/login') {
       if (!isRefreshing) {
         isRefreshing = true;
+        const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('cg_refresh_token') : null;
+        
         refreshPromise = fetch(`${cleanBaseUrl}/auth/refresh`, {
           method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken }),
           credentials: 'include',
-        }).then(res => {
+        }).then(async res => {
           isRefreshing = false;
           if (!res.ok) throw new Error(`Refresh failed with status ${res.status}`);
-          return res;
+          
+          const refreshData = await res.json();
+          if (typeof window !== 'undefined' && refreshData?.tokens) {
+            localStorage.setItem('cg_access_token', refreshData.tokens.accessToken);
+            localStorage.setItem('cg_refresh_token', refreshData.tokens.refreshToken);
+          }
+          return refreshData;
         }).catch(err => {
           isRefreshing = false;
           throw err;
@@ -48,7 +65,14 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
 
       try {
         await refreshPromise;
-        // Retry the original request
+        // Retry the original request with the new token
+        if (typeof window !== 'undefined') {
+          const newAccessToken = localStorage.getItem('cg_access_token');
+          if (newAccessToken) {
+            headers['Authorization'] = `Bearer ${newAccessToken}`;
+            defaultOptions.headers = headers;
+          }
+        }
         response = await fetch(url, defaultOptions);
       } catch (refreshError) {
         if (typeof window !== 'undefined') {
@@ -58,6 +82,8 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
           localStorage.removeItem('cg_profile');
           localStorage.removeItem('nexus_schools');
           localStorage.removeItem('nexus_finance');
+          localStorage.removeItem('cg_access_token');
+          localStorage.removeItem('cg_refresh_token');
           
           // Only redirect if we're not already on the login page
           if (window.location.pathname !== '/login') {
@@ -80,6 +106,8 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
         localStorage.removeItem('cg_profile');
         localStorage.removeItem('nexus_schools');
         localStorage.removeItem('nexus_finance');
+        localStorage.removeItem('cg_access_token');
+        localStorage.removeItem('cg_refresh_token');
       }
       return null;
     }

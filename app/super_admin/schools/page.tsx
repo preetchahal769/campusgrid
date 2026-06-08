@@ -226,7 +226,7 @@ export default function SchoolsListPage() {
 
                     <div className="flex gap-2">
                       <button 
-                        onClick={() => router.push(`/super_admin/schools/${school.id}`)}
+                        onClick={() => router.push(`/super_admin/schools/detail?id=${school.id}`)}
                         className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 hover:bg-blue-600 hover:text-white transition-all active:scale-90"
                         title="View Node Details"
                       >

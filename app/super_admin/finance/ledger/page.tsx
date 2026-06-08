@@ -203,7 +203,7 @@ export default function DetailedLedgerPage() {
 
               <div className="flex items-center gap-2 pt-2">
                 <button 
-                  onClick={() => router.push(`/super_admin/finance/subscriptions/override/${inv.id}`)}
+                  onClick={() => router.push(`/super_admin/finance/subscriptions/override?id=${inv.id}`)}
                   className="flex-1 h-10 rounded-xl bg-muted/50 border border-border/40 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-muted transition-colors active:scale-95"
                 >
                   <RiSettings4Line className="w-3.5 h-3.5" />
