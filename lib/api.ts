@@ -1,4 +1,7 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
+let BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
+if (BASE_URL && !BASE_URL.startsWith('http')) {
+  BASE_URL = `https://${BASE_URL}`;
+}
 
 // Track if we are currently refreshing the token to avoid multiple simultaneous refreshes
 let isRefreshing = false;
