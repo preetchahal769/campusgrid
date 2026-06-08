@@ -8,11 +8,11 @@ on:
       environment:
         description: 'Target API Environment'
         required: true
-        default: 'production'
+        default: 'staging'
         type: choice
         options:
-          - production
           - staging
+          - production
 
 jobs:
   build:
@@ -34,10 +34,10 @@ jobs:
     - name: Determine API URL
       id: set-api
       run: |
-        if [ "${{ github.event.inputs.environment }}" = "staging" ]; then
-          echo "API_URL=${{ secrets.STAGING_API_URL }}" >> $GITHUB_ENV
-        else
+        if [ "${{ github.event.inputs.environment }}" = "production" ]; then
           echo "API_URL=${{ secrets.PROD_API_URL }}" >> $GITHUB_ENV
+        else
+          echo "API_URL=${{ secrets.STAGING_API_URL }}" >> $GITHUB_ENV
         fi
 
     - name: Build Next.js Export
