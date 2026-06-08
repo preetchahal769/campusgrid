@@ -23,6 +23,8 @@ jobs:
       run: rm -f package-lock.json && npm install
 
     - name: Build Next.js Export
+      env:
+        NEXT_PUBLIC_API_URL: ${{ secrets.PROD_API_URL || secrets.STAGING_API_URL }}
       run: MOBILE_BUILD=true npm run build
 
     - name: Setup Java
