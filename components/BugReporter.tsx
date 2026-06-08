@@ -45,7 +45,8 @@ export function BugReporter() {
 
       // Capture screenshot using html-to-image BEFORE opening modal
       const blob = await htmlToImage.toBlob(document.body, {
-        quality: 0.7,
+        quality: 0.5, // Lower quality slightly for faster processing
+        pixelRatio: 1, // Force 1x resolution (disables 3x retina scaling which causes massive lag)
         skipFonts: true,
         filter: (node) => {
           if (node.id === 'bug-reporter-btn') return false;
