@@ -4,6 +4,15 @@ on:
   push:
     branches: [ "android-main" ]
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target API Environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
 
 jobs:
   build:
@@ -22,9 +31,18 @@ jobs:
     - name: Install dependencies (Ignore Windows Lockfile)
       run: rm -f package-lock.json && npm install
 
+    - name: Determine API URL
+      id: set-api
+      run: |
+        if [ "${{ github.event.inputs.environment }}" = "staging" ]; then
+          echo "API_URL=${{ secrets.STAGING_API_URL }}" >> $GITHUB_ENV
+        else
+          echo "API_URL=${{ secrets.PROD_API_URL }}" >> $GITHUB_ENV
+        fi
+
     - name: Build Next.js Export
       env:
-        NEXT_PUBLIC_API_URL: ${{ secrets.PROD_API_URL || secrets.STAGING_API_URL }}
+        NEXT_PUBLIC_API_URL: ${{ env.API_URL }}
       run: MOBILE_BUILD=true npm run build
 
     - name: Setup Java
