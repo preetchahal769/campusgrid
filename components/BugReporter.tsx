@@ -36,25 +36,20 @@ export function BugReporter() {
     try {
       setIsCapturing(true)
       
-      // Hide the button so it's not in the screenshot
-      const btn = document.getElementById("bug-reporter-btn")
-      if (btn) btn.style.display = "none"
-
-      // Wait 50ms so React can render the loading spinner before html2canvas freezes the main thread
+      // Wait a tiny bit for React to render the loading spinner
       await new Promise(resolve => setTimeout(resolve, 50))
 
-      // Capture screenshot using html-to-image BEFORE opening modal
+      // Capture screenshot using html-to-image
+      // The button is automatically excluded via the filter function below
       const blob = await htmlToImage.toBlob(document.body, {
-        quality: 0.5, // Lower quality slightly for faster processing
-        pixelRatio: 1, // Force 1x resolution (disables 3x retina scaling which causes massive lag)
+        quality: 0.5,
+        pixelRatio: 1,
         skipFonts: true,
         filter: (node) => {
           if (node.id === 'bug-reporter-btn') return false;
           return true;
         }
       })
-
-      if (btn) btn.style.display = "flex"
 
       if (blob) {
         setScreenshotBlob(blob)
@@ -63,8 +58,6 @@ export function BugReporter() {
       setIsOpen(true)
     } catch (err) {
       console.error("Failed to capture screenshot", err)
-      const btn = document.getElementById("bug-reporter-btn")
-      if (btn) btn.style.display = "flex"
       setIsOpen(true) // Open it anyway, just without screenshot
     } finally {
       setIsCapturing(false)
