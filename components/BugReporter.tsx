@@ -23,6 +23,7 @@ export function BugReporter() {
   const [reopenId, setReopenId] = useState<string | null>(null)
   const [reopenMessage, setReopenMessage] = useState("")
   const [isReopening, setIsReopening] = useState(false)
+  const [isClosing, setIsClosing] = useState<string | null>(null) // Stores the ID of the report being closed
 
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
@@ -167,6 +168,21 @@ export function BugReporter() {
     }
   }
 
+  const handleClose = async (reportId: string) => {
+    setIsClosing(reportId)
+    try {
+      await apiFetch(`/bug-reports/${reportId}/close`, {
+        method: 'PATCH'
+      })
+      fetchMyReports() // Refresh list
+    } catch (err) {
+      console.error("Failed to close issue", err)
+      setError("Failed to close issue")
+    } finally {
+      setIsClosing(null)
+    }
+  }
+
   const handlePointerDown = (e: any) => {
     e.currentTarget.setPointerCapture(e.pointerId)
     setIsDragging(true)
@@ -207,6 +223,7 @@ export function BugReporter() {
       case "REOPENED": return "bg-fuchsia-500/10 text-fuchsia-600 border-fuchsia-200"
       case "WORKING": return "bg-amber-500/10 text-amber-600 border-amber-200"
       case "SOLVED": return "bg-emerald-500/10 text-emerald-600 border-emerald-200"
+      case "CLOSED": return "bg-slate-500/10 text-slate-600 border-slate-200"
       default: return "bg-slate-100 text-slate-600"
     }
   }
@@ -353,7 +370,7 @@ export function BugReporter() {
                           )}
 
                           {report.status === "SOLVED" && (
-                            <div className="mt-2 pt-3 border-t border-slate-100">
+                            <div className="mt-2 pt-3 border-t border-slate-100 flex flex-col gap-2">
                               {reopenId === report.id ? (
                                 <form onSubmit={(e) => handleReopen(e, report.id)} className="flex items-end gap-2 animate-in slide-in-from-top-2">
                                   <div className="flex-1">
@@ -364,12 +381,12 @@ export function BugReporter() {
                                       onChange={(e) => setReopenMessage(e.target.value)}
                                       placeholder="Why is it not solved?"
                                       className="w-full h-9 rounded-xl bg-muted/50 border border-border/50 px-3 text-xs font-medium outline-none focus:ring-2 focus:ring-fuchsia-500/20 focus:border-fuchsia-500/50"
-                                      disabled={isReopening}
+                                      disabled={isReopening || isClosing === report.id}
                                     />
                                   </div>
                                   <button
                                     type="submit"
-                                    disabled={isReopening || !reopenMessage.trim()}
+                                    disabled={isReopening || !reopenMessage.trim() || isClosing === report.id}
                                     className="h-9 px-3 rounded-xl bg-fuchsia-600 text-white font-bold text-xs hover:bg-fuchsia-700 disabled:opacity-50 transition-colors shadow-sm flex items-center gap-1.5 shrink-0"
                                   >
                                     {isReopening ? <RiLoader4Line className="w-3.5 h-3.5 animate-spin" /> : <><RiSendPlaneLine className="w-3.5 h-3.5" /> Send</>}
@@ -378,17 +395,30 @@ export function BugReporter() {
                                     type="button"
                                     onClick={() => setReopenId(null)}
                                     className="h-9 px-3 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs hover:bg-slate-200 transition-colors shrink-0"
+                                    disabled={isReopening || isClosing === report.id}
                                   >
                                     Cancel
                                   </button>
                                 </form>
                               ) : (
-                                <button
-                                  onClick={() => setReopenId(report.id)}
-                                  className="text-xs font-bold text-fuchsia-600 hover:text-fuchsia-700 flex items-center gap-1"
-                                >
-                                  Not satisfied? Reopen issue
-                                </button>
+                                <div className="flex items-center gap-3">
+                                  <button
+                                    onClick={() => setReopenId(report.id)}
+                                    disabled={isClosing === report.id}
+                                    className="text-xs font-bold text-fuchsia-600 hover:text-fuchsia-700 flex items-center gap-1 disabled:opacity-50"
+                                  >
+                                    Not satisfied? Reopen issue
+                                  </button>
+                                  <span className="text-slate-300 text-xs">•</span>
+                                  <button
+                                    onClick={() => handleClose(report.id)}
+                                    disabled={isClosing === report.id}
+                                    className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 disabled:opacity-50 bg-emerald-50 px-2 py-1 rounded-md transition-colors"
+                                  >
+                                    {isClosing === report.id ? <RiLoader4Line className="w-3.5 h-3.5 animate-spin" /> : <RiCheckLine className="w-3.5 h-3.5" />}
+                                    Mark as Satisfied (Close)
+                                  </button>
+                                </div>
                               )}
                             </div>
                           )}
