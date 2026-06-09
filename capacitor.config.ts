@@ -15,10 +15,6 @@ const config: CapacitorConfig = {
       androidSpinnerStyle: "large",
       spinnerColor: "#0A4EA6"
     }
-  },
-  server: {
-    url: 'http://192.168.0.191:3000',
-    cleartext: true
   }
 };
 
