@@ -133,12 +133,32 @@ export default function BugReportsPage() {
         ctx?.drawImage(img, 0, 0)
         const imgData = canvas.toDataURL("image/jpeg")
         
-        // Calculate aspect ratio to fit width
+        // Calculate aspect ratio to fit width and height
         const maxWidth = 170
-        const scale = maxWidth / img.width
-        const height = img.height * scale
+        const pageHeight = 297
+        let startY = currentY + 10
         
-        doc.addImage(imgData, "JPEG", 20, currentY + 10, maxWidth, height)
+        let width = maxWidth
+        let height = img.height * (maxWidth / img.width)
+        
+        // If it doesn't fit on this page, push to next page
+        if (startY + height > pageHeight - 20 && startY > 150) {
+          doc.addPage()
+          startY = 20
+        }
+        
+        // Scale down to fit the page height if it's super tall (like a phone screenshot)
+        const maxAvailableHeight = pageHeight - startY - 20
+        if (height > maxAvailableHeight) {
+          const ratio = maxAvailableHeight / height
+          height = maxAvailableHeight
+          width = width * ratio
+        }
+        
+        // Center the image horizontally
+        const xOffset = 20 + (maxWidth - width) / 2
+        
+        doc.addImage(imgData, "JPEG", xOffset, startY, width, height)
       } catch (err) {
         console.error("Failed to add image to PDF", err)
         doc.setFontSize(10)
