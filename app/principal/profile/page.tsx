@@ -124,6 +124,37 @@ export default function PrincipalProfilePage() {
     }
   }
 
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
+  const [passwordForm, setPasswordForm] = useState({ oldPassword: "", newPassword: "" })
+  const [passwordStatus, setPasswordStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!passwordForm.oldPassword || !passwordForm.newPassword) {
+      setPasswordError("Please fill in both fields")
+      return
+    }
+    setPasswordStatus('loading')
+    setPasswordError(null)
+
+    try {
+      await apiFetch('/auth/change-password', {
+        method: 'POST',
+        body: JSON.stringify(passwordForm)
+      })
+      setPasswordStatus('success')
+      setTimeout(() => {
+        setIsPasswordModalOpen(false)
+        setPasswordStatus('idle')
+        setPasswordForm({ oldPassword: "", newPassword: "" })
+      }, 2000)
+    } catch (err: any) {
+      setPasswordError(err.message || "Failed to change password")
+      setPasswordStatus('error')
+    }
+  }
+
   return (
     <div className="min-h-screen pb-10 relative z-0">
       {/* Decorative header bg */}
@@ -272,7 +303,7 @@ export default function PrincipalProfilePage() {
             <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
               <RiLockPasswordLine className="w-3.5 h-3.5 text-amber-500" /> Security
             </h3>
-            <button className="w-full flex items-center justify-between p-4 bg-muted/30 rounded-2xl border border-border/40 hover:bg-muted/50 transition-colors group">
+            <button onClick={() => setIsPasswordModalOpen(true)} className="w-full flex items-center justify-between p-4 bg-muted/30 rounded-2xl border border-border/40 hover:bg-muted/50 transition-colors group">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600 shrink-0">
                   <RiLockPasswordLine className="w-5 h-5" />
@@ -294,6 +325,66 @@ export default function PrincipalProfilePage() {
           Sign Out
         </Button>
       </div>
+
+      {/* Change Password Modal */}
+      {isPasswordModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-background w-[90%] max-w-md rounded-3xl p-6 shadow-2xl">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-black text-xl tracking-tight text-foreground">Change Password</h3>
+              <button onClick={() => setIsPasswordModalOpen(false)} className="w-8 h-8 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80">
+                <RiCloseLine className="w-5 h-5" />
+              </button>
+            </div>
+
+            {passwordStatus === 'success' ? (
+              <div className="py-8 flex flex-col items-center justify-center text-center animate-in zoom-in">
+                <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mb-4">
+                  <RiShieldCheckLine className="w-8 h-8" />
+                </div>
+                <p className="font-black text-lg text-foreground">Password Updated!</p>
+                <p className="text-sm text-muted-foreground mt-2">Your new password is now active.</p>
+              </div>
+            ) : (
+              <form onSubmit={handleChangePassword} className="space-y-4">
+                {passwordError && (
+                  <p className="text-xs text-rose-500 font-bold bg-rose-500/10 p-3 rounded-xl border border-rose-500/20">{passwordError}</p>
+                )}
+                
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Current Password</label>
+                  <input
+                    type="password"
+                    value={passwordForm.oldPassword}
+                    onChange={e => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
+                    className="w-full h-12 rounded-2xl bg-muted/40 border border-border/50 px-4 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10"
+                    placeholder="Enter current password"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">New Password</label>
+                  <input
+                    type="password"
+                    value={passwordForm.newPassword}
+                    onChange={e => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                    className="w-full h-12 rounded-2xl bg-muted/40 border border-border/50 px-4 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10"
+                    placeholder="Enter new password"
+                  />
+                </div>
+
+                <Button 
+                  type="submit" 
+                  disabled={passwordStatus === 'loading'}
+                  className="w-full h-12 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold shadow-lg shadow-amber-500/20 mt-2"
+                >
+                  {passwordStatus === 'loading' ? <RiLoader4Line className="w-5 h-5 animate-spin" /> : 'Update Password'}
+                </Button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
