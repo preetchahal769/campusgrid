@@ -13,7 +13,7 @@ const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" })
 export const metadata = {
   title: "SikshaTantar | The Modern School Operating System",
   description: "A beautiful, lightning-fast platform that connects students, empowers teachers, and gives administrators total control. Built for schools of all sizes.",
-  keywords: ["School ERP", "School Management System", "EdTech", "Student Portal", "Teacher Dashboard", "SikshaTantar", "CampusGrid"],
+  keywords: ["School ERP", "School Management System", "EdTech", "Student Portal", "Teacher Dashboard", "SikshaTantar"],
   openGraph: {
     title: "SikshaTantar | The Modern School Operating System",
     description: "A beautiful, lightning-fast platform that connects students, empowers teachers, and gives administrators total control.",

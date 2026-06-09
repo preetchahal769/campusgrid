@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.sikshatantar.campusgrid',
-  appName: 'campusgrid',
+  appName: 'Siksha Tantar',
   webDir: 'out'
 };
 
