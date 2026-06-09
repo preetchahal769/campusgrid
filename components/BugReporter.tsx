@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { RiBugLine, RiCloseLine, RiLoader4Line, RiCheckLine, RiErrorWarningLine } from "@remixicon/react"
 import { useAppSelector } from "@/lib/store/hooks"
-import * as htmlToImage from "html-to-image"
+import html2canvas from "html2canvas"
 
 export function BugReporter() {
   const [isVisible, setIsVisible] = useState(false)
@@ -39,16 +39,16 @@ export function BugReporter() {
       // Wait a tiny bit for React to render the loading spinner
       await new Promise(resolve => setTimeout(resolve, 50))
 
-      // Capture screenshot using html-to-image
-      // The button is automatically excluded via the filter function below
-      const blob = await htmlToImage.toBlob(document.body, {
-        quality: 0.5,
-        pixelRatio: 1,
-        skipFonts: true,
-        filter: (node) => {
-          if (node.id === 'bug-reporter-btn') return false;
-          return true;
-        }
+      // Capture screenshot using html2canvas which is more reliable on Mobile WebViews
+      const canvas = await html2canvas(document.body, {
+        scale: 1,
+        useCORS: true,
+        allowTaint: true,
+        ignoreElements: (node) => node.id === 'bug-reporter-btn'
+      })
+
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob((b) => resolve(b), 'image/jpeg', 0.5)
       })
 
       if (blob) {
