@@ -117,6 +117,7 @@ export default function BugReportsPage() {
         doc.text("Screenshot Evidence", 20, currentY)
         
         const img = new Image()
+        img.crossOrigin = "Anonymous"
         const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
         img.src = `${backendUrl}/bug-reports/proxy-image?url=${encodeURIComponent(report.screenshotUrl)}`
         
