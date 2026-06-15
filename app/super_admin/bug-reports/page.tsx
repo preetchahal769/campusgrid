@@ -59,6 +59,7 @@ export default function BugReportsPage() {
       case "WORKING": return "bg-amber-500/10 text-amber-600 border-amber-200"
       case "SOLVED": return "bg-emerald-500/10 text-emerald-600 border-emerald-200"
       case "CLOSED": return "bg-slate-100 text-slate-500 border-slate-200"
+      case "REOPENED": return "bg-orange-500/10 text-orange-600 border-orange-200 font-extrabold"
       default: return "bg-slate-100 text-slate-600"
     }
   }
@@ -253,7 +254,7 @@ export default function BugReportsPage() {
                     Export PDF
                   </button>
                   <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
-                  {["OPEN", "WORKING", "SOLVED", "CLOSED"].map((status) => (
+                  {["OPEN", "WORKING", "SOLVED", "CLOSED", "REOPENED"].map((status) => (
                     <button
                       key={status}
                       onClick={() => updateStatus(selectedReport.id, status)}
@@ -262,7 +263,8 @@ export default function BugReportsPage() {
                           ? status === "OPEN" ? "bg-rose-100 text-rose-700"
                             : status === "WORKING" ? "bg-amber-100 text-amber-700"
                             : status === "SOLVED" ? "bg-emerald-100 text-emerald-700"
-                            : "bg-slate-100 text-slate-700"
+                            : status === "CLOSED" ? "bg-slate-100 text-slate-700"
+                            : "bg-orange-100 text-orange-700"
                           : "text-slate-500 hover:bg-slate-50"
                       }`}
                     >
@@ -274,6 +276,12 @@ export default function BugReportsPage() {
               </div>
 
               <div className="p-6 flex-1 overflow-y-auto space-y-8">
+                {selectedReport.status === "REOPENED" && (
+                  <div className="p-4 rounded-xl bg-orange-50 border border-orange-200 text-orange-800 text-sm font-bold flex items-center gap-2 shadow-sm animate-pulse">
+                    <span>⚠️</span>
+                    <span>Warning: This is a reopened request! What are you doing?</span>
+                  </div>
+                )}
                 {/* Context Context */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
