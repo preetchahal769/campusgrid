@@ -58,6 +58,7 @@ export default function BugReportsPage() {
       case "OPEN": return "bg-rose-500/10 text-rose-600 border-rose-200"
       case "WORKING": return "bg-amber-500/10 text-amber-600 border-amber-200"
       case "SOLVED": return "bg-emerald-500/10 text-emerald-600 border-emerald-200"
+      case "CLOSED": return "bg-slate-100 text-slate-500 border-slate-200"
       default: return "bg-slate-100 text-slate-600"
     }
   }
@@ -252,7 +253,7 @@ export default function BugReportsPage() {
                     Export PDF
                   </button>
                   <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
-                  {["OPEN", "WORKING", "SOLVED"].map((status) => (
+                  {["OPEN", "WORKING", "SOLVED", "CLOSED"].map((status) => (
                     <button
                       key={status}
                       onClick={() => updateStatus(selectedReport.id, status)}
@@ -260,7 +261,8 @@ export default function BugReportsPage() {
                         selectedReport.status === status
                           ? status === "OPEN" ? "bg-rose-100 text-rose-700"
                             : status === "WORKING" ? "bg-amber-100 text-amber-700"
-                            : "bg-emerald-100 text-emerald-700"
+                            : status === "SOLVED" ? "bg-emerald-100 text-emerald-700"
+                            : "bg-slate-100 text-slate-700"
                           : "text-slate-500 hover:bg-slate-50"
                       }`}
                     >
