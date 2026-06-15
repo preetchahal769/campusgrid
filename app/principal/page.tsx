@@ -16,6 +16,7 @@ import {
   RiTimeLine,
   RiLogoutBoxLine,
   RiUserSharedLine,
+  RiCalendarEventLine,
 } from "@remixicon/react"
 import { cn } from "@/lib/utils"
 import { Card } from "@/components/ui/card"
@@ -31,6 +32,8 @@ const ACTIONS = [
   { label: "Leave Appeals",     icon: RiCalendarCheckLine, route: "/principal/leaves",          color: "text-[#AB47BC]",  bg: "bg-[#AB47BC]/10" },
   { label: "Substitutions", icon: RiUserSharedLine, route: "/principal/substitutions", color: "text-[#825CD6]",  bg: "bg-[#825CD6]/10" },
   { label: "Availability", icon: RiTimeLine,         route: "/principal/staff-attendance", color: "text-[#45A3F5]",  bg: "bg-[#45A3F5]/10" },
+  { label: "Attendance Logs", icon: RiCalendarCheckLine, route: "/principal/attendance",       color: "text-[#6FCA72]",  bg: "bg-[#6FCA72]/10" },
+  { label: "Set Holidays",    icon: RiCalendarEventLine, route: "/principal/calendar",         color: "text-[#FA5D5D]",  bg: "bg-[#FA5D5D]/10" },
 ]
 
 export default function PrincipalDashboardPage() {
