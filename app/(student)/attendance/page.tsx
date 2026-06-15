@@ -94,7 +94,7 @@ export default function AttendancePage() {
       if (!user?.School_id) return
       try {
         const data = await apiFetch(`/academics/events?schoolId=${user.School_id}`)
-        const hList = data.filter((e: any) => e.type === "HOLIDAY")
+        const hList = Array.isArray(data) ? data.filter((e: any) => e.type === "HOLIDAY") : []
         const studentSectionId = profile?.section?.id || (profile as any)?.section_id
         
         const filtered = hList.filter((h: any) => 

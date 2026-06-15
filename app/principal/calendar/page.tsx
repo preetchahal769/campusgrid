@@ -52,7 +52,7 @@ export default function PrincipalCalendarPage() {
     setError(null)
     try {
       const data = await apiFetch(`/academics/events?schoolId=${user.School_id}`)
-      setEvents(data.filter((e: SchoolEvent) => e.type === "HOLIDAY"))
+      setEvents(Array.isArray(data) ? data.filter((e: SchoolEvent) => e.type === "HOLIDAY") : [])
     } catch (err: any) {
       setError(err.message || "Failed to load events")
     } finally {
@@ -63,7 +63,7 @@ export default function PrincipalCalendarPage() {
   const fetchSections = async () => {
     try {
       const data = await apiFetch('/academics/sections')
-      setSections(data)
+      setSections(Array.isArray(data) ? data : [])
     } catch (err) {
       console.error("Failed to load sections", err)
     }

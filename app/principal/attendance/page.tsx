@@ -77,7 +77,7 @@ export default function PrincipalAttendancePage() {
     const fetchSections = async () => {
       try {
         const data = await apiFetch('/academics/sections')
-        setSections(data)
+        setSections(Array.isArray(data) ? data : [])
       } catch (err: any) {
         setError(err.message || "Failed to load sections")
       }
@@ -112,7 +112,7 @@ export default function PrincipalAttendancePage() {
         }
 
         const data: ApiResponse = await apiFetch(url)
-        setRecords(data.records)
+        setRecords(data?.records || [])
       } catch (err: any) {
         setError(err.message || "Failed to fetch attendance records")
       } finally {

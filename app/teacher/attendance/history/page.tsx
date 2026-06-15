@@ -82,9 +82,10 @@ export default function TeacherAttendanceHistoryPage() {
     const fetchSections = async () => {
       try {
         const data = await apiFetch('/academics/sections')
-        setSections(data)
-        if (data.length > 0) {
-          setSelectedSectionId(data[0].id)
+        const sectionsList = Array.isArray(data) ? data : []
+        setSections(sectionsList)
+        if (sectionsList.length > 0) {
+          setSelectedSectionId(sectionsList[0].id)
         }
       } catch (err: any) {
         setError(err.message || "Failed to load sections")
@@ -116,7 +117,7 @@ export default function TeacherAttendanceHistoryPage() {
         }
 
         const data: ApiResponse = await apiFetch(url)
-        setRecords(data.records)
+        setRecords(data?.records || [])
       } catch (err: any) {
         setError(err.message || "Failed to fetch attendance ledger")
       } finally {
