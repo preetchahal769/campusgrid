@@ -77,7 +77,7 @@ export default function StudentDashboardPage() {
         dispatch(setAssignments(assignmentsData))
         dispatch(setBroadcasts(broadcastsData))
         dispatch(setTimetable(timetableData))
-        dispatch(setAttendance(attendanceData))
+        dispatch(setAttendance(attendanceData?.days || []))
       } catch (err: any) {
         dispatch(setError(err.message))
       } finally {

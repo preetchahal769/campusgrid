@@ -71,7 +71,7 @@ export default function ProfilePage() {
       setIsLoadingAttendance(true)
       try {
         const data = await apiFetch('/attendance/me')
-        dispatch(setAttendance(data))
+        dispatch(setAttendance(data?.days || []))
       } catch (err: any) {
         setAttendanceError(err.message)
       } finally {
