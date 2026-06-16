@@ -82,6 +82,8 @@ export default function CreateAssignmentPage() {
     return null
   }
 
+  const [submitAsDraft, setSubmitAsDraft] = useState(false)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const validationErr = validate()
@@ -97,6 +99,7 @@ export default function CreateAssignmentPage() {
       formData.append('maxMarks', maxMarks)
       formData.append('subject_id', subjectId.trim())
       formData.append('section_id', sectionId.trim())
+      formData.append('isDraft', submitAsDraft ? 'true' : 'false')
       
       selectedFiles.forEach(file => {
         formData.append('files', file)
@@ -312,21 +315,37 @@ export default function CreateAssignmentPage() {
           </div>
         )}
 
-        {/* Submit */}
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full h-14 rounded-2xl font-bold text-base shadow-xl shadow-primary/20 mt-2"
-        >
-          {isSubmitting ? (
-            <RiLoader4Line className="w-6 h-6 animate-spin" />
-          ) : (
-            <>
-              <RiCheckLine className="w-5 h-5 mr-2" />
-              Publish Assignment
-            </>
-          )}
-        </Button>
+        {/* Action Buttons */}
+        <div className="grid grid-cols-2 gap-3 pt-2">
+          <Button
+            type="submit"
+            onClick={() => setSubmitAsDraft(true)}
+            disabled={isSubmitting}
+            variant="outline"
+            className="h-14 rounded-2xl font-bold text-sm border-border/50 text-muted-foreground bg-background hover:bg-muted/40 transition-colors shadow-sm"
+          >
+            {isSubmitting && submitAsDraft ? (
+              <RiLoader4Line className="w-6 h-6 animate-spin text-muted-foreground" />
+            ) : (
+              "Save Draft"
+            )}
+          </Button>
+          <Button
+            type="submit"
+            onClick={() => setSubmitAsDraft(false)}
+            disabled={isSubmitting}
+            className="h-14 rounded-2xl font-bold text-sm shadow-xl shadow-primary/20 bg-primary text-white"
+          >
+            {isSubmitting && !submitAsDraft ? (
+              <RiLoader4Line className="w-6 h-6 animate-spin text-white" />
+            ) : (
+              <>
+                <RiCheckLine className="w-5 h-5 mr-2" />
+                Publish
+              </>
+            )}
+          </Button>
+        </div>
       </form>
     </div>
   )

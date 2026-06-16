@@ -258,6 +258,11 @@ export default function HomeworkPage() {
                             {format(new Date(assignment.submission.submittedAt), 'MMM d, h:mm a')}
                           </p>
                         )}
+                        {(assignment.submission as any)?.obtainedMarks !== null && (assignment.submission as any)?.obtainedMarks !== undefined && (
+                          <Badge className="bg-[#0A4EA6]/10 text-[#0A4EA6] border-[#0A4EA6]/20 font-bold text-[9px] uppercase tracking-wider mt-1 px-2.5 py-0.5">
+                            Grade: {(assignment.submission as any).letterGrade} ({(assignment.submission as any).percentage}%)
+                          </Badge>
+                        )}
                         {assignment.submission?.attachments && assignment.submission.attachments.length > 0 && (
                           <div className="flex gap-1.5 mt-1">
                             {assignment.submission.attachments.map((att, i) => (
@@ -275,6 +280,10 @@ export default function HomeworkPage() {
                           </div>
                         )}
                       </div>
+                    ) : isPast(new Date(assignment.dueDate)) ? (
+                      <Badge className="bg-red-500/10 text-red-600 border-red-500/20 font-bold text-[10px] uppercase tracking-wider px-3 py-1.5">
+                        Closed
+                      </Badge>
                     ) : (
                       <Button
                         size="sm"

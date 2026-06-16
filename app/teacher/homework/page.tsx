@@ -50,6 +50,7 @@ interface Assignment {
     submissions: number
   }
   attachments?: Attachment[]
+  isDraft?: boolean
 }
 
 interface Submission {
@@ -70,6 +71,9 @@ interface Submission {
     name?: string
   }
   studentId?: string
+  obtainedMarks?: number
+  percentage?: number
+  letterGrade?: string
 }
 
 export default function TeacherHomeworkPage() {
@@ -176,9 +180,16 @@ export default function TeacherHomeworkPage() {
             >
               <CardContent className="p-5 space-y-4">
                 <div className="flex items-center justify-between gap-2">
-                  <Badge className="bg-primary/10 text-primary border-primary/20 font-bold text-[10px] uppercase tracking-wider">
-                    {assignment.subject.name}
-                  </Badge>
+                  <div className="flex items-center gap-1.5">
+                    <Badge className="bg-primary/10 text-primary border-primary/20 font-bold text-[10px] uppercase tracking-wider">
+                      {assignment.subject.name}
+                    </Badge>
+                    {assignment.isDraft && (
+                      <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 font-bold text-[10px] uppercase tracking-wider">
+                        Draft
+                      </Badge>
+                    )}
+                  </div>
                   <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground">
                     <RiTimeLine className="w-3.5 h-3.5" />
                     Due {format(new Date(assignment.dueDate), 'MMM d')}
@@ -341,9 +352,19 @@ export default function TeacherHomeworkPage() {
                                   )
                                 })()}
                               </div>
-                              <Badge className="bg-emerald-500/10 text-emerald-600 border-none text-[8px] font-black uppercase">
-                                {sub.status}
-                              </Badge>
+                              <div className="flex flex-col items-end gap-1">
+                                <Badge className={cn(
+                                  "border-none text-[8px] font-black uppercase",
+                                  sub.status === 'GRADED' ? "bg-blue-500/10 text-blue-600" : "bg-emerald-500/10 text-emerald-600"
+                                )}>
+                                  {sub.status}
+                                </Badge>
+                                {sub.status === 'GRADED' && sub.obtainedMarks !== null && sub.obtainedMarks !== undefined && (
+                                  <span className="text-[10px] font-black text-[#0A4EA6] bg-primary/5 border border-primary/15 rounded-lg px-2 py-0.5 mt-1">
+                                    {sub.obtainedMarks} pts ({sub.percentage}%) • {sub.letterGrade}
+                                  </span>
+                                )}
+                              </div>
                             </div>
 
                             {sub.content && (
