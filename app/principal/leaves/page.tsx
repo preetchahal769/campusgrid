@@ -62,8 +62,13 @@ export default function PrincipalLeavesPage() {
   const [leaves, setLeaves] = useState<LeaveRequest[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [selectedRole, setSelectedRole] = useState<string>("")
   const [actioningId, setActioningId] = useState<string | null>(null)
   const [filter, setFilter] = useState<LeaveStatus | 'ALL'>('ALL')
+
+  const [showApprovalModal, setShowApprovalModal] = useState<LeaveRequest | null>(null)
+  const [appStart, setAppStart] = useState("")
+  const [appEnd, setAppEnd] = useState("")
 
   const fetchLeaves = async () => {
     setIsLoading(true)
@@ -96,6 +101,12 @@ export default function PrincipalLeavesPage() {
     } finally {
       setActioningId(null)
     }
+  }
+
+  const openApprovalModal = (leave: LeaveRequest) => {
+    setAppStart(leave.startDate)
+    setAppEnd(leave.endDate)
+    setShowApprovalModal(leave)
   }
 
   const filtered = filter === 'ALL' ? leaves : leaves.filter(l => l.status === filter)
@@ -235,7 +246,7 @@ export default function PrincipalLeavesPage() {
                         {isActioning ? <RiLoader4Line className="w-4 h-4 animate-spin" /> : <><RiCloseLine className="w-4 h-4" /> Reject</>}
                       </button>
                       <button
-                        onClick={() => handleAction(leave.id, 'APPROVED')}
+                        onClick={() => openApprovalModal(leave)}
                         disabled={isActioning}
                         className="flex-1 h-11 rounded-2xl bg-emerald-600 text-white font-bold text-sm flex items-center justify-center gap-2 hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition-all active:scale-95 disabled:opacity-50"
                       >
@@ -249,6 +260,94 @@ export default function PrincipalLeavesPage() {
           })
         )}
       </div>
+
+      {/* Approve Custom Range Modal */}
+      {showApprovalModal && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setShowApprovalModal(null)} />
+          <div className="relative w-full max-w-lg bg-background border border-border/50 rounded-3xl shadow-2xl p-6 space-y-5 animate-in slide-in-from-bottom-8 duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-black text-lg">Approve Leave Request</h3>
+                <p className="text-xs text-muted-foreground font-medium mt-0.5">Customize approved dates to grant partial leave</p>
+              </div>
+              <button
+                onClick={() => setShowApprovalModal(null)}
+                className="w-8 h-8 rounded-xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors"
+              >
+                <RiCloseLine className="w-5 h-5 text-muted-foreground" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="p-4 rounded-2xl bg-muted/30 border border-border/40 text-xs font-semibold">
+                <span className="text-muted-foreground uppercase tracking-widest text-[9px] block mb-1">Requested Range</span>
+                <span className="text-foreground font-bold">
+                  {format(parseISO(showApprovalModal.startDate), 'MMM d')} → {format(parseISO(showApprovalModal.endDate), 'MMM d, yyyy')}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Approved Start</label>
+                  <input
+                    type="date"
+                    value={appStart}
+                    onChange={e => setAppStart(e.target.value)}
+                    min={showApprovalModal.startDate}
+                    max={showApprovalModal.endDate}
+                    className="w-full h-12 rounded-2xl bg-muted/40 border border-border/50 px-4 text-sm font-medium focus:ring-4 focus:ring-primary/10 focus:bg-background outline-none transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Approved End</label>
+                  <input
+                    type="date"
+                    value={appEnd}
+                    onChange={e => setAppEnd(e.target.value)}
+                    min={appStart}
+                    max={showApprovalModal.endDate}
+                    className="w-full h-12 rounded-2xl bg-muted/40 border border-border/50 px-4 text-sm font-medium focus:ring-4 focus:ring-primary/10 focus:bg-background outline-none transition-all"
+                  />
+                </div>
+              </div>
+
+              <Button
+                onClick={async () => {
+                  setActioningId(showApprovalModal.id)
+                  try {
+                    await apiFetch(`/academics/leaves/${showApprovalModal.id}/status`, {
+                      method: "PATCH",
+                      body: JSON.stringify({ 
+                        status: 'APPROVED',
+                        approvedStartDate: appStart,
+                        approvedEndDate: appEnd
+                      }),
+                    })
+                    setLeaves(prev => prev.map(l => l.id === showApprovalModal.id ? { ...l, status: 'APPROVED', startDate: appStart, endDate: appEnd } : l))
+                    setShowApprovalModal(null)
+                  } catch (err: any) {
+                    alert(err.message)
+                  } finally {
+                    setActioningId(null)
+                  }
+                }}
+                disabled={actioningId === showApprovalModal.id}
+                className="w-full h-13 rounded-2xl font-bold text-base bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20"
+              >
+                {actioningId === showApprovalModal.id ? (
+                  <RiLoader4Line className="w-5 h-5 animate-spin" />
+                ) : (
+                  <>
+                    <RiShieldCheckLine className="w-5 h-5 mr-2" />
+                    Approve Date Range
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
