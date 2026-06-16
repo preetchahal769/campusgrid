@@ -66,7 +66,7 @@ export default function SubstitutionPage() {
     setAvailableSubs([])
     try {
       const day = new Date().toLocaleDateString('en-US', { weekday: 'long' }) // Dynamic in production
-      const data = await apiFetch(`/academics/substitutions/available-teachers?lectureNo=${slot.lectureNo}&dayOfWeek=${day}`)
+      const data = await apiFetch(`/academics/substitutions/available-teachers?lectureNo=${slot.lectureNo}&dayOfWeek=${day}&subjectId=${slot.subjectId || ''}&sectionId=${slot.sectionId || ''}`)
       setAvailableSubs(data)
     } catch (err: any) {
       console.error(err)
@@ -163,7 +163,9 @@ export default function SubstitutionPage() {
                     </div>
                     <div>
                       <h3 className="font-bold text-lg">{teacher.name}</h3>
-                      <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest bg-red-500/10 px-2 py-0.5 rounded-md inline-block mt-0.5">ON LEAVE</p>
+                      <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest bg-red-500/10 px-2 py-0.5 rounded-md inline-block mt-0.5">
+                        {teacher.status}
+                      </p>
                     </div>
                   </div>
 
@@ -172,10 +174,10 @@ export default function SubstitutionPage() {
                     {teacher.affectedSlots.map((slot: any) => (
                       <div 
                         key={slot.timetableId}
-                        onClick={() => fetchSubstitutes(slot)}
+                        onClick={() => !slot.isCovered && fetchSubstitutes(slot)}
                         className={cn(
                           "flex items-center justify-between p-3 rounded-2xl border border-border/40 transition-all cursor-pointer",
-                          slot.isCovered ? "bg-emerald-500/5 border-emerald-500/20" : "bg-muted/30 hover:border-primary/40 hover:bg-background"
+                          slot.isCovered ? "bg-emerald-500/5 border-emerald-500/20 cursor-default" : "bg-muted/30 hover:border-primary/40 hover:bg-background"
                         )}
                       >
                         <div className="flex items-center gap-3">
@@ -188,9 +190,14 @@ export default function SubstitutionPage() {
                           </div>
                         </div>
                         {slot.isCovered ? (
-                          <div className="flex items-center gap-1.5 text-emerald-600 font-black text-[10px] uppercase tracking-wider">
-                            <RiCheckLine className="w-3 h-3" />
-                            Covered
+                          <div className="flex flex-col items-end gap-0.5 text-emerald-600">
+                            <span className="flex items-center gap-1 font-black text-[10px] uppercase tracking-wider">
+                              <RiCheckLine className="w-3 h-3" />
+                              Covered
+                            </span>
+                            <span className="text-[9px] font-medium text-emerald-600/70">
+                              By {slot.coveredBy}
+                            </span>
                           </div>
                         ) : (
                           <div className="flex items-center gap-1.5 text-primary font-black text-[10px] uppercase tracking-wider animate-pulse">
@@ -276,23 +283,33 @@ export default function SubstitutionPage() {
                       availableSubs.map((sub) => (
                         <Card 
                           key={sub.id} 
-                          className="p-3 rounded-2xl border-border/40 hover:border-primary/40 hover:bg-primary/5 transition-all group"
+                          className="p-3.5 rounded-2xl border-border/40 hover:border-primary/40 hover:bg-primary/5 transition-all group"
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center font-bold text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center font-bold text-primary group-hover:bg-primary group-hover:text-white transition-colors shrink-0">
                                 {sub.name.charAt(0)}
                               </div>
                               <div>
                                 <p className="text-sm font-bold">{sub.name}</p>
-                                <p className="text-[10px] font-semibold text-muted-foreground">{sub.department || 'Academic Staff'}</p>
+                                <div className="flex flex-wrap items-center gap-2 mt-0.5">
+                                  <span className="text-[10px] font-semibold text-muted-foreground">
+                                    {sub.specialization}
+                                  </span>
+                                  <span className="text-[9px] font-bold text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                                    {sub.recommendationReason}
+                                  </span>
+                                  <span className="text-[9px] font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                                    Workload: {sub.workloadToday} lectures today
+                                  </span>
+                                </div>
                               </div>
                             </div>
                             <Button 
                               size="sm" 
                               onClick={() => handleAssign(sub.id)}
                               disabled={submitting}
-                              className="rounded-xl font-bold text-[10px] h-8 px-4"
+                              className="rounded-xl font-bold text-[10px] h-8 px-4 shrink-0"
                             >
                               Assign
                             </Button>

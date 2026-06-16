@@ -129,3 +129,7 @@ export const getImageUrl = (path: string | undefined | null) => {
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   return `${cleanBaseUrl}${cleanPath}`;
 };
+
+export const getApiUrl = () => {
+  return BASE_URL;
+};
