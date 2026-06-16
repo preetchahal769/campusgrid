@@ -62,7 +62,7 @@ export default function PrincipalAttendancePage() {
   const router = useRouter()
   const [sections, setSections] = useState<any[]>([])
   const [selectedSectionId, setSelectedSectionId] = useState<string>("all")
-  const [selectedRole, setSelectedRole] = useState<string>("all")
+  const [selectedRole, setSelectedRole] = useState<string>("")
   const [range, setRange] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('daily')
   const [date, setDate] = useState<Date>(new Date())
   const [searchQuery, setSearchQuery] = useState("")
@@ -87,6 +87,11 @@ export default function PrincipalAttendancePage() {
 
   // Fetch attendance records based on filters
   useEffect(() => {
+    if (!selectedRole) {
+      setRecords([])
+      return
+    }
+
     const fetchAttendance = async () => {
       setIsLoading(true)
       setError(null)
@@ -159,31 +164,40 @@ export default function PrincipalAttendancePage() {
         {/* Filters */}
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap gap-2">
-            <Select value={selectedSectionId} onValueChange={setSelectedSectionId}>
+            <Select 
+              value={selectedRole} 
+              onValueChange={(val) => {
+                setSelectedRole(val)
+                if (val !== 'STUDENT') {
+                  setSelectedSectionId('all')
+                }
+              }}
+            >
               <SelectTrigger className="flex-1 min-w-[120px] h-11 rounded-2xl bg-background/60 shadow-sm border-border/50 text-xs font-semibold">
-                <SelectValue placeholder="All Classes" />
+                <SelectValue placeholder="Select Role" />
               </SelectTrigger>
               <SelectContent className="rounded-2xl border-border/50 shadow-xl overflow-hidden">
-                <SelectItem value="all" className="text-xs sm:text-sm font-semibold cursor-pointer">All Classes</SelectItem>
-                {sections.map(s => (
-                  <SelectItem key={s.id} value={s.id} className="text-xs sm:text-sm font-semibold cursor-pointer">
-                    {s.grade?.name} - {s.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={selectedRole} onValueChange={setSelectedRole}>
-              <SelectTrigger className="flex-1 min-w-[120px] h-11 rounded-2xl bg-background/60 shadow-sm border-border/50 text-xs font-semibold">
-                <SelectValue placeholder="All Roles" />
-              </SelectTrigger>
-              <SelectContent className="rounded-2xl border-border/50 shadow-xl overflow-hidden">
-                <SelectItem value="all" className="text-xs sm:text-sm font-semibold cursor-pointer">All Roles</SelectItem>
                 <SelectItem value="STUDENT" className="text-xs sm:text-sm font-semibold cursor-pointer">Students</SelectItem>
                 <SelectItem value="TEACHER" className="text-xs sm:text-sm font-semibold cursor-pointer">Teachers</SelectItem>
                 <SelectItem value="STAFF" className="text-xs sm:text-sm font-semibold cursor-pointer">Staff</SelectItem>
               </SelectContent>
             </Select>
+
+            {selectedRole === 'STUDENT' && (
+              <Select value={selectedSectionId} onValueChange={setSelectedSectionId}>
+                <SelectTrigger className="flex-1 min-w-[120px] h-11 rounded-2xl bg-background/60 shadow-sm border-border/50 text-xs font-semibold animate-in fade-in slide-in-from-left-4 duration-300">
+                  <SelectValue placeholder="All Classes" />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-border/50 shadow-xl overflow-hidden">
+                  <SelectItem value="all" className="text-xs sm:text-sm font-semibold cursor-pointer">All Classes</SelectItem>
+                  {sections.map(s => (
+                    <SelectItem key={s.id} value={s.id} className="text-xs sm:text-sm font-semibold cursor-pointer">
+                      {s.grade?.name} - {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
 
             <Select value={range} onValueChange={(r: any) => setRange(r)}>
               <SelectTrigger className="w-[100px] h-11 rounded-2xl bg-background/60 shadow-sm border-border/50 text-xs font-semibold">
@@ -223,17 +237,28 @@ export default function PrincipalAttendancePage() {
               type="text"
               placeholder="Search user by name or email..."
               value={searchQuery}
+              disabled={!selectedRole}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-3 rounded-full bg-background/60 border border-border/50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 backdrop-blur-md transition-all shadow-sm"
+              className="w-full pl-9 pr-4 py-3 rounded-full bg-background/60 border border-border/50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 backdrop-blur-md transition-all shadow-sm disabled:opacity-50"
             />
           </div>
         </div>
       </div>
 
       <ScrollArea className="flex-1 w-full p-4">
-        {isLoading ? (
+        {!selectedRole ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground animate-in fade-in duration-500">
+            <div className="w-16 h-16 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-[#0A4EA6] mb-4">
+              <RiTeamLine className="w-8 h-8 text-white" />
+            </div>
+            <h3 className="font-bold text-base text-foreground mb-1">Select a Role to Begin</h3>
+            <p className="text-xs max-w-[240px] leading-relaxed text-muted-foreground">
+              Please choose a role (Students, Teachers, or Staff) above to load target attendance records.
+            </p>
+          </div>
+        ) : isLoading ? (
           <div className="flex justify-center py-20">
-            <RiLoader4Line className="w-8 h-8 animate-spin text-white" />
+            <RiLoader4Line className="w-8 h-8 animate-spin text-[#0A4EA6]" />
           </div>
         ) : error ? (
           <div className="flex items-start gap-3 p-4 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive m-2">
