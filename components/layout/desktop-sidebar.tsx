@@ -28,6 +28,7 @@ export function DesktopSidebar() {
   if (isStudent) secondTabHref = "/timetable"
   if (user?.role === 'PRINCIPAL') secondTabHref = "/principal/staff-attendance"
   if (user?.role === 'SUPER_ADMIN') secondTabHref = "/super_admin/schools"
+  if (user?.role === 'PARENT') secondTabHref = "/parent?tab=academics"
   
   const navItems: NavItem[] = [
     { label: "Dashboard", icon: RiDashboard3Line, href: `/${rolePath}` },
