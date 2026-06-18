@@ -4,7 +4,7 @@ export interface User {
   id: string
   name: string
   email: string
-  role: 'STUDENT' | 'TEACHER' | 'PRINCIPAL' | 'ADMIN' | 'SUPER_ADMIN' | 'PARENT' | 'BURSAR' | 'LIBRARIAN' | 'ACADEMIC_COORDINATOR' | 'TRANSPORT_MANAGER'
+  role: 'STUDENT' | 'TEACHER' | 'PRINCIPAL' | 'ADMIN' | 'SUPER_ADMIN' | 'PARENT' | 'BURSAR' | 'LIBRARIAN' | 'ACADEMIC_COORDINATOR' | 'TRANSPORT_MANAGER' | 'STAFF'
   School_id?: string
   School_name?: string
   phoneNo?: string
@@ -14,7 +14,7 @@ export interface User {
 
 interface AuthState {
   user: User | null
-  userRole: 'student' | 'teacher' | 'principal' | 'admin' | 'super_admin' | 'parent' | 'bursar' | 'librarian' | 'academic_coordinator' | 'transport_manager' | null
+  userRole: 'student' | 'teacher' | 'principal' | 'admin' | 'super_admin' | 'parent' | 'bursar' | 'librarian' | 'academic_coordinator' | 'transport_manager' | 'staff' | null
   isAuthenticated: boolean
   isLoading: boolean
   error: string | null
@@ -29,7 +29,7 @@ const getInitialState = (): AuthState => {
     if (savedUser && savedRole) {
       return {
         user: JSON.parse(savedUser),
-        userRole: savedRole as 'student' | 'teacher' | 'principal' | 'admin' | 'super_admin' | 'parent' | 'bursar' | 'librarian' | 'academic_coordinator' | 'transport_manager',
+        userRole: savedRole as 'student' | 'teacher' | 'principal' | 'admin' | 'super_admin' | 'parent' | 'bursar' | 'librarian' | 'academic_coordinator' | 'transport_manager' | 'staff',
         isAuthenticated: true,
         isLoading: false,
         error: null,
@@ -58,7 +58,7 @@ export const authSlice = createSlice({
     setAuthSuccess: (state, action: PayloadAction<{ user: User; tokens?: { accessToken: string; refreshToken: string } }>) => {
       const { user, tokens } = action.payload
       state.user = user
-      state.userRole = user.role.toLowerCase() as 'student' | 'teacher' | 'principal' | 'admin' | 'super_admin' | 'parent' | 'bursar' | 'librarian' | 'academic_coordinator' | 'transport_manager'
+      state.userRole = user.role.toLowerCase() as 'student' | 'teacher' | 'principal' | 'admin' | 'super_admin' | 'parent' | 'bursar' | 'librarian' | 'academic_coordinator' | 'transport_manager' | 'staff'
       state.isAuthenticated = true
       state.isLoading = false
       state.error = null
