@@ -3,40 +3,22 @@
 import * as React from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { RiDashboard3Line, RiBuilding2Line, RiUserLine } from "@remixicon/react"
-
 import { useAppSelector } from "@/lib/store/hooks"
-
-interface NavItem {
-  label: string
-  icon: React.ElementType
-  href: string
-}
+import { getNavItems } from "./desktop-sidebar"
 
 export function MobileNav() {
   const pathname = usePathname()
   const router = useRouter()
   const { user } = useAppSelector((state) => state.auth)
 
-  const isStudent = user?.role === 'STUDENT'
-  const rolePath = user?.role === 'SUPER_ADMIN' ? 'super_admin' : user?.role?.toLowerCase() || 'student'
-  
-  let secondTabHref = `/${rolePath}/schedule`
-  if (isStudent) secondTabHref = "/timetable"
-  if (user?.role === 'PRINCIPAL') secondTabHref = "/principal/staff-attendance"
-  if (user?.role === 'SUPER_ADMIN') secondTabHref = "/super_admin/schools"
-  if (user?.role === 'PARENT') secondTabHref = "/parent?tab=academics"
-  
-  const navItems: NavItem[] = [
-    { label: "Dashboard", icon: RiDashboard3Line, href: `/${rolePath}` },
-    { label: "Operations", icon: RiBuilding2Line, href: secondTabHref },
-    { label: "Profile", icon: RiUserLine, href: isStudent ? "/profile" : `/${rolePath}/profile` },
-  ]
+  const navItems = getNavItems(user?.role)
+
+  if (navItems.length === 0) return null
 
   return (
     <div className="fixed md:hidden bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] z-[100]">
       <nav className="flex items-center justify-around bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-2xl border border-zinc-200/50 dark:border-zinc-800 p-2 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.08)] h-[70px]">
-        {navItems.map((item, idx) => {
+        {navItems.map((item) => {
           const isActive = pathname === item.href
           return (
             <button

@@ -22,7 +22,11 @@ import { cn } from "@/lib/utils"
 const ROLES = [
   { label: "Teacher", value: "TEACHER" },
   { label: "Student", value: "STUDENT" },
-  { label: "Staff", value: "STAFF" },
+  { label: "Clerk", value: "CLERK" },
+  { label: "Bursar", value: "BURSAR" },
+  { label: "Librarian", value: "LIBRARIAN" },
+  { label: "Academic Coordinator", value: "ACADEMIC_COORDINATOR" },
+  { label: "Transport Manager", value: "TRANSPORT_MANAGER" },
   { label: "Principal", value: "PRINCIPAL" },
   { label: "Admin", value: "ADMIN" },
 ]
