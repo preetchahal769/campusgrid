@@ -68,20 +68,65 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-[#F8F9FA] overflow-hidden relative">
-      <Card className="w-full max-w-[420px] bg-white border-zinc-100 shadow-xl rounded-3xl overflow-hidden animate-in fade-in zoom-in duration-700">
-        <CardHeader className="space-y-3 pt-10 pb-6 text-center">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30 rotate-3 hover:rotate-0 transition-transform duration-500">
-            <RiLockPasswordLine className="w-8 h-8 text-primary-foreground" />
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#F8FAFC] overflow-hidden">
+      
+      {/* Left Pane - Desktop/Tablet Only */}
+      <div className="hidden md:flex md:w-1/2 bg-[#c84b1a] p-12 lg:p-24 flex-col justify-between relative text-white overflow-hidden">
+        <div className="absolute inset-0 opacity-10"
+          style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+
+        {/* Top Content: Logo Card */}
+        <div className="flex flex-col items-start space-y-8 animate-in slide-in-from-left duration-700 relative z-10">
+          <div className="bg-white p-5 rounded-[2.5rem] shadow-xl w-36 h-36 flex items-center justify-center">
+            <img 
+              src="/logo.png" 
+              alt="Sikshatantar Logo" 
+              className="w-28 h-28 object-contain"
+            />
           </div>
-          <div className="space-y-1">
-            <CardTitle className="text-3xl font-black tracking-tighter">Welcome Back</CardTitle>
-            <CardDescription className="text-muted-foreground font-medium">Enter your credentials to access your portal</CardDescription>
+          
+          <div className="space-y-4 max-w-md">
+            <h1 className="text-4xl lg:text-5xl font-black tracking-tight leading-tight font-outfit">
+              Connected.<br />Empowered.<br />Education.
+            </h1>
+            <p className="text-white/80 font-medium text-sm lg:text-base leading-relaxed">
+              Your school, streamlined. Every role, every workflow, every notice — in one place.
+            </p>
           </div>
-        </CardHeader>
-        
-        <CardContent className="px-8 pb-10">
-          <form onSubmit={handleLogin} className="space-y-5">
+        </div>
+
+        {/* Footer */}
+        <div className="text-white/50 text-xs font-semibold mt-8 relative z-10">
+          © 2026 CampusGrid · Sikshatantar
+        </div>
+      </div>
+
+      {/* Right Pane - Form Container */}
+      <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-12 lg:p-24 bg-[#F8FAFC]">
+        <div className="w-full max-w-[420px] space-y-8 animate-in fade-in zoom-in-95 duration-500">
+          
+          {/* Logo - Mobile Only */}
+          <div className="flex md:hidden justify-center mb-4">
+            <div className="bg-white p-4 rounded-3xl shadow-md w-28 h-28 flex items-center justify-center">
+              <img 
+                src="/logo.png" 
+                alt="Sikshatantar Logo" 
+                className="w-20 h-20 object-contain"
+              />
+            </div>
+          </div>
+
+          {/* Form Header */}
+          <div className="text-center md:text-left space-y-1">
+            <h2 className="text-3xl font-black tracking-tight text-zinc-900 font-outfit">
+              Welcome back
+            </h2>
+            <p className="text-zinc-500 font-medium text-sm">
+              Sign in to access your portal
+            </p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-6">
             {/* Error Message */}
             {(error || validationError) && (
               <div className="flex items-start gap-3 p-4 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-sm animate-in slide-in-from-top-2 duration-300">
@@ -92,33 +137,37 @@ export default function LoginPage() {
 
             <div className="space-y-4">
               {/* Email Input */}
-              <div className="space-y-2 group">
-                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1 group-focus-within:text-primary transition-colors">
-                  School Email
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-zinc-700 tracking-wide">
+                  Email address
                 </label>
-                <div className="relative">
-                  <RiMailLine className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                  <Input 
-                    type="email" 
-                    placeholder="name@school.edu" 
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value)
-                      setValidationError(null)
-                    }}
-                    className="pl-12"
-                  />
-                </div>
+                <input 
+                  type="email" 
+                  placeholder="you@school.edu.in" 
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value)
+                    setValidationError(null)
+                  }}
+                  className="w-full h-14 rounded-2xl bg-white border border-zinc-200 px-4 text-sm font-semibold text-zinc-800 placeholder:text-zinc-400 outline-none focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C] transition-all"
+                />
               </div>
 
               {/* Password Input */}
-              <div className="space-y-2 group">
-                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1 group-focus-within:text-primary transition-colors">
-                  Secure Password
-                </label>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-zinc-700 tracking-wide">
+                    Password
+                  </label>
+                  <button 
+                    type="button" 
+                    className="text-xs font-bold text-[#C2410C] hover:underline"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
                 <div className="relative">
-                  <RiLockPasswordLine className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                  <Input 
+                  <input 
                     type={showPassword ? "text" : "password"} 
                     placeholder="••••••••" 
                     value={password}
@@ -126,42 +175,55 @@ export default function LoginPage() {
                       setPassword(e.target.value)
                       setValidationError(null)
                     }}
-                    className="pl-12 pr-12"
+                    className="w-full h-14 rounded-2xl bg-white border border-zinc-200 pl-4 pr-12 text-sm font-semibold text-zinc-800 placeholder:text-zinc-400 outline-none focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C] transition-all"
                   />
                   <button 
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-muted rounded-md transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-zinc-50 rounded-lg transition-colors text-zinc-400 hover:text-zinc-600"
                   >
-                    {showPassword ? <RiEyeOffLine className="w-5 h-5 text-muted-foreground" /> : <RiEyeLine className="w-5 h-5 text-muted-foreground" />}
+                    {showPassword ? <RiEyeOffLine className="w-5 h-5" /> : <RiEyeLine className="w-5 h-5" />}
                   </button>
                 </div>
               </div>
             </div>
 
-            <Button 
+            {/* Submit Button */}
+            <button 
               type="submit" 
               disabled={isLoading}
-              className="w-full h-14 text-lg mt-4 group"
+              className="w-full h-14 rounded-2xl bg-[#C2410C] hover:bg-[#A8370A] text-white font-black text-sm tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-orange-700/10 hover:shadow-orange-700/20 active:scale-[0.98] transition-all"
             >
               {isLoading ? (
                 <RiLoader4Line className="w-6 h-6 animate-spin" />
               ) : (
-                <span className="flex items-center gap-2">
-                  Access Portal
-                  <RiArrowRightLine className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </span>
+                <>
+                  <span>Sign in</span>
+                  <RiArrowRightLine className="w-4 h-4" />
+                </>
               )}
-            </Button>
+            </button>
 
-            <div className="text-center pt-2">
-              <p className="text-xs text-muted-foreground font-medium">
-                Difficulty signing in? <button type="button" className="text-primary font-bold hover:underline">Contact Administrator</button>
+            {/* Help / Footer Links */}
+            <div className="text-center space-y-4 pt-2 text-xs font-semibold">
+              <p className="text-zinc-500">
+                Need help? <button type="button" className="text-[#C2410C] font-bold hover:underline">Contact your school admin</button>
               </p>
+              <div>
+                <button 
+                  type="button" 
+                  onClick={() => router.push('/')}
+                  className="inline-flex items-center gap-1.5 text-zinc-500 hover:text-zinc-800 transition-colors"
+                >
+                  <span>← Back to home</span>
+                </button>
+              </div>
             </div>
           </form>
-        </CardContent>
-      </Card>
+
+        </div>
+      </div>
+
     </div>
   )
 }

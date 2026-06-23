@@ -115,11 +115,12 @@ export function DesktopSidebar() {
 
   return (
     <aside className="hidden md:flex flex-col w-64 h-[calc(100vh-2rem)] sticky top-4 left-4 z-40 bg-white border border-zinc-100 rounded-3xl shadow-sm p-4 mr-4">
-      <div className="px-4 py-6">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-8 h-8 bg-primary rounded-xl flex items-center justify-center text-white font-black text-sm">S</div>
-          <p className="text-lg font-black tracking-tight text-zinc-900">SikshaTantar</p>
-        </div>
+      <div className="px-2 py-4">
+        <img 
+          src="/logo.png" 
+          alt="Sikshatantar Logo" 
+          className="h-12 object-contain"
+        />
       </div>
 
       <nav className="flex-1 space-y-2 mt-4">

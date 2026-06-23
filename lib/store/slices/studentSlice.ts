@@ -24,13 +24,19 @@ export interface Assignment {
   id: string
   title: string
   description: string
+  assignedDate?: string
   dueDate: string
   maxMarks: number
   subject: { name: string; code: string }
+  teacher?: { name: string }
+  attachments?: { fileurl: string; filename: string }[]
   isSubmitted?: boolean
   submission?: {
     status: string
-    submittedAt: string
+    submittedAt?: string
+    marksReceived?: number
+    feedback?: string
+    studentNote?: string
     attachments: { fileurl: string; filename: string }[]
   }
 }
@@ -42,6 +48,7 @@ export interface Broadcast {
   targetrole: string
   author: { name: string; role: string }
   attachments: { id: string; fileurl: string; filetype: string; filename: string }[]
+  createdAt?: string
 }
 
 export interface TimetableEntry {
@@ -50,6 +57,7 @@ export interface TimetableEntry {
   lectureNo: number
   startTime: string
   endTime: string
+  room?: string
   teachersubjectsection: {
     subject: { name: string }
     teachers: { users: { name: string } }
