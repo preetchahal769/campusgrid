@@ -7,7 +7,6 @@ import { apiFetch } from "@/lib/api"
 import { 
   setLoading, 
   setProfile, 
-  setAssignments, 
   setBroadcasts, 
   setTimetable, 
   setAttendance,
@@ -31,6 +30,8 @@ import { FeesTab } from "@/components/student/FeesTab"
 import { PerformanceTab } from "@/components/student/PerformanceTab"
 import { ProfileTab } from "@/components/student/ProfileTab"
 
+import { useGetHomeworkQuery } from "@/lib/store/services/studentApi"
+
 const NAV = [
   { id: "dashboard",  icon: LayoutDashboard, label: "Dashboard"  },
   { id: "homework",   icon: FileText,        label: "Homework"   },
@@ -42,7 +43,8 @@ export default function StudentDashboardPage() {
   const dispatch = useAppDispatch()
   const router = useRouter()
   const { user } = useAppSelector((state) => state.auth)
-  const { profile, assignments, broadcasts, timetable, attendance } = useAppSelector((state) => state.student)
+  const { profile, broadcasts, timetable, attendance } = useAppSelector((state) => state.student)
+  const { data: assignments = [] } = useGetHomeworkQuery()
   const [mounted, setMounted] = useState(false)
   const [tab, setTab] = useState<string>("dashboard")
   
@@ -89,9 +91,8 @@ export default function StudentDashboardPage() {
     const fetchData = async () => {
       dispatch(setLoading(true))
       try {
-        const [profileData, assignmentsData, broadcastsData, timetableData, attendanceData] = await Promise.all([
+        const [profileData, broadcastsData, timetableData, attendanceData] = await Promise.all([
           apiFetch('/students/me'),
-          apiFetch('/academics/assignments'),
           apiFetch('/communications/broadcasts'),
           apiFetch('/academics/timetable/section/me').catch(async () => {
             const p = await apiFetch('/students/me')
@@ -102,7 +103,6 @@ export default function StudentDashboardPage() {
         if (profileData) {
           dispatch(setProfile(profileData))
         }
-        dispatch(setAssignments(assignmentsData?.length ? assignmentsData : []))
         dispatch(setBroadcasts(broadcastsData?.length ? broadcastsData : []))
         dispatch(setTimetable(timetableData?.length ? timetableData : []))
         dispatch(setAttendance(attendanceData?.days?.length ? attendanceData.days : []))
@@ -156,7 +156,7 @@ export default function StudentDashboardPage() {
         />
       )}
 
-      {tab === "homework" && <HomeworkTab assignments={assignments} />}
+      {tab === "homework" && <HomeworkTab />}
 
       {tab === "timetable" && <TimetableTab timetable={timetable} />}
 

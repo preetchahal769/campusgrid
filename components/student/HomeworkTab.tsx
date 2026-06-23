@@ -1,19 +1,51 @@
 "use client"
 
 import { useState } from "react"
+import { useGetHomeworkQuery } from "@/lib/store/services/studentApi"
 import { Assignment } from "@/lib/store/slices/studentSlice"
 import { Badge } from "@/components/layout/DashboardLayout"
 import { cn } from "@/lib/utils"
 import { X, UploadCloud, CheckCircle2, AlertCircle, Download, FileText } from "lucide-react"
 
-interface HomeworkTabProps {
-  assignments: Assignment[]
-}
-
-export function HomeworkTab({ assignments }: HomeworkTabProps) {
+export function HomeworkTab() {
+  const { data: assignments = [], isLoading, error } = useGetHomeworkQuery()
   const [homeworkFilter, setHomeworkFilter] = useState<"All" | "Pending" | "Submitted" | "Overdue">("All")
   const [selectedHomework, setSelectedHomework] = useState<Assignment | null>(null)
   const [viewingAttachment, setViewingAttachment] = useState<string | null>(null)
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex gap-2 animate-pulse">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="h-9 w-24 bg-gray-200 rounded-full" />
+          ))}
+        </div>
+        <div className="space-y-3">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="bg-white rounded-2xl border border-border p-4 h-24 animate-pulse flex flex-col justify-between">
+              <div className="flex justify-between items-start">
+                <div className="space-y-2 w-2/3">
+                  <div className="h-4 bg-gray-200 rounded w-3/4" />
+                  <div className="h-3 bg-gray-200 rounded w-1/2" />
+                </div>
+                <div className="h-6 bg-gray-200 rounded-full w-16" />
+              </div>
+              <div className="h-3 bg-gray-200 rounded w-1/3" />
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-2xl border border-border p-8 text-center space-y-3">
+        <p className="text-sm font-semibold text-red-500">Failed to load homework assignments.</p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">
