@@ -14,7 +14,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const { user } = useAppSelector((state) => state.auth)
   
-  const isDashboardRoot = ["/student", "/teacher", "/principal", "/super_admin"].includes(pathname)
+  const isDashboardRoot = ["/teacher", "/principal", "/super_admin"].includes(pathname)
 
   React.useEffect(() => {
     // Force onboarding if user hasn't filled out their profile

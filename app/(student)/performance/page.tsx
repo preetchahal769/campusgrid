@@ -81,7 +81,7 @@ export default function PerformancePage() {
   }
 
   const rating = profile?.users?.globalRating || 0
-  const rank = profile?.users?.globalRank || "N/A"
+  const rank = profile?.users?.globalRank || 0
 
   if (loading) {
     return (
