@@ -1,38 +1,101 @@
 "use client"
 
 import { useState } from "react"
+import { gql } from "@apollo/client"
+import { useQuery } from "@apollo/client/react"
 import { Assignment } from "@/lib/store/slices/studentSlice"
 import { Badge } from "@/components/layout/DashboardLayout"
 import { cn } from "@/lib/utils"
 import { X, UploadCloud, CheckCircle2, AlertCircle, Download, FileText } from "lucide-react"
 
-interface HomeworkTabProps {
-  assignments: Assignment[]
-}
+const GET_STUDENT_HOMEWORK = gql`
+  query GetStudentHomework {
+    studentHomework {
+      id
+      title
+      description
+      dueDate
+      maxMarks
+      subject {
+        name
+        code
+      }
+      teachers {
+        users {
+          name
+        }
+      }
+      isSubmitted
+      submission {
+        id
+        status
+        submittedAt
+        obtainedMarks
+        fileUrl
+      }
+    }
+  }
+`
 
-export function HomeworkTab({ assignments }: HomeworkTabProps) {
+export function HomeworkTab() {
+  const { data, loading: isLoading, error } = useQuery<any>(GET_STUDENT_HOMEWORK)
+  const assignments = data?.studentHomework || []
   const [homeworkFilter, setHomeworkFilter] = useState<"All" | "Pending" | "Submitted" | "Overdue">("All")
   const [selectedHomework, setSelectedHomework] = useState<Assignment | null>(null)
   const [viewingAttachment, setViewingAttachment] = useState<string | null>(null)
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex gap-2 animate-pulse">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="h-9 w-24 bg-gray-200 rounded-full" />
+          ))}
+        </div>
+        <div className="space-y-3">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="bg-white rounded-2xl border border-border p-4 h-24 animate-pulse flex flex-col justify-between">
+              <div className="flex justify-between items-start">
+                <div className="space-y-2 w-2/3">
+                  <div className="h-4 bg-gray-200 rounded w-3/4" />
+                  <div className="h-3 bg-gray-200 rounded w-1/2" />
+                </div>
+                <div className="h-6 bg-gray-200 rounded-full w-16" />
+              </div>
+              <div className="h-3 bg-gray-200 rounded w-1/3" />
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-2xl border border-border p-8 text-center space-y-3">
+        <p className="text-sm font-semibold text-red-500">Failed to load homework assignments.</p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
         <button onClick={() => setHomeworkFilter('All')} className={cn("px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2 shrink-0 transition-colors", homeworkFilter === 'All' ? "bg-[#c84b1a] text-white" : "bg-white border border-border text-gray-900 hover:bg-gray-50")}>All <span className="bg-black/10 px-1.5 rounded-full text-xs">{assignments.length}</span></button>
-        <button onClick={() => setHomeworkFilter('Pending')} className={cn("px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2 shrink-0 transition-colors", homeworkFilter === 'Pending' ? "bg-[#c84b1a] text-white" : "bg-white border border-border text-gray-900 hover:bg-gray-50")}>Pending <span className="bg-black/10 px-1.5 rounded-full text-xs">{assignments.filter(a => !a.isSubmitted && new Date(a.dueDate) >= new Date()).length}</span></button>
-        <button onClick={() => setHomeworkFilter('Submitted')} className={cn("px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2 shrink-0 transition-colors", homeworkFilter === 'Submitted' ? "bg-[#c84b1a] text-white" : "bg-white border border-border text-gray-900 hover:bg-gray-50")}>Submitted <span className="bg-black/10 px-1.5 rounded-full text-xs">{assignments.filter(a => a.isSubmitted).length}</span></button>
-        <button onClick={() => setHomeworkFilter('Overdue')} className={cn("px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2 shrink-0 transition-colors", homeworkFilter === 'Overdue' ? "bg-[#c84b1a] text-white" : "bg-white border border-border text-gray-900 hover:bg-gray-50")}>Overdue <span className="bg-black/10 px-1.5 rounded-full text-xs">{assignments.filter(a => !a.isSubmitted && new Date(a.dueDate) < new Date()).length}</span></button>
+        <button onClick={() => setHomeworkFilter('Pending')} className={cn("px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2 shrink-0 transition-colors", homeworkFilter === 'Pending' ? "bg-[#c84b1a] text-white" : "bg-white border border-border text-gray-900 hover:bg-gray-50")}>Pending <span className="bg-black/10 px-1.5 rounded-full text-xs">{assignments.filter((a: any) => !a.isSubmitted && new Date(a.dueDate) >= new Date()).length}</span></button>
+        <button onClick={() => setHomeworkFilter('Submitted')} className={cn("px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2 shrink-0 transition-colors", homeworkFilter === 'Submitted' ? "bg-[#c84b1a] text-white" : "bg-white border border-border text-gray-900 hover:bg-gray-50")}>Submitted <span className="bg-black/10 px-1.5 rounded-full text-xs">{assignments.filter((a: any) => a.isSubmitted).length}</span></button>
+        <button onClick={() => setHomeworkFilter('Overdue')} className={cn("px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2 shrink-0 transition-colors", homeworkFilter === 'Overdue' ? "bg-[#c84b1a] text-white" : "bg-white border border-border text-gray-900 hover:bg-gray-50")}>Overdue <span className="bg-black/10 px-1.5 rounded-full text-xs">{assignments.filter((a: any) => !a.isSubmitted && new Date(a.dueDate) < new Date()).length}</span></button>
       </div>
 
       <div className="space-y-3">
-        {assignments.filter(hw => {
+        {assignments.filter((hw: any) => {
           const isSubmitted = hw.isSubmitted
           const isOverdue = !isSubmitted && new Date(hw.dueDate) < new Date()
           if (homeworkFilter === 'Pending') return !isSubmitted && !isOverdue
           if (homeworkFilter === 'Submitted') return isSubmitted
           if (homeworkFilter === 'Overdue') return isOverdue
           return true
-        }).map((hw, i) => {
+        }).map((hw: any, i: number) => {
           const isSubmitted = hw.isSubmitted
           const isOverdue = !isSubmitted && new Date(hw.dueDate) < new Date()
           const statusText = isSubmitted ? "Submitted" : isOverdue ? "Overdue" : "Pending"
