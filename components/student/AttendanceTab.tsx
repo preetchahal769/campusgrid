@@ -1,25 +1,69 @@
 "use client"
 
 import { useState } from "react"
-import { CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react"
+import { CheckCircle2, ChevronLeft, ChevronRight, XCircle, AlertCircle, Calendar as CalendarIcon, Clock } from "lucide-react"
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts"
 import { cn } from "@/lib/utils"
+import { gql } from "@apollo/client"
+import { useQuery } from "@apollo/client/react"
+
+const GET_STUDENT_ATTENDANCE = gql`
+  query GetStudentAttendance($range: String, $month: Int, $year: Int) {
+    studentAttendance(range: $range, month: $month, year: $year) {
+      days {
+        date
+        status
+        title
+      }
+      stats {
+        present
+        absent
+        leave
+        holiday
+        unmarked
+        percentage
+      }
+    }
+  }
+`
 
 interface AttendanceItem {
   date: string
-  status: "PRESENT" | "ABSENT" | "LEAVE"
+  status: "PRESENT" | "ABSENT" | "LEAVE" | "HOLIDAY" | "UNMARKED"
+  title?: string
 }
 
-interface AttendanceTabProps {
-  attendance: AttendanceItem[]
-}
-
-export function AttendanceTab({ attendance }: AttendanceTabProps) {
+export function AttendanceTab() {
+  const { data, loading: isLoading, error } = useQuery<any>(GET_STUDENT_ATTENDANCE)
+  const attendanceData = data?.studentAttendance
+  const attendance = attendanceData?.days || []
   const [timeframe, setTimeframe] = useState<"month" | "year">("month")
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
 
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="bg-gray-100 rounded-2xl p-4 h-20 animate-pulse" />
+        <div className="grid grid-cols-4 gap-3">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="bg-white rounded-2xl border border-border h-24 animate-pulse" />
+          ))}
+        </div>
+        <div className="bg-white rounded-2xl border border-border h-64 animate-pulse" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-2xl border border-border p-8 text-center">
+        <p className="text-sm font-semibold text-red-500">Failed to load attendance record.</p>
+      </div>
+    )
+  }
+
   // Filter attendance records by the selected timeframe
-  const filteredAttendance = attendance.filter(a => {
+  const filteredAttendance = attendance.filter((a: AttendanceItem) => {
     const d = new Date(a.date)
     const todayEnd = new Date()
     todayEnd.setHours(23, 59, 59, 999)
@@ -32,26 +76,82 @@ export function AttendanceTab({ attendance }: AttendanceTabProps) {
     }
   })
 
-  const totalDays = filteredAttendance.length
-  const presentDays = filteredAttendance.filter(a => a.status === "PRESENT").length
-  const leaveDays = filteredAttendance.filter(a => a.status === "LEAVE").length
-  const absentDays = totalDays - presentDays - leaveDays
-  const attendancePct = totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 0
+  const presentDays = filteredAttendance.filter((a: AttendanceItem) => a.status === "PRESENT").length
+  const absentDays = filteredAttendance.filter((a: AttendanceItem) => a.status === "ABSENT").length
+  const leaveDays = filteredAttendance.filter((a: AttendanceItem) => a.status === "LEAVE").length
+  const holidayDays = filteredAttendance.filter((a: AttendanceItem) => a.status === "HOLIDAY").length
+  const unmarkedDays = filteredAttendance.filter((a: AttendanceItem) => a.status === "UNMARKED").length
+  
+  const workingDays = presentDays + absentDays
+  const attendancePct = workingDays > 0 ? Math.round((presentDays / workingDays) * 100) : 100
+
+  // Today dynamic status
+  const today = new Date()
+  const todayRecord = attendance.find((a: AttendanceItem) => {
+    const ad = new Date(a.date)
+    return ad.getDate() === today.getDate() && ad.getMonth() === today.getMonth() && ad.getFullYear() === today.getFullYear()
+  })
+
+  const todayStatus = todayRecord?.status || "UNMARKED"
+
+  let bannerBg = "bg-gray-50 border-gray-200"
+  let bannerIconBg = "bg-gray-100"
+  let bannerIconColor = "text-gray-500"
+  let bannerTitle = "Today — Not Marked"
+  let bannerSubline = "Attendance has not been marked for today yet"
+  let bannerBadgeBg = "bg-gray-200/80 text-gray-600"
+  let BannerIcon = Clock
+
+  if (todayStatus === "PRESENT") {
+    bannerBg = "bg-[#e6fcf1] border-[#a7f3d0]"
+    bannerIconBg = "bg-[#a7f3d0]"
+    bannerIconColor = "text-[#05b672]"
+    bannerTitle = "Today — Present"
+    bannerSubline = "Marked by class teacher"
+    bannerBadgeBg = "bg-[#a7f3d0] text-[#05b672]"
+    BannerIcon = CheckCircle2
+  } else if (todayStatus === "ABSENT") {
+    bannerBg = "bg-red-50 border-red-200"
+    bannerIconBg = "bg-red-100"
+    bannerIconColor = "text-red-600"
+    bannerTitle = "Today — Absent"
+    bannerSubline = "Marked by class teacher"
+    bannerBadgeBg = "bg-red-100 text-red-600"
+    BannerIcon = XCircle
+  } else if (todayStatus === "LEAVE") {
+    bannerBg = "bg-amber-50 border-amber-200"
+    bannerIconBg = "bg-amber-100"
+    bannerIconColor = "text-amber-600"
+    bannerTitle = "Today — On Leave"
+    bannerSubline = "Approved leave"
+    bannerBadgeBg = "bg-amber-100 text-amber-600"
+    BannerIcon = AlertCircle
+  } else if (todayStatus === "HOLIDAY") {
+    bannerBg = "bg-blue-50 border-blue-200"
+    bannerIconBg = "bg-blue-100"
+    bannerIconColor = "text-blue-600"
+    bannerTitle = "Today — Holiday"
+    bannerSubline = todayRecord?.title ? `School Holiday: ${todayRecord.title}` : "School Holiday"
+    bannerBadgeBg = "bg-blue-100 text-blue-600"
+    BannerIcon = CalendarIcon
+  }
 
   return (
     <div className="space-y-4">
       {/* Today Banner */}
-      <div className="bg-[#e6fcf1] border border-[#a7f3d0] rounded-2xl p-4 flex items-center justify-between">
+      <div className={cn("border rounded-2xl p-4 flex items-center justify-between transition-colors", bannerBg)}>
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-[#a7f3d0] rounded-full flex items-center justify-center">
-            <CheckCircle2 className="w-6 h-6 text-[#05b672]" />
+          <div className={cn("w-12 h-12 rounded-full flex items-center justify-center transition-colors", bannerIconBg)}>
+            <BannerIcon className={cn("w-6 h-6", bannerIconColor)} />
           </div>
           <div>
-            <h3 className="text-[17px] font-bold text-gray-900 leading-snug">Today — Present</h3>
-            <p className="text-sm text-[#05b672] font-semibold mt-0.5">Marked by class teacher · {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+            <h3 className="text-[17px] font-bold text-gray-900 leading-snug">{bannerTitle}</h3>
+            <p className={cn("text-sm font-semibold mt-0.5", todayStatus === "UNMARKED" ? "text-gray-500" : bannerIconColor)}>
+              {bannerSubline} · {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </p>
           </div>
         </div>
-        <div className="bg-[#a7f3d0] px-3 py-1 rounded-full text-xs font-bold text-[#05b672]">
+        <div className={cn("px-3 py-1 rounded-full text-xs font-bold transition-colors", bannerBadgeBg)}>
           Read-only
         </div>
       </div>
@@ -86,8 +186,8 @@ export function AttendanceTab({ attendance }: AttendanceTabProps) {
         <div className="flex items-center gap-4">
           <button 
             onClick={() => {
-              if (timeframe === "month") setSelectedDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))
-              else setSelectedDate(prev => new Date(prev.getFullYear() - 1, 0, 1))
+              if (timeframe === "month") setSelectedDate((prev: Date) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))
+              else setSelectedDate((prev: Date) => new Date(prev.getFullYear() - 1, 0, 1))
             }}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
@@ -98,8 +198,8 @@ export function AttendanceTab({ attendance }: AttendanceTabProps) {
           </h2>
           <button 
             onClick={() => {
-              if (timeframe === "month") setSelectedDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))
-              else setSelectedDate(prev => new Date(prev.getFullYear() + 1, 0, 1))
+              if (timeframe === "month") setSelectedDate((prev: Date) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))
+              else setSelectedDate((prev: Date) => new Date(prev.getFullYear() + 1, 0, 1))
             }}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
@@ -137,13 +237,13 @@ export function AttendanceTab({ attendance }: AttendanceTabProps) {
                  if (timeframe === "month" && (start.getMonth() > month || start.getFullYear() > year)) break;
                  if (timeframe === "year" && start.getFullYear() > year) break;
                  
-                 const mData = filteredAttendance.filter(a => {
+                 const mData = filteredAttendance.filter((a: AttendanceItem) => {
                    const d = new Date(a.date)
                    return d >= start && d <= end
                  })
                  weeks.push({
                    date: `W${i}`,
-                   status: mData.filter(a => a.status === 'PRESENT').length
+                   status: mData.filter((a: any) => a.status === 'PRESENT').length
                  })
                  start.setDate(start.getDate() + 7)
                  i++
@@ -202,7 +302,7 @@ export function AttendanceTab({ attendance }: AttendanceTabProps) {
              
              for (let i = 1; i <= daysInMonth; i++) {
                const d = new Date(currentYear, currentMonth, i)
-               const record = attendance.find(a => {
+               const record = attendance.find((a: AttendanceItem) => {
                  const ad = new Date(a.date);
                  return ad.getDate() === d.getDate() && ad.getMonth() === d.getMonth() && ad.getFullYear() === d.getFullYear();
                })
@@ -210,14 +310,28 @@ export function AttendanceTab({ attendance }: AttendanceTabProps) {
                const isFuture = d > today
                
                let className = "h-12 sm:h-14 flex items-center justify-center rounded-2xl transition-colors "
-               if (isToday && record) {
-                 className += "bg-[#05b672] text-white"
+               
+               if (isToday) {
+                 className += "ring-2 ring-indigo-500 ring-offset-2 "
+                 if (record?.status === 'PRESENT') {
+                   className += "bg-[#05b672] text-white"
+                 } else if (record?.status === 'LEAVE') {
+                   className += "bg-amber-500 text-white"
+                 } else if (record?.status === 'ABSENT') {
+                   className += "bg-red-500 text-white"
+                 } else if (record?.status === 'HOLIDAY') {
+                   className += "bg-blue-500 text-white"
+                 } else {
+                   className += "bg-gray-100 text-gray-700 border-2 border-dashed border-gray-300"
+                 }
                } else if (isFuture) {
                  className += "text-gray-400"
                } else if (record) {
                  if (record.status === 'PRESENT') className += "bg-green-50 text-green-700"
                  else if (record.status === 'LEAVE') className += "bg-amber-50 text-amber-600"
-                 else className += "bg-red-50 text-red-500"
+                 else if (record.status === 'HOLIDAY') className += "bg-blue-50 text-blue-600"
+                 else if (record.status === 'ABSENT') className += "bg-red-50 text-red-500"
+                 else className += "text-gray-400" // UNMARKED
                } else {
                  className += "text-gray-400"
                }

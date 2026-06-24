@@ -13,6 +13,42 @@ import {
   setError
 } from "@/lib/store/slices/studentSlice"
 import { logout } from "@/lib/store/slices/authSlice"
+import { gql } from "@apollo/client"
+import { useQuery } from "@apollo/client/react"
+
+const GET_STUDENT_PROFILE = gql`
+  query GetStudentProfile {
+    studentProfile {
+      id
+      rollNumber
+      rankingPoints
+      users {
+        id
+        name
+        email
+        phoneNo
+        globalRating
+      }
+      section {
+        id
+        name
+        grade {
+          id
+          name
+        }
+      }
+      todayAttendance
+    }
+  }
+`
+
+const GET_STUDENT_BROADCASTS = gql`
+  query GetStudentBroadcasts {
+    studentBroadcasts {
+      id
+    }
+  }
+`
 
 // Icons
 import { LayoutDashboard, FileText, Calendar, Clock } from "lucide-react"
@@ -20,17 +56,18 @@ import { LayoutDashboard, FileText, Calendar, Clock } from "lucide-react"
 // Dashboard Layout Primitives
 import { DashboardLayout, INDIGO } from "@/components/layout/DashboardLayout"
 
-// Tab Components
-import { DashboardTab } from "@/components/student/DashboardTab"
-import { HomeworkTab } from "@/components/student/HomeworkTab"
-import { TimetableTab } from "@/components/student/TimetableTab"
-import { AttendanceTab } from "@/components/student/AttendanceTab"
-import { NoticesTab } from "@/components/student/NoticesTab"
-import { FeesTab } from "@/components/student/FeesTab"
-import { PerformanceTab } from "@/components/student/PerformanceTab"
-import { ProfileTab } from "@/components/student/ProfileTab"
+import dynamic from "next/dynamic"
 
-import { useGetHomeworkQuery } from "@/lib/store/services/studentApi"
+// Tab Components (Lazy loaded)
+const DashboardTab = dynamic(() => import("@/components/student/DashboardTab").then(mod => mod.DashboardTab), { ssr: false })
+const HomeworkTab = dynamic(() => import("@/components/student/HomeworkTab").then(mod => mod.HomeworkTab), { ssr: false })
+const TimetableTab = dynamic(() => import("@/components/student/TimetableTab").then(mod => mod.TimetableTab), { ssr: false })
+const AttendanceTab = dynamic(() => import("@/components/student/AttendanceTab").then(mod => mod.AttendanceTab), { ssr: false })
+const NoticesTab = dynamic(() => import("@/components/student/NoticesTab").then(mod => mod.NoticesTab), { ssr: false })
+const FeesTab = dynamic(() => import("@/components/student/FeesTab").then(mod => mod.FeesTab), { ssr: false })
+const PerformanceTab = dynamic(() => import("@/components/student/PerformanceTab").then(mod => mod.PerformanceTab), { ssr: false })
+const ProfileTab = dynamic(() => import("@/components/student/ProfileTab").then(mod => mod.ProfileTab), { ssr: false })
+
 
 const NAV = [
   { id: "dashboard",  icon: LayoutDashboard, label: "Dashboard"  },
@@ -43,27 +80,29 @@ export default function StudentDashboardPage() {
   const dispatch = useAppDispatch()
   const router = useRouter()
   const { user } = useAppSelector((state) => state.auth)
-  const { profile, broadcasts, timetable, attendance } = useAppSelector((state) => state.student)
-  const { data: assignments = [] } = useGetHomeworkQuery()
+  const { profile } = useAppSelector((state) => state.student)
+
+  const { data: profileData, loading: profileLoading } = useQuery<any>(GET_STUDENT_PROFILE, {
+    skip: !user || user.role !== 'STUDENT',
+  })
+
+  const { data: broadcastsData } = useQuery<any>(GET_STUDENT_BROADCASTS, {
+    skip: !user || user.role !== 'STUDENT',
+  })
+
+  const broadcasts = broadcastsData?.studentBroadcasts || []
   const [mounted, setMounted] = useState(false)
   const [tab, setTab] = useState<string>("dashboard")
-  
-  // Real attendance % computed from Redux state for dashboard monthly summary
-  const filteredAttendanceForHeader = attendance.filter(a => {
-    const d = new Date(a.date)
-    const todayEnd = new Date()
-    todayEnd.setHours(23, 59, 59, 999)
-    if (d > todayEnd) return false // Ignore any future dates returned by backend seeds
-    
-    const now = new Date()
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
-  })
-  const totalDays = filteredAttendanceForHeader.length
-  const presentDays = filteredAttendanceForHeader.filter(a => a.status === 'PRESENT').length
-  const attendancePct = totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 0
-  
-  // Homework due count (unsubmitted homework)
-  const pendingHomeworkCount = assignments.filter(a => !a.isSubmitted).length
+
+  useEffect(() => {
+    if (profileData?.studentProfile) {
+      dispatch(setProfile(profileData.studentProfile))
+    }
+  }, [profileData, dispatch])
+
+  useEffect(() => {
+    dispatch(setLoading(profileLoading))
+  }, [profileLoading, dispatch])
 
   const fullName = profile?.users?.name || user?.name || "Student"
   const firstName = fullName.split(' ')[0]
@@ -85,37 +124,8 @@ export default function StudentDashboardPage() {
     setMounted(true)
     if (user && user.role !== 'STUDENT') {
       router.replace(`/${user.role.toLowerCase()}`)
-      return
     }
-
-    const fetchData = async () => {
-      dispatch(setLoading(true))
-      try {
-        const [profileData, broadcastsData, timetableData, attendanceData] = await Promise.all([
-          apiFetch('/students/me'),
-          apiFetch('/communications/broadcasts'),
-          apiFetch('/academics/timetable/section/me').catch(async () => {
-            const p = await apiFetch('/students/me')
-            return apiFetch(`/academics/timetable/section/${p.section.id}`)
-          }),
-          apiFetch('/attendance/me'),
-        ])
-        if (profileData) {
-          dispatch(setProfile(profileData))
-        }
-        dispatch(setBroadcasts(broadcastsData?.length ? broadcastsData : []))
-        dispatch(setTimetable(timetableData?.length ? timetableData : []))
-        dispatch(setAttendance(attendanceData?.days?.length ? attendanceData.days : []))
-      } catch (err: any) {
-        console.warn("API failed.", err)
-        dispatch(setError(err.message))
-      } finally {
-        dispatch(setLoading(false))
-      }
-    }
-
-    fetchData()
-  }, [dispatch])
+  }, [user, router])
 
   const handleLogout = async () => {
     try {
@@ -137,32 +147,24 @@ export default function StudentDashboardPage() {
       navItems={NAV} activeId={tab} onNav={setTab}
       greeting={`Good morning, ${firstName} 👋`}
       subline={`Class ${profile?.section?.grade?.name || "11"} — ${profile?.section?.name || "Science (A)"} · ${currentDateStr}`}
-      unreadCount={broadcasts.length || 2}
+      unreadCount={broadcasts.length}
       hasProfile={true}
       onLogout={handleLogout}
     >
       {tab === "dashboard" && (
         <DashboardTab
-          attendancePct={attendancePct}
           profile={profile}
-          pendingHomeworkCount={pendingHomeworkCount}
-          assignments={assignments}
-          timetable={timetable}
-          broadcasts={broadcasts}
-          filteredAttendance={filteredAttendanceForHeader}
-          presentDays={presentDays}
-          totalDays={totalDays}
           setTab={setTab}
         />
       )}
 
       {tab === "homework" && <HomeworkTab />}
 
-      {tab === "timetable" && <TimetableTab timetable={timetable} />}
+      {tab === "timetable" && <TimetableTab />}
 
-      {tab === "attendance" && <AttendanceTab attendance={attendance} />}
+      {tab === "attendance" && <AttendanceTab />}
 
-      {tab === "notices" && <NoticesTab broadcasts={broadcasts} />}
+      {tab === "notices" && <NoticesTab />}
 
       {tab === "fees" && <FeesTab />}
 

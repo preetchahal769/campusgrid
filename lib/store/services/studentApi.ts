@@ -29,13 +29,30 @@ const customBaseQuery: BaseQueryFn<
 export const studentApi = createApi({
   reducerPath: "studentApi",
   baseQuery: customBaseQuery,
-  tagTypes: ["Homework"],
+  tagTypes: ["Homework", "Attendance", "Timetable", "Broadcasts"],
   endpoints: (builder) => ({
     getHomework: builder.query<Assignment[], void>({
       query: () => ({ url: "/academics/assignments" }),
       providesTags: ["Homework"],
     }),
+    getAttendance: builder.query<any, void>({
+      query: () => ({ url: "/attendance/me" }),
+      providesTags: ["Attendance"],
+    }),
+    getTimetable: builder.query<any[], void>({
+      query: () => ({ url: "/academics/timetable/section/me" }),
+      providesTags: ["Timetable"],
+    }),
+    getBroadcasts: builder.query<any[], void>({
+      query: () => ({ url: "/communications/broadcasts" }),
+      providesTags: ["Broadcasts"],
+    }),
   }),
 })
 
-export const { useGetHomeworkQuery } = studentApi
+export const { 
+  useGetHomeworkQuery, 
+  useGetAttendanceQuery, 
+  useGetTimetableQuery, 
+  useGetBroadcastsQuery 
+} = studentApi

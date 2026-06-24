@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { apiFetch } from "@/lib/api"
 import { 
   RiBugLine, 
@@ -26,12 +26,102 @@ interface DebugInfo {
 }
 
 export function DebugMenu() {
+  const [isVisible, setIsVisible] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [countdown, setCountdown] = useState({ access: 0, refresh: 0 })
+  const [metrics, setMetrics] = useState<any[]>([])
+  const [pageLoadTime, setPageLoadTime] = useState<number>(0)
 
-  const isProduction = process.env.NODE_ENV === "production"
+  // Drag state (same pattern as BugReporter)
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [hasMoved, setHasMoved] = useState(false)
+  const dragRef = useRef<{ startX: number; startY: number } | null>(null)
+
+  // Only show on staging, localhost, or development
+  useEffect(() => {
+    const hostname = window.location.hostname
+    if (
+      hostname.includes("staging") ||
+      hostname.includes("localhost") ||
+      process.env.NODE_ENV === "development"
+    ) {
+      setIsVisible(true)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const calculateLoadTime = () => {
+      const [entry] = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[]
+      if (entry && entry.duration > 0) {
+        setPageLoadTime(Math.round(entry.duration))
+        return true
+      }
+      const timing = performance.timing
+      const loadTime = timing.loadEventEnd - timing.navigationStart
+      if (loadTime > 0) {
+        setPageLoadTime(loadTime)
+        return true
+      }
+      return false
+    }
+
+    if (!calculateLoadTime()) {
+      const handleLoad = () => {
+        setTimeout(calculateLoadTime, 200)
+      }
+      window.addEventListener('load', handleLoad)
+      return () => window.removeEventListener('load', handleLoad)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!isOpen) return
+    const updateMetrics = () => {
+      if (typeof window !== 'undefined') {
+        setMetrics([...((window as any).apiMetrics || [])])
+      }
+    }
+    updateMetrics()
+    const interval = setInterval(updateMetrics, 1000)
+    return () => clearInterval(interval)
+  }, [isOpen])
+
+  // Drag handlers
+  const handlePointerDown = (e: any) => {
+    e.currentTarget.setPointerCapture(e.pointerId)
+    setIsDragging(true)
+    setHasMoved(false)
+    dragRef.current = {
+      startX: e.clientX - position.x,
+      startY: e.clientY - position.y,
+    }
+  }
+
+  const handlePointerMove = (e: any) => {
+    if (!isDragging || !dragRef.current) return
+    const moveX = Math.abs(e.clientX - dragRef.current.startX - position.x)
+    const moveY = Math.abs(e.clientY - dragRef.current.startY - position.y)
+    if (moveX > 5 || moveY > 5) {
+      setHasMoved(true)
+    }
+    setPosition({
+      x: e.clientX - dragRef.current.startX,
+      y: e.clientY - dragRef.current.startY,
+    })
+  }
+
+  const handlePointerUp = (e: any) => {
+    setIsDragging(false)
+    e.currentTarget.releasePointerCapture(e.pointerId)
+    if (!hasMoved) {
+      setIsOpen(true)
+    }
+  }
 
   const fetchDebugInfo = async () => {
     try {
@@ -94,13 +184,17 @@ export function DebugMenu() {
     window.location.href = "/login"
   }
 
-  if (isProduction) return null
+  if (!isVisible) return null
 
   return (
     <>
       <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 left-6 z-50 flex h-12 items-center gap-2 rounded-full bg-slate-800 px-4 text-slate-200 shadow-lg transition-transform hover:scale-105 hover:bg-slate-700"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
+        className="fixed bottom-6 left-6 z-50 flex h-12 cursor-grab touch-none items-center gap-2 rounded-full bg-slate-800 px-4 text-slate-200 shadow-lg transition-transform hover:scale-105 hover:bg-slate-700 active:cursor-grabbing"
       >
         <RiBugLine className="text-xl text-yellow-400" />
         <span className="font-semibold text-sm">Debug Info</span>
@@ -171,6 +265,18 @@ export function DebugMenu() {
                     </div>
                   </div>
 
+                  <div className="rounded-xl bg-slate-800 p-3 border border-slate-700">
+                    <div className="text-xs text-slate-400 mb-2 flex items-center gap-1">
+                      <RiTimeLine /> Client Performance
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-slate-300">Initial Page Load</span>
+                      <span className={`font-mono font-bold ${pageLoadTime > 1500 ? 'text-red-400' : pageLoadTime > 800 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                        {pageLoadTime > 0 ? `${pageLoadTime}ms` : 'Measuring...'}
+                      </span>
+                    </div>
+                  </div>
+
                   {debugInfo.rawJwt && (
                     <div className="rounded-xl bg-slate-800 p-3 border border-slate-700">
                       <div className="text-xs text-slate-400 mb-2 flex items-center gap-1">
@@ -185,6 +291,30 @@ export function DebugMenu() {
               ) : (
                 !error && <div className="text-center text-sm text-slate-400 py-4">Loading debug data...</div>
               )}
+
+              {/* API Latency Metrics */}
+              <div className="rounded-xl bg-slate-800 p-3 border border-slate-700">
+                <div className="text-xs text-slate-400 mb-2 flex items-center gap-1">
+                  <RiTimeLine /> API Load Latency
+                </div>
+                {metrics.length === 0 ? (
+                  <p className="text-xs text-slate-500 py-1 italic">No API requests recorded yet.</p>
+                ) : (
+                  <div className="space-y-1.5 max-h-[160px] overflow-y-auto pr-1">
+                    {metrics.map((m, i) => (
+                      <div key={i} className="flex justify-between items-center text-xs border-b border-slate-850 pb-1.5 last:border-0 last:pb-0">
+                        <span className="font-mono text-slate-300 truncate max-w-[220px]" title={m.endpoint}>
+                          <span className="text-[9px] font-black px-1 py-0.5 rounded bg-slate-700 text-slate-300 mr-1.5">{m.method}</span>
+                          {m.endpoint}
+                        </span>
+                        <span className={`font-mono font-bold ${m.durationMs > 500 ? 'text-red-400' : m.durationMs > 250 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                          {m.durationMs}ms
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               <div className="pt-2 border-t border-slate-800 grid grid-cols-2 gap-2">
                 <button

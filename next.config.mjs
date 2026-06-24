@@ -6,7 +6,7 @@ const nextConfig = {
   // Produces a static HTML/JS export required by CapacitorJS when building for mobile
   // Otherwise uses standalone output for Docker container efficiency on web
   output: isMobileBuild ? 'export' : 'standalone',
-  
+
   // Disable server-side image optimization since Capacitor is static
   ...(isMobileBuild ? {
     images: {

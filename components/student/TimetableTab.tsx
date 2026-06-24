@@ -2,6 +2,34 @@
 
 import { useState } from "react"
 import { cn } from "@/lib/utils"
+import { gql } from "@apollo/client"
+import { useQuery } from "@apollo/client/react"
+
+const GET_STUDENT_TIMETABLE = gql`
+  query GetStudentTimetable {
+    studentTimetable(sectionId: "me") {
+      id
+      dayOfWeek
+      startTime
+      endTime
+      lectureNo
+      room
+      studioRoom {
+        roomName
+      }
+      teachersubjectsection {
+        subject {
+          name
+        }
+        teachers {
+          users {
+            name
+          }
+        }
+      }
+    }
+  }
+`
 
 interface TimetableItem {
   dayOfWeek: string
@@ -21,15 +49,47 @@ interface TimetableItem {
   }
 }
 
-interface TimetableTabProps {
-  timetable: TimetableItem[]
-}
-
-export function TimetableTab({ timetable }: TimetableTabProps) {
+export function TimetableTab() {
+  const { data, loading: isLoading, error } = useQuery<any>(GET_STUDENT_TIMETABLE)
+  const timetable = data?.studentTimetable || []
   const [selectedDay, setSelectedDay] = useState<string>(() => {
     const today = new Date().toLocaleDateString('en-US', { weekday: 'short' })
     return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].includes(today) ? today : 'Mon'
   })
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex gap-2 animate-pulse">
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <div key={i} className="h-10 w-16 bg-gray-200 rounded-xl" />
+          ))}
+        </div>
+        <div className="space-y-3">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="bg-white rounded-2xl border border-border p-4 h-16 animate-pulse flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-1 h-10 bg-gray-200 rounded-full" />
+                <div className="w-16 h-8 bg-gray-200 rounded" />
+                <div className="space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-28" />
+                  <div className="h-3 bg-gray-200 rounded w-20" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-2xl border border-border p-8 text-center">
+        <p className="text-sm font-semibold text-red-500">Failed to load timetable.</p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">
@@ -56,8 +116,8 @@ export function TimetableTab({ timetable }: TimetableTabProps) {
       <div className="space-y-3">
         {(() => {
           const daysSchedule = timetable
-            .filter(t => t.dayOfWeek.toUpperCase() === selectedDay.toUpperCase() || t.dayOfWeek === selectedDay)
-            .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))
+            .filter((t: any) => t.dayOfWeek.toUpperCase() === selectedDay.toUpperCase() || t.dayOfWeek === selectedDay)
+            .sort((a: any, b: any) => (a.startTime || '').localeCompare(b.startTime || ''))
 
           if (daysSchedule.length === 0) {
             return (
@@ -70,7 +130,7 @@ export function TimetableTab({ timetable }: TimetableTabProps) {
           return (
             <>
               <p className="text-xs text-gray-500 px-1">{daysSchedule.length} periods</p>
-              {daysSchedule.map((cls, i) => {
+              {daysSchedule.map((cls: any, i: number) => {
                 const nextCls = daysSchedule[i + 1]
                 let breakDuration = null
                 if (nextCls) {

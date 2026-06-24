@@ -8,6 +8,7 @@ let isRefreshing = false;
 let refreshPromise: Promise<any> | null = null;
 
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
+  const startTime = Date.now();
   const cleanBaseUrl = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   const url = `${cleanBaseUrl}${cleanEndpoint}`;
@@ -34,6 +35,21 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     ...options,
     credentials: 'include',
     headers,
+  };
+
+  const logPerformance = (status: number) => {
+    if (typeof window !== 'undefined') {
+      const duration = Date.now() - startTime;
+      const metrics = (window as any).apiMetrics || [];
+      metrics.unshift({
+        endpoint: cleanEndpoint,
+        method: options.method || 'GET',
+        status,
+        durationMs: duration,
+        timestamp: new Date().toLocaleTimeString()
+      });
+      (window as any).apiMetrics = metrics.slice(0, 15);
+    }
   };
 
   try {
@@ -93,14 +109,18 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
             window.location.href = '/login';
           }
         }
+        logPerformance(401);
         throw new Error('Session expired');
       }
     }
 
     if (!response.ok) {
+      logPerformance(response.status);
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.message || `API error: ${response.status}`);
     }
+
+    logPerformance(response.status);
 
     if (response.status === 204 || endpoint === '/auth/logout') {
       if (endpoint === '/auth/logout' && typeof window !== 'undefined') {
@@ -117,6 +137,7 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
 
     return await response.json();
   } catch (error) {
+    logPerformance(500);
     console.error(`Fetch error for ${url}:`, error);
     throw error;
   }

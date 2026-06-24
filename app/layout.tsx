@@ -3,6 +3,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 import { StoreProvider } from "@/lib/store/StoreProvider"
+import { ApolloProviderWrapper } from "@/components/providers/ApolloProviderWrapper"
 import { GoogleAnalytics } from "@next/third-parties/google"
 import { BugReporter } from "@/components/BugReporter"
 import { DebugMenu } from "@/components/DebugMenu"
@@ -55,13 +56,15 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className={cn("antialiased", fontMono.variable, outfit.variable, "font-sans")} >
       <body suppressHydrationWarning>
         <StoreProvider>
-          <ThemeProvider>
-            <main className="min-h-screen">
-              {children}
-            </main>
-          </ThemeProvider>
-          <BugReporter />
-          <DebugMenu />
+          <ApolloProviderWrapper>
+            <ThemeProvider>
+              <main className="min-h-screen">
+                {children}
+              </main>
+            </ThemeProvider>
+            <BugReporter />
+            <DebugMenu />
+          </ApolloProviderWrapper>
         </StoreProvider>
         <GoogleAnalytics gaId="G-N8L8H47Y5Y" />
       </body>

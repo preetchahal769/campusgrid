@@ -3,33 +3,82 @@
 import { CheckCircle2, TrendingUp, AlertCircle, DollarSign, ChevronRight } from "lucide-react"
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { StatCard, SectionCard, Badge, ORANGE, INDIGO } from "@/components/layout/DashboardLayout"
-import { Assignment } from "@/lib/store/slices/studentSlice"
+import { gql } from "@apollo/client"
+import { useQuery } from "@apollo/client/react"
+
+const GET_DASHBOARD_DATA = gql`
+  query GetDashboardData {
+    studentHomework {
+      id
+      title
+      dueDate
+      maxMarks
+      subject {
+        name
+      }
+      isSubmitted
+    }
+    studentAttendance(range: "monthly") {
+      days {
+        date
+        status
+      }
+      stats {
+        percentage
+      }
+    }
+    studentTimetable(sectionId: "me") {
+      id
+      dayOfWeek
+      startTime
+      endTime
+      lectureNo
+      teachersubjectsection {
+        subject {
+          name
+        }
+      }
+    }
+    studentBroadcasts {
+      id
+      title
+      message
+    }
+  }
+`
 
 interface DashboardTabProps {
-  attendancePct: number
   profile: any
-  pendingHomeworkCount: number
-  assignments: Assignment[]
-  timetable: any[]
-  broadcasts: any[]
-  filteredAttendance: any[]
-  presentDays: number
-  totalDays: number
   setTab: (tab: string) => void
 }
 
 export function DashboardTab({
-  attendancePct,
   profile,
-  pendingHomeworkCount,
-  assignments,
-  timetable,
-  broadcasts,
-  filteredAttendance,
-  presentDays,
-  totalDays,
   setTab,
 }: DashboardTabProps) {
+  const { data, loading } = useQuery<any>(GET_DASHBOARD_DATA)
+
+  const assignments = data?.studentHomework || []
+  const attendanceData = data?.studentAttendance
+  const timetable = data?.studentTimetable || []
+  const broadcasts = data?.studentBroadcasts || []
+
+  const attendance = attendanceData?.days || []
+  const pendingHomeworkCount = assignments.filter((a: any) => !a.isSubmitted).length
+
+  // Real attendance % computed from Redux state for dashboard monthly summary
+  const filteredAttendance = attendance.filter((a: any) => {
+    const d = new Date(a.date)
+    const todayEnd = new Date()
+    todayEnd.setHours(23, 59, 59, 999)
+    if (d > todayEnd) return false // Ignore any future dates returned by backend seeds
+    
+    const now = new Date()
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+  })
+  const totalDays = filteredAttendance.length
+  const presentDays = filteredAttendance.filter((a: any) => a.status === 'PRESENT').length
+  const attendancePct = totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 0
   return (
     <div className="space-y-3 md:space-y-4">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -58,7 +107,7 @@ export function DashboardTab({
             {assignments.length === 0 ? (
               <p className="text-xs text-gray-500 py-4 text-center">No homework assigned</p>
             ) : (
-              assignments.slice(0, 4).map((hw, i) => {
+              assignments.slice(0, 4).map((hw: any, i: number) => {
                 const isSubmitted = hw.isSubmitted
                 const isOverdue = !isSubmitted && new Date(hw.dueDate) < new Date()
                 const statusText = isSubmitted ? "Submitted" : isOverdue ? "Overdue" : "Pending"
@@ -116,7 +165,7 @@ export function DashboardTab({
             {broadcasts.length === 0 ? (
               <p className="text-xs text-gray-500 py-4 text-center">No new notices</p>
             ) : (
-              broadcasts.slice(0, 3).map((n, i) => (
+              broadcasts.slice(0, 3).map((n: any, i: number) => (
                 <div key={i} className="flex gap-2.5 pb-3 border-b border-border last:border-0 last:pb-0">
                   <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 bg-red-500" />
                   <div>
@@ -138,7 +187,7 @@ export function DashboardTab({
       }>
         <div className="h-40">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={filteredAttendance.length > 0 ? filteredAttendance.map((a) => ({ day: new Date(a.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}), pct: a.status === 'PRESENT' ? 100 : a.status === 'LEAVE' ? 50 : 0 })) : []} margin={{ top: 10, right: 4, left: -28, bottom: 0 }}>
+            <AreaChart data={filteredAttendance.length > 0 ? filteredAttendance.map((a: any) => ({ day: new Date(a.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}), pct: a.status === 'PRESENT' ? 100 : a.status === 'LEAVE' ? 50 : 0 })) : []} margin={{ top: 10, right: 4, left: -28, bottom: 0 }}>
               <defs>
                 <linearGradient id="attendGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={INDIGO} stopOpacity={0.15} />

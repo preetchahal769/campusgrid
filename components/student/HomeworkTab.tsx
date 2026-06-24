@@ -1,14 +1,45 @@
 "use client"
 
 import { useState } from "react"
-import { useGetHomeworkQuery } from "@/lib/store/services/studentApi"
+import { gql } from "@apollo/client"
+import { useQuery } from "@apollo/client/react"
 import { Assignment } from "@/lib/store/slices/studentSlice"
 import { Badge } from "@/components/layout/DashboardLayout"
 import { cn } from "@/lib/utils"
 import { X, UploadCloud, CheckCircle2, AlertCircle, Download, FileText } from "lucide-react"
 
+const GET_STUDENT_HOMEWORK = gql`
+  query GetStudentHomework {
+    studentHomework {
+      id
+      title
+      description
+      dueDate
+      maxMarks
+      subject {
+        name
+        code
+      }
+      teachers {
+        users {
+          name
+        }
+      }
+      isSubmitted
+      submission {
+        id
+        status
+        submittedAt
+        obtainedMarks
+        fileUrl
+      }
+    }
+  }
+`
+
 export function HomeworkTab() {
-  const { data: assignments = [], isLoading, error } = useGetHomeworkQuery()
+  const { data, loading: isLoading, error } = useQuery<any>(GET_STUDENT_HOMEWORK)
+  const assignments = data?.studentHomework || []
   const [homeworkFilter, setHomeworkFilter] = useState<"All" | "Pending" | "Submitted" | "Overdue">("All")
   const [selectedHomework, setSelectedHomework] = useState<Assignment | null>(null)
   const [viewingAttachment, setViewingAttachment] = useState<string | null>(null)
@@ -51,20 +82,20 @@ export function HomeworkTab() {
     <div className="space-y-4">
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
         <button onClick={() => setHomeworkFilter('All')} className={cn("px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2 shrink-0 transition-colors", homeworkFilter === 'All' ? "bg-[#c84b1a] text-white" : "bg-white border border-border text-gray-900 hover:bg-gray-50")}>All <span className="bg-black/10 px-1.5 rounded-full text-xs">{assignments.length}</span></button>
-        <button onClick={() => setHomeworkFilter('Pending')} className={cn("px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2 shrink-0 transition-colors", homeworkFilter === 'Pending' ? "bg-[#c84b1a] text-white" : "bg-white border border-border text-gray-900 hover:bg-gray-50")}>Pending <span className="bg-black/10 px-1.5 rounded-full text-xs">{assignments.filter(a => !a.isSubmitted && new Date(a.dueDate) >= new Date()).length}</span></button>
-        <button onClick={() => setHomeworkFilter('Submitted')} className={cn("px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2 shrink-0 transition-colors", homeworkFilter === 'Submitted' ? "bg-[#c84b1a] text-white" : "bg-white border border-border text-gray-900 hover:bg-gray-50")}>Submitted <span className="bg-black/10 px-1.5 rounded-full text-xs">{assignments.filter(a => a.isSubmitted).length}</span></button>
-        <button onClick={() => setHomeworkFilter('Overdue')} className={cn("px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2 shrink-0 transition-colors", homeworkFilter === 'Overdue' ? "bg-[#c84b1a] text-white" : "bg-white border border-border text-gray-900 hover:bg-gray-50")}>Overdue <span className="bg-black/10 px-1.5 rounded-full text-xs">{assignments.filter(a => !a.isSubmitted && new Date(a.dueDate) < new Date()).length}</span></button>
+        <button onClick={() => setHomeworkFilter('Pending')} className={cn("px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2 shrink-0 transition-colors", homeworkFilter === 'Pending' ? "bg-[#c84b1a] text-white" : "bg-white border border-border text-gray-900 hover:bg-gray-50")}>Pending <span className="bg-black/10 px-1.5 rounded-full text-xs">{assignments.filter((a: any) => !a.isSubmitted && new Date(a.dueDate) >= new Date()).length}</span></button>
+        <button onClick={() => setHomeworkFilter('Submitted')} className={cn("px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2 shrink-0 transition-colors", homeworkFilter === 'Submitted' ? "bg-[#c84b1a] text-white" : "bg-white border border-border text-gray-900 hover:bg-gray-50")}>Submitted <span className="bg-black/10 px-1.5 rounded-full text-xs">{assignments.filter((a: any) => a.isSubmitted).length}</span></button>
+        <button onClick={() => setHomeworkFilter('Overdue')} className={cn("px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2 shrink-0 transition-colors", homeworkFilter === 'Overdue' ? "bg-[#c84b1a] text-white" : "bg-white border border-border text-gray-900 hover:bg-gray-50")}>Overdue <span className="bg-black/10 px-1.5 rounded-full text-xs">{assignments.filter((a: any) => !a.isSubmitted && new Date(a.dueDate) < new Date()).length}</span></button>
       </div>
 
       <div className="space-y-3">
-        {assignments.filter(hw => {
+        {assignments.filter((hw: any) => {
           const isSubmitted = hw.isSubmitted
           const isOverdue = !isSubmitted && new Date(hw.dueDate) < new Date()
           if (homeworkFilter === 'Pending') return !isSubmitted && !isOverdue
           if (homeworkFilter === 'Submitted') return isSubmitted
           if (homeworkFilter === 'Overdue') return isOverdue
           return true
-        }).map((hw, i) => {
+        }).map((hw: any, i: number) => {
           const isSubmitted = hw.isSubmitted
           const isOverdue = !isSubmitted && new Date(hw.dueDate) < new Date()
           const statusText = isSubmitted ? "Submitted" : isOverdue ? "Overdue" : "Pending"
