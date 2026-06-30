@@ -100,3 +100,16 @@
     @apply font-sans;
     }
 }
+
+/* Touch-only devices (tablets like iPad Pro) — force mobile layout regardless of screen width */
+@media (hover: none) and (pointer: coarse) {
+  .layout-sidebar { display: none !important; }
+  .layout-mobile-topbar { display: flex !important; }
+  .layout-desktop-topbar { display: none !important; }
+  .layout-mobile-bottomnav { display: flex !important; }
+  .layout-main {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    padding-bottom: 6rem !important;
+  }
+}

@@ -2,11 +2,11 @@
 
 import { useState } from "react"
 import { gql } from "@apollo/client"
-import { useQuery } from "@apollo/client/react"
+import { useQuery, useMutation } from "@apollo/client/react"
 import { Assignment } from "@/lib/store/slices/studentSlice"
 import { Badge } from "@/components/layout/DashboardLayout"
 import { cn } from "@/lib/utils"
-import { X, UploadCloud, CheckCircle2, AlertCircle, Download, FileText } from "lucide-react"
+import { X, UploadCloud, CheckCircle2, AlertCircle, Download, FileText, Loader2 } from "lucide-react"
 
 const GET_STUDENT_HOMEWORK = gql`
   query GetStudentHomework {
@@ -37,12 +37,88 @@ const GET_STUDENT_HOMEWORK = gql`
   }
 `
 
+const GET_UPLOAD_PRESIGNED_URL = gql`
+  mutation GetUploadPresignedUrl($filename: String!, $filetype: String!, $assignmentId: String!) {
+    getUploadPresignedUrl(filename: $filename, filetype: $filetype, assignmentId: $assignmentId) {
+      uploadUrl
+      fileUrl
+    }
+  }
+`
+
+const SUBMIT_HOMEWORK = gql`
+  mutation SubmitHomework($assignmentId: ID!, $fileUrl: String!, $notes: String) {
+    submitHomework(assignmentId: $assignmentId, fileUrl: $fileUrl, notes: $notes) {
+      id
+      status
+      submittedAt
+      obtainedMarks
+      fileUrl
+    }
+  }
+`
+
 export function HomeworkTab() {
-  const { data, loading: isLoading, error } = useQuery<any>(GET_STUDENT_HOMEWORK)
+  const { data, loading: isLoading, error, refetch } = useQuery<any>(GET_STUDENT_HOMEWORK)
   const assignments = data?.studentHomework || []
   const [homeworkFilter, setHomeworkFilter] = useState<"All" | "Pending" | "Submitted" | "Overdue">("All")
   const [selectedHomework, setSelectedHomework] = useState<Assignment | null>(null)
   const [viewingAttachment, setViewingAttachment] = useState<string | null>(null)
+  const [file, setFile] = useState<File | null>(null)
+  const [notes, setNotes] = useState<string>("")
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+
+  const [getPresignedUrl] = useMutation(GET_UPLOAD_PRESIGNED_URL)
+  const [submitHomework] = useMutation(SUBMIT_HOMEWORK)
+
+  const handleSubmit = async () => {
+    if (!file || !selectedHomework) return
+    setIsSubmitting(true)
+    setSubmitError(null)
+
+    try {
+      const { data: presignedData } = await getPresignedUrl({
+        variables: {
+          filename: file.name,
+          filetype: file.type,
+          assignmentId: selectedHomework.id,
+        }
+      })
+
+      const { uploadUrl, fileUrl } = presignedData.getUploadPresignedUrl
+
+      const response = await fetch(uploadUrl, {
+        method: "PUT",
+        body: file,
+        headers: {
+          "Content-Type": file.type,
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to upload file to storage.")
+      }
+
+      await submitHomework({
+        variables: {
+          assignmentId: selectedHomework.id,
+          fileUrl: fileUrl,
+          notes: notes,
+        }
+      })
+
+      await refetch()
+      setSelectedHomework(null)
+      setFile(null)
+      setNotes("")
+    } catch (err: any) {
+      console.error(err)
+      setSubmitError(err.message || "An error occurred.")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -232,24 +308,68 @@ export function HomeworkTab() {
                   <div>
                     <h3 className="text-xs font-bold text-gray-500 tracking-wider mb-2">YOUR SUBMISSION</h3>
                     <label className="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-gray-50 transition-colors cursor-pointer relative group">
-                      <input type="file" className="hidden" multiple />
+                      <input 
+                        type="file" 
+                        className="hidden" 
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files.length > 0) {
+                            setFile(e.target.files[0]);
+                          }
+                        }} 
+                      />
                       <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mb-3 group-hover:bg-gray-200 transition-colors">
                         <UploadCloud className="w-5 h-5 text-gray-500" />
                       </div>
-                      <p className="text-sm font-bold text-gray-900 mb-1">Tap to attach file</p>
-                      <p className="text-xs text-gray-500">PDF, Word, Image — max 25 MB</p>
-                      <p className="text-xs font-semibold text-blue-500 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">or drag and drop here</p>
+                      {file ? (
+                        <div>
+                          <p className="text-sm font-bold text-green-600 mb-1">✓ File Selected</p>
+                          <p className="text-xs text-gray-900 truncate max-w-xs">{file.name}</p>
+                          <p className="text-[10px] text-gray-500">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                        </div>
+                      ) : (
+                        <>
+                          <p className="text-sm font-bold text-gray-900 mb-1">Tap to attach file</p>
+                          <p className="text-xs text-gray-500">PDF, Word, Image — max 25 MB</p>
+                        </>
+                      )}
                     </label>
                   </div>
                   <div>
                     <h3 className="text-xs font-bold text-gray-500 tracking-wider mb-2">NOTE TO TEACHER (optional)</h3>
-                    <textarea className="w-full border border-border rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#c84b1a]/20 focus:border-[#c84b1a]" rows={3} placeholder="Add a message for your teacher..." />
+                    <textarea 
+                      className="w-full border border-border rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#c84b1a]/20 focus:border-[#c84b1a]" 
+                      rows={3} 
+                      placeholder="Add a message for your teacher..." 
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                    />
                   </div>
+                  {submitError && (
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                      <p className="text-xs font-semibold text-red-700">{submitError}</p>
+                    </div>
+                  )}
                   <div className="pt-2">
-                    <button className="w-full bg-[#e39f82] text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 pointer-events-none transition-opacity hover:opacity-90">
-                      <UploadCloud className="w-4 h-4" /> Submit homework
+                    <button 
+                      onClick={handleSubmit}
+                      disabled={!file || isSubmitting}
+                      className={cn(
+                        "w-full text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-opacity hover:opacity-90",
+                        (!file || isSubmitting) ? "bg-gray-300 cursor-not-allowed" : "bg-[#c84b1a]"
+                      )}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" /> Submitting...
+                        </>
+                      ) : (
+                        <>
+                          <UploadCloud className="w-4 h-4" /> Submit homework
+                        </>
+                      )}
                     </button>
-                    <p className="text-center text-xs text-gray-500 mt-2">Attach at least one file to submit</p>
+                    {!file && <p className="text-center text-xs text-gray-500 mt-2">Attach at least one file to submit</p>}
                   </div>
                 </>
               ) : (

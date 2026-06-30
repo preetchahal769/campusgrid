@@ -4,6 +4,7 @@ import { type ReactNode } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Bell, Search, LogOut, type LucideIcon } from "lucide-react"
+import { Logo } from "@/components/Logo"
 
 export const ORANGE = "#c84b1a"
 export const INDIGO = "#6366f1"
@@ -50,7 +51,7 @@ export function DashboardLayout({
     <div className="flex flex-col h-full">
       <div className="px-5 pt-5 pb-5 border-b border-border flex items-center gap-3">
         <Link href="/" className="flex items-center gap-2">
-          <img src="/logo.png" alt="Sikshatantar" className="h-10 w-auto object-contain" />
+          <Logo className="h-8 w-auto text-[#c84b1a]" />
         </Link>
       </div>
 
@@ -121,22 +122,17 @@ export function DashboardLayout({
       '--border': 'oklch(0.92 0.01 240)',
     } as React.CSSProperties}>
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-56 lg:w-60 flex-col bg-white border-r border-border flex-shrink-0">
+      <aside className="layout-sidebar hidden xl:flex w-56 xl:w-60 flex-col bg-white border-r border-border flex-shrink-0">
         {sidebar}
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile topbar */}
-        <header className="md:hidden flex items-center justify-between px-4 bg-white border-b border-border flex-shrink-0"
+        <header className="layout-mobile-topbar xl:hidden flex items-center justify-between px-4 bg-white border-b border-border flex-shrink-0"
           style={{ height: 56, paddingTop: "env(safe-area-inset-top)" }}>
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl overflow-hidden flex-shrink-0 bg-white border border-border">
-              <img src="/logo.png" alt="CampusGrid" className="w-full h-full object-contain p-0.5" />
-            </div>
-            <div>
-              <p className="text-sm font-black text-foreground leading-none">CampusGrid</p>
-              <p className="text-[10px] font-semibold leading-none mt-0.5" style={{ color: roleColor }}>{role}</p>
-            </div>
+          <div className="flex items-center gap-2">
+            <Logo className="h-7 w-auto text-foreground" />
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md ml-1" style={{ background: roleBg, color: roleColor }}>{role}</span>
           </div>
           <div className="flex items-center gap-3">
             <button className="relative text-muted-foreground"
@@ -157,7 +153,7 @@ export function DashboardLayout({
         </header>
 
         {/* Desktop topbar */}
-        <header className="hidden md:flex h-14 bg-white border-b border-border items-center gap-3 px-6 flex-shrink-0">
+        <header className="layout-desktop-topbar hidden xl:flex h-14 bg-white border-b border-border items-center gap-3 px-6 flex-shrink-0">
           <div className="flex items-center gap-2 flex-1 max-w-xs bg-muted/60 rounded-lg px-3 py-2">
             <Search size={14} className="text-muted-foreground flex-shrink-0" />
             <input placeholder="Search…" className="bg-transparent text-sm outline-none text-foreground placeholder:text-muted-foreground/60 w-full" />
@@ -180,10 +176,10 @@ export function DashboardLayout({
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto px-4 md:px-6 py-4 md:py-5 pb-24 md:pb-5">
+        <main className="layout-main flex-1 overflow-y-auto px-4 xl:px-6 py-4 xl:py-5 pb-24 xl:pb-5">
           {(greeting || subline) && (
             <div className="mb-4 md:mb-5">
-              <h1 className="text-lg md:text-xl font-black text-foreground">{greeting}</h1>
+              <h1 className="font-black text-foreground" style={{ fontSize: "clamp(1.2rem, 2.5vw + 0.5rem, 1.6rem)" }}>{greeting}</h1>
               {subline && <p className="text-xs md:text-sm text-muted-foreground mt-0.5">{subline}</p>}
             </div>
           )}
@@ -191,8 +187,8 @@ export function DashboardLayout({
         </main>
       </div>
 
-      {/* Mobile bottom tab bar — 4 items, clean */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-border z-30 flex"
+      {/* Mobile bottom tab bar */}
+      <nav className="layout-mobile-bottomnav xl:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-border z-30 flex"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
         {bottomNav.map(({ icon: Icon, label, id }) => {
           const active = activeId === id
@@ -200,11 +196,11 @@ export function DashboardLayout({
             <button key={id} onClick={() => onNav(id)}
               className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 active:scale-95 transition-transform">
               <div className="w-10 h-6 flex items-center justify-center rounded-full transition-colors"
-                style={active ? { background: roleBg } : undefined}>
-                <Icon size={19} strokeWidth={active ? 2.5 : 2}
-                  style={{ color: active ? roleColor : "#9ca3af" }} />
+                style={active ? { background: roleColor } : undefined}>
+                <Icon size={17} strokeWidth={active ? 2.5 : 2}
+                  style={{ color: active ? "#ffffff" : "#9ca3af" }} />
               </div>
-              <span className="text-[10px] font-semibold leading-none tracking-tight"
+              <span className="text-[10px] font-bold leading-none tracking-tight mt-1"
                 style={{ color: active ? roleColor : "#9ca3af" }}>
                 {label}
               </span>

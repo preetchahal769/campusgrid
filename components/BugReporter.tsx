@@ -27,6 +27,15 @@ export function BugReporter() {
   const dragRef = useRef<{ startX: number; startY: number } | null>(null)
 
   const { user } = useAppSelector((state) => state.auth)
+  const [isMobile, setIsMobile] = useState(true)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const handleResize = () => setIsMobile(window.innerWidth < 768)
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // Only show on staging or development
   useEffect(() => {
@@ -177,8 +186,12 @@ export function BugReporter() {
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
         disabled={isCapturing}
-        style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
-        className="fixed right-6 bottom-6 z-9999 flex h-12 w-12 cursor-grab touch-none items-center justify-center rounded-full bg-rose-600 text-white shadow-lg shadow-rose-600/30 transition-colors hover:scale-105 hover:bg-rose-700 active:cursor-grabbing disabled:opacity-50"
+        style={{
+          transform: `translate(${position.x}px, ${position.y}px)`,
+          right: '24px',
+          bottom: isMobile ? '80px' : '24px',
+        }}
+        className="fixed z-9999 flex h-12 w-12 cursor-grab touch-none items-center justify-center rounded-full bg-rose-600 text-white shadow-lg shadow-rose-600/30 transition-colors hover:scale-105 hover:bg-rose-700 active:cursor-grabbing disabled:opacity-50"
         title="Report a bug"
       >
         {isCapturing ? (

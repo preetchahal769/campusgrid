@@ -1,32 +1,71 @@
 "use client"
 
+import { gql } from "@apollo/client"
+import { useQuery } from "@apollo/client/react"
 import { StatCard, SectionCard, Badge, INDIGO, ORANGE } from "@/components/layout/DashboardLayout"
-import { CheckCircle2, TrendingUp, BookOpen, GraduationCap } from "lucide-react"
+import { CheckCircle2, TrendingUp } from "lucide-react"
+
+const GET_STUDENT_PERFORMANCE = gql`
+  query GetStudentPerformance {
+    studentPerformance {
+      gpa
+      rank
+      sectionName
+      subjects {
+        subjectName
+        score
+        color
+      }
+      examResults {
+        title
+        date
+        score
+        grade
+        variant
+      }
+    }
+  }
+`
 
 interface PerformanceTabProps {
   profile: any
 }
 
 export function PerformanceTab({ profile }: PerformanceTabProps) {
-  // Use profile stats if available, otherwise fallback to the mock values from design
-  const rating = profile?.users?.globalRating ? (profile.users.globalRating / 10).toFixed(1) : "8.7"
-  const rank = profile?.rankingPoints ? `#${profile.rankingPoints}` : "#4"
-  const sectionName = profile?.section?.name ? `${profile.section.name} (42 Students)` : "Out of 42"
+  const { data, loading: isLoading, error } = useQuery<any>(GET_STUDENT_PERFORMANCE)
 
-  const subjects = [
-    { name: "Mathematics", score: 88, color: "#6366f1" },
-    { name: "Physics",     score: 76, color: "#06b6d4" },
-    { name: "Chemistry",   score: 71, color: "#f59e0b" },
-    { name: "English",     score: 82, color: "#10b981" },
-    { name: "Computer Sc.", score: 90, color: "#c2410c" }
-  ]
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="h-24 bg-gray-200 rounded-2xl animate-pulse" />
+          <div className="h-24 bg-gray-200 rounded-2xl animate-pulse" />
+        </div>
+        <div className="h-64 bg-gray-200 rounded-2xl animate-pulse" />
+        <div className="h-64 bg-gray-200 rounded-2xl animate-pulse" />
+      </div>
+    )
+  }
 
-  const examResults = [
-    { title: "Unit Test I — Maths",    date: "May 15", score: "44/50",  grade: "A+", variant: "green"  as const },
-    { title: "Unit Test I — Physics",  date: "May 16", score: "38/50",  grade: "B+", variant: "blue"   as const },
-    { title: "Mid-Term — English",     date: "Apr 20", score: "78/100", grade: "A",  variant: "green"  as const },
-    { title: "Mid-Term — Chemistry",   date: "Apr 21", score: "71/100", grade: "B+", variant: "blue"   as const }
-  ]
+  if (error) {
+    return (
+      <div className="bg-white rounded-2xl border border-border p-8 text-center">
+        <p className="text-sm font-semibold text-red-500">Failed to load performance metrics.</p>
+      </div>
+    )
+  }
+
+  const performance = data?.studentPerformance || {
+    gpa: 0,
+    rank: "N/A",
+    sectionName: "N/A",
+    subjects: [],
+    examResults: []
+  }
+
+  // Support local fallback if db has no ratings populated yet
+  const displayGPA = performance.gpa > 0 ? performance.gpa.toFixed(1) : (profile?.users?.globalRating ? (profile.users.globalRating / 10).toFixed(1) : "0.0")
+  const displayRank = performance.rank !== "0 / 0" && performance.rank !== "N/A / 0" ? performance.rank : (profile?.rankingPoints ? `#${profile.rankingPoints}` : "N/A")
 
   return (
     <div className="space-y-4">
@@ -34,7 +73,7 @@ export function PerformanceTab({ profile }: PerformanceTabProps) {
       <div className="grid grid-cols-2 gap-3">
         <StatCard 
           label="Overall GPA" 
-          value={rating} 
+          value={displayGPA} 
           sub="Out of 10" 
           color={INDIGO} 
           bg="#eef0fd" 
@@ -42,8 +81,8 @@ export function PerformanceTab({ profile }: PerformanceTabProps) {
         />
         <StatCard 
           label="Class Rank" 
-          value={rank} 
-          sub={sectionName} 
+          value={displayRank} 
+          sub={performance.sectionName !== "N/A" ? performance.sectionName : "Section Rank"} 
           color={ORANGE} 
           bg="#fdf2ec" 
           icon={CheckCircle2} 
@@ -53,40 +92,48 @@ export function PerformanceTab({ profile }: PerformanceTabProps) {
       {/* Subject-wise Scores */}
       <SectionCard title="Subject-wise Scores">
         <div className="space-y-4 py-2">
-          {subjects.map((sub, i) => (
-            <div key={i} className="space-y-2">
-              <div className="flex justify-between items-center text-sm font-semibold">
-                <span className="text-gray-900">{sub.name}</span>
-                <span className="text-gray-900">
-                  {sub.score}<span className="text-xs text-gray-400 font-medium">/100</span>
-                </span>
+          {performance.subjects.length === 0 ? (
+            <p className="text-xs text-gray-500 py-4 text-center">No subject marks registered</p>
+          ) : (
+            performance.subjects.map((sub: any, i: number) => (
+              <div key={i} className="space-y-2">
+                <div className="flex justify-between items-center text-sm font-semibold">
+                  <span className="text-gray-900">{sub.subjectName}</span>
+                  <span className="text-gray-900">
+                    {sub.score}<span className="text-xs text-gray-400 font-medium">/100</span>
+                  </span>
+                </div>
+                <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full rounded-full transition-all duration-500" 
+                    style={{ width: `${sub.score}%`, backgroundColor: sub.color }}
+                  />
+                </div>
               </div>
-              <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-                <div 
-                  className="h-full rounded-full transition-all duration-500" 
-                  style={{ width: `${sub.score}%`, backgroundColor: sub.color }}
-                />
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </SectionCard>
 
       {/* Recent Exam Results */}
       <SectionCard title="Recent Exam Results">
         <div className="space-y-1">
-          {examResults.map((exam, i) => (
-            <div key={i} className="flex items-center justify-between py-3 border-b border-border last:border-0 last:pb-0">
-              <div>
-                <p className="text-sm font-bold text-gray-900">{exam.title}</p>
-                <p className="text-xs text-gray-400 font-medium mt-0.5">{exam.date}</p>
+          {performance.examResults.length === 0 ? (
+            <p className="text-xs text-gray-500 py-4 text-center">No graded exams recorded</p>
+          ) : (
+            performance.examResults.map((exam: any, i: number) => (
+              <div key={i} className="flex items-center justify-between py-3 border-b border-border last:border-0 last:pb-0">
+                <div>
+                  <p className="text-sm font-bold text-gray-900">{exam.title}</p>
+                  <p className="text-xs text-gray-400 font-medium mt-0.5">{exam.date}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-bold text-gray-900">{exam.score}</span>
+                  <Badge text={exam.grade} variant={exam.variant} />
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-bold text-gray-900">{exam.score}</span>
-                <Badge text={exam.grade} variant={exam.variant} />
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </SectionCard>
     </div>

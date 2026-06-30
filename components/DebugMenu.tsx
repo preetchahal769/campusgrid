@@ -39,6 +39,15 @@ export function DebugMenu() {
   const [isDragging, setIsDragging] = useState(false)
   const [hasMoved, setHasMoved] = useState(false)
   const dragRef = useRef<{ startX: number; startY: number } | null>(null)
+  const [isMobile, setIsMobile] = useState(true)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const handleResize = () => setIsMobile(window.innerWidth < 768)
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // Only show on staging, localhost, or development
   useEffect(() => {
@@ -193,8 +202,12 @@ export function DebugMenu() {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
-        style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
-        className="fixed bottom-6 left-6 z-50 flex h-12 cursor-grab touch-none items-center gap-2 rounded-full bg-slate-800 px-4 text-slate-200 shadow-lg transition-transform hover:scale-105 hover:bg-slate-700 active:cursor-grabbing"
+        style={{
+          transform: `translate(${position.x}px, ${position.y}px)`,
+          left: isMobile ? '24px' : '260px',
+          bottom: isMobile ? '80px' : '24px',
+        }}
+        className="fixed z-50 flex h-12 cursor-grab touch-none items-center gap-2 rounded-full bg-slate-800 px-4 text-slate-200 shadow-lg transition-transform hover:scale-105 hover:bg-slate-700 active:cursor-grabbing"
       >
         <RiBugLine className="text-xl text-yellow-400" />
         <span className="font-semibold text-sm">Debug Info</span>
@@ -206,7 +219,11 @@ export function DebugMenu() {
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
-            className="fixed bottom-24 left-6 z-50 w-96 rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl overflow-hidden"
+            style={{
+              left: isMobile ? '24px' : '260px',
+              bottom: isMobile ? '144px' : '88px',
+            }}
+            className="fixed z-50 w-96 rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl overflow-hidden"
           >
             <div className="flex items-center justify-between border-b border-slate-800 bg-slate-800/50 p-4">
               <h3 className="font-semibold text-slate-200 flex items-center gap-2">

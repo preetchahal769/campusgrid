@@ -83,6 +83,7 @@ export function AttendanceTab() {
   const unmarkedDays = filteredAttendance.filter((a: AttendanceItem) => a.status === "UNMARKED").length
   
   const workingDays = presentDays + absentDays
+  const hasChartData = filteredAttendance.length > 0 && filteredAttendance.some((a: AttendanceItem) => a.status === "PRESENT" || a.status === "LEAVE")
   const attendancePct = workingDays > 0 ? Math.round((presentDays / workingDays) * 100) : 100
 
   // Today dynamic status
@@ -219,55 +220,67 @@ export function AttendanceTab() {
           </div>
         </div>
         <div className="h-48 w-full -ml-4">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={(() => {
-              const year = selectedDate.getFullYear()
-              const month = selectedDate.getMonth()
-              const weeks = []
-              
-              let start = timeframe === "month" ? new Date(year, month, 1) : new Date(year, 0, 1)
-              while (start.getDay() !== 1) start.setDate(start.getDate() - 1)
-              
-              let i = 1;
-              while (true) {
-                 const end = new Date(start)
-                 end.setDate(start.getDate() + 6)
-                 end.setHours(23,59,59,999)
-                 
-                 if (timeframe === "month" && (start.getMonth() > month || start.getFullYear() > year)) break;
-                 if (timeframe === "year" && start.getFullYear() > year) break;
-                 
-                 const mData = filteredAttendance.filter((a: AttendanceItem) => {
-                   const d = new Date(a.date)
-                   return d >= start && d <= end
-                 })
-                 weeks.push({
-                   date: `W${i}`,
-                   status: mData.filter((a: any) => a.status === 'PRESENT').length
-                 })
-                 start.setDate(start.getDate() + 7)
-                 i++
-              }
-              return weeks
-            })()}>
-              <defs>
-                <linearGradient id="colorStatus" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2}/>
-                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#9ca3af' }} interval="preserveStartEnd" minTickGap={20} />
-              <Tooltip 
-                cursor={{ stroke: '#6366f1', strokeWidth: 1, strokeDasharray: '3 3' }}
-                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', fontSize: '12px', fontWeight: 'bold' }}
-                labelStyle={{ color: '#6b7280', marginBottom: '4px' }}
-                formatter={(value) => [`${value} Days Present`, "Total"]}
-              />
-              <ReferenceLine y={6} stroke="#10b981" strokeDasharray="3 3" opacity={0.3} />
-              <ReferenceLine y={0} stroke="#ef4444" strokeDasharray="3 3" opacity={0.3} />
-              <Area type="monotone" dataKey="status" stroke="#6366f1" strokeWidth={3} fillOpacity={1} fill="url(#colorStatus)" isAnimationActive={false} />
-            </AreaChart>
-          </ResponsiveContainer>
+          {!hasChartData ? (
+            <div className="h-full flex flex-col items-center justify-center py-4 text-center ml-4">
+              <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center mb-2">
+                <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <p className="text-xs font-bold text-gray-900">No data available yet</p>
+              <p className="text-[10px] text-gray-500 mt-0.5">Attendance trend will appear once marked</p>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={(() => {
+                const year = selectedDate.getFullYear()
+                const month = selectedDate.getMonth()
+                const weeks = []
+                
+                let start = timeframe === "month" ? new Date(year, month, 1) : new Date(year, 0, 1)
+                while (start.getDay() !== 1) start.setDate(start.getDate() - 1)
+                
+                let i = 1;
+                while (true) {
+                   const end = new Date(start)
+                   end.setDate(start.getDate() + 6)
+                   end.setHours(23,59,59,999)
+                   
+                   if (timeframe === "month" && (start.getMonth() > month || start.getFullYear() > year)) break;
+                   if (timeframe === "year" && start.getFullYear() > year) break;
+                   
+                   const mData = filteredAttendance.filter((a: AttendanceItem) => {
+                     const d = new Date(a.date)
+                     return d >= start && d <= end
+                   })
+                   weeks.push({
+                     date: `W${i}`,
+                     status: mData.filter((a: any) => a.status === 'PRESENT').length
+                   })
+                   start.setDate(start.getDate() + 7)
+                   i++
+                }
+                return weeks
+              })()}>
+                <defs>
+                  <linearGradient id="colorStatus" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2}/>
+                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#9ca3af' }} interval="preserveStartEnd" minTickGap={20} />
+                <Tooltip 
+                  cursor={{ stroke: '#6366f1', strokeWidth: 1, strokeDasharray: '3 3' }}
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', fontSize: '12px', fontWeight: 'bold' }}
+                  labelStyle={{ color: '#6b7280', marginBottom: '4px' }}
+                  formatter={(value) => [`${value} Days Present`, "Total"]}
+                />
+                <ReferenceLine y={6} stroke="#10b981" strokeDasharray="3 3" opacity={0.3} />
+                <ReferenceLine y={0} stroke="#ef4444" strokeDasharray="3 3" opacity={0.3} />
+                <Area type="monotone" dataKey="status" stroke="#6366f1" strokeWidth={3} fillOpacity={1} fill="url(#colorStatus)" isAnimationActive={false} />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </div>
 
