@@ -9,8 +9,8 @@
 # Rolling back to a previous deploy:
 #   ssh deploy@prod-server-ip
 #   cd /opt/campusgrid
-#   docker pull ghcr.io/preetchahal769/campusgrid:prod-a1b2c3d
-#   docker pull ghcr.io/preetchahal769/campusgrid-engine:prod-a1b2c3d
+#   docker pull registry.gitlab.com/sikshatantar_dev/sikshatantar:prod-a1b2c3d
+#   docker pull registry.gitlab.com/sikshatantar_dev/sikshatantar-engine:prod-a1b2c3d
 #   FRONTEND_TAG=prod-a1b2c3d BACKEND_TAG=prod-a1b2c3d docker compose up -d
 #   # Takes ~10 seconds. No code changes, no pipeline run needed.
 #
@@ -23,7 +23,7 @@
 
 services:
   frontend:
-    image: ghcr.io/preetchahal769/campusgrid:${FRONTEND_TAG:-latest}
+    image: registry.gitlab.com/sikshatantar_dev/sikshatantar:${FRONTEND_TAG:-latest}
     container_name: campusgrid-frontend-prod
     restart: unless-stopped
     ports:
@@ -32,7 +32,7 @@ services:
       - NODE_ENV=production
 
   backend:
-    image: ghcr.io/preetchahal769/campusgrid-engine:${BACKEND_TAG:-latest}
+    image: registry.gitlab.com/sikshatantar_dev/sikshatantar-engine:${BACKEND_TAG:-latest}
     container_name: campusgrid-backend-prod
     restart: unless-stopped
     ports:

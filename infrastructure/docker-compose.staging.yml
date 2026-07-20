@@ -20,14 +20,14 @@
 
 services:
   frontend:
-    image: ghcr.io/preetchahal769/campusgrid:${FRONTEND_TAG:-latest}
+    image: registry.gitlab.com/sikshatantar_dev/sikshatantar:${FRONTEND_TAG:-latest}
     container_name: campusgrid-frontend-staging
     restart: unless-stopped
     ports:
       - "127.0.0.1:3000:3000"
 
   backend:
-    image: ghcr.io/preetchahal769/campusgrid-engine:${BACKEND_TAG:-latest}
+    image: registry.gitlab.com/sikshatantar_dev/sikshatantar-engine:${BACKEND_TAG:-latest}
     container_name: campusgrid-backend-staging
     restart: unless-stopped
     ports:
